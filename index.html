@@ -199,7 +199,12 @@ footer nav{gap:18px;align-items:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* ===== Team dashboard ===== */
-.dash{position:fixed;inset:0;z-index:60;background:var(--paper);overflow:auto;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.dash{position:relative;z-index:1;background:var(--paper);min-height:100vh;min-height:100dvh;padding-bottom:env(safe-area-inset-bottom)}
+body.dash-open > :not(.dash):not(.escrim):not(.editor):not(.toast):not(script){display:none!important}
+body.dash-open .dbar{padding-top:env(safe-area-inset-top)}
+/* iOS-safe scroll lock while a panel is open */
+body.locked{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+.sheet,.dbody,.ebody,.drawer,.editor{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .dbar{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--paper)}
 .dbar .wrap{display:flex;align-items:center;gap:14px;height:62px}
 .dbar .logo{font-size:22px}
@@ -582,16 +587,19 @@ function addToBag(id){
 }
 
 /* ===== Overlays ===== */
+let lockY=0, locked=false;
+function lockScroll(){ if(locked)return; locked=true; lockY=window.scrollY; document.body.style.top=(-lockY)+"px"; document.body.classList.add("locked"); }
+function unlockScroll(){ if(!locked)return; locked=false; document.body.classList.remove("locked"); document.body.style.top=""; window.scrollTo({top:lockY,behavior:"instant"}); }
 let lastFocus=null;
 function open(el){
   lastFocus=document.activeElement;
-  $("scrim").hidden=false; el.hidden=false; document.body.style.overflow="hidden";
+  $("scrim").hidden=false; el.hidden=false; lockScroll();
   requestAnimationFrame(()=>{$("scrim").classList.add("on");el.classList.add("on")});
   setTimeout(()=>{const f=el.querySelector("button,input,select,a");f&&f.focus({preventScroll:true})},60);
 }
 function closeAll(){
   ["sheet","drawer","scrim"].forEach(id=>$(id).classList.remove("on"));
-  setTimeout(()=>{["sheet","drawer","scrim"].forEach(id=>$(id).hidden=true);if($("dash").hidden)document.body.style.overflow="";lastFocus&&lastFocus.focus({preventScroll:true})},260);
+  setTimeout(()=>{["sheet","drawer","scrim"].forEach(id=>$(id).hidden=true);unlockScroll();lastFocus&&lastFocus.focus({preventScroll:true})},260);
 }
 $("scrim").onclick=closeAll;
 document.addEventListener("keydown",e=>{ if(e.key!=="Escape")return; if(!$("editor").hidden) return closeEditor(); if(!$("dash").hidden && $("sheet").hidden && $("drawer").hidden) return closeDash(); closeAll(); });
@@ -677,8 +685,9 @@ function renderFoot(){
 
 /* ===== Team dashboard ===== */
 let dq="", dstat="all";
-function openDash(){ $("dash").hidden=false; document.body.style.overflow="hidden"; $("dash").scrollTop=0; renderDash(); $("closeDash").focus(); }
-function closeDash(){ $("dash").hidden=true; document.body.style.overflow=""; render(); }
+let shopY=0;
+function openDash(){ shopY=window.scrollY; $("dash").hidden=false; document.body.classList.add("dash-open"); window.scrollTo({top:0,behavior:"instant"}); renderDash(); $("closeDash").focus({preventScroll:true}); }
+function closeDash(){ $("dash").hidden=true; document.body.classList.remove("dash-open"); render(); window.scrollTo({top:shopY,behavior:"instant"}); }
 $("openDash").onclick=openDash; $("closeDash").onclick=closeDash;
 $("dq").oninput=e=>{dq=e.target.value.toLowerCase();renderTable()};
 $("newProduct").onclick=()=>openEditor(null);
@@ -735,10 +744,10 @@ function openEditor(id){
   draft=src?JSON.parse(JSON.stringify(src)):{id:null,name:"",brand:"",era:"90s",cat:"Tops",size:"",price:"",cond:"Very good",m:{},status:"live",photo:""};
   renderEditor(!!src);
   $("escrim").hidden=false; $("editor").hidden=false;
-  requestAnimationFrame(()=>$("editor").classList.add("on"));
+  lockScroll(); requestAnimationFrame(()=>$("editor").classList.add("on"));
   setTimeout(()=>$("eName").focus({preventScroll:true}),80);
 }
-function closeEditor(){ $("editor").classList.remove("on"); setTimeout(()=>{$("editor").hidden=true;$("escrim").hidden=true},300); }
+function closeEditor(){ $("editor").classList.remove("on"); setTimeout(()=>{$("editor").hidden=true;$("escrim").hidden=true;unlockScroll()},300); }
 $("escrim").onclick=closeEditor;
 function renderEditor(isEdit){
   const d=draft, ms=MEASURE[d.cat]||[];
