@@ -1,0 +1,353 @@
+[
+  {
+    "code": "TQ-0701",
+    "name": "Embroidered tiger souvenir jacket",
+    "brand": "Unbranded",
+    "era": "Y2K",
+    "category": "Outerwear",
+    "size": "L",
+    "price_qar": 260,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Pit to pit": 60.0,
+      "Length": 68.0,
+      "Sleeve": 62.0
+    },
+    "status": "live",
+    "photo": "design/img/tiger-souvenir-jacket.jpg"
+  },
+  {
+    "code": "TQ-0702",
+    "name": "Green leather biker jacket",
+    "brand": "Unbranded",
+    "era": "2000s",
+    "category": "Outerwear",
+    "size": "M",
+    "price_qar": 320,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Pit to pit": 57.0,
+      "Length": 64.0,
+      "Sleeve": 63.0
+    },
+    "status": "live",
+    "photo": "design/img/green-leather-jacket.jpg"
+  },
+  {
+    "code": "TQ-0703",
+    "name": "Asymmetric zip denim jacket",
+    "brand": "Unbranded",
+    "era": "Y2K",
+    "category": "Outerwear",
+    "size": "S",
+    "price_qar": 150,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Pit to pit": 46.0,
+      "Length": 52.0,
+      "Sleeve": 60.0
+    },
+    "status": "live",
+    "photo": "design/img/denim-jacket.jpg"
+  },
+  {
+    "code": "TQ-0704",
+    "name": "Check wool double-breasted coat",
+    "brand": "Unbranded",
+    "era": "80s",
+    "category": "Outerwear",
+    "size": "M",
+    "price_qar": 290,
+    "condition": "Good",
+    "measurements_cm": {
+      "Pit to pit": 52.0,
+      "Length": 92.0,
+      "Sleeve": 60.0
+    },
+    "status": "live",
+    "photo": "design/img/tweed-coat.jpg"
+  },
+  {
+    "code": "TQ-0705",
+    "name": "Olive bomber with shearling collar",
+    "brand": "Timberland",
+    "era": "90s",
+    "category": "Outerwear",
+    "size": "L",
+    "price_qar": 340,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Pit to pit": 62.0,
+      "Length": 66.0,
+      "Sleeve": 63.0
+    },
+    "status": "sold",
+    "photo": "design/img/olive-bomber.jpg"
+  },
+  {
+    "code": "TQ-0706",
+    "name": "Patchwork knit sweater",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Knitwear",
+    "size": "L",
+    "price_qar": 165,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Pit to pit": 61.0,
+      "Length": 68.0,
+      "Sleeve": 60.0
+    },
+    "status": "live",
+    "photo": "design/img/green-knit-sweater.jpg"
+  },
+  {
+    "code": "TQ-0707",
+    "name": "Manhattan college sweatshirt",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Knitwear",
+    "size": "M",
+    "price_qar": 110,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Pit to pit": 56.0,
+      "Length": 66.0,
+      "Sleeve": 60.0
+    },
+    "status": "live",
+    "photo": "design/img/college-sweatshirt.jpg"
+  },
+  {
+    "code": "TQ-0708",
+    "name": "Coral stripe open-knit jumper",
+    "brand": "Unbranded",
+    "era": "2000s",
+    "category": "Knitwear",
+    "size": "S",
+    "price_qar": 95,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Pit to pit": 48.0,
+      "Length": 58.0,
+      "Sleeve": 57.0
+    },
+    "status": "live",
+    "photo": "design/img/striped-knit.jpg"
+  },
+  {
+    "code": "TQ-0709",
+    "name": "Sage V-neck sweater",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Knitwear",
+    "size": "M",
+    "price_qar": 120,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Pit to pit": 55.0,
+      "Length": 64.0,
+      "Sleeve": 58.0
+    },
+    "status": "live",
+    "photo": "design/img/mint-sweater.jpg"
+  },
+  {
+    "code": "TQ-0710",
+    "name": "Navy stripe ringer tee",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Tops",
+    "size": "M",
+    "price_qar": 65,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Pit to pit": 52.0,
+      "Length": 70.0
+    },
+    "status": "live",
+    "photo": "design/img/striped-tee.jpg"
+  },
+  {
+    "code": "TQ-0711",
+    "name": "Speedway graphic tee",
+    "brand": "Unbranded",
+    "era": "2000s",
+    "category": "Tops",
+    "size": "L",
+    "price_qar": 75,
+    "condition": "Good",
+    "measurements_cm": {
+      "Pit to pit": 55.0,
+      "Length": 72.0
+    },
+    "status": "sold",
+    "photo": "design/img/speedway-tee.jpg"
+  },
+  {
+    "code": "TQ-0712",
+    "name": "Teal V-neck skater dress",
+    "brand": "Unbranded",
+    "era": "2010s",
+    "category": "Dresses",
+    "size": "S",
+    "price_qar": 120,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Bust": 42.0,
+      "Waist": 34.0,
+      "Length": 92.0
+    },
+    "status": "live",
+    "photo": "design/img/green-vneck-dress.jpg"
+  },
+  {
+    "code": "TQ-0713",
+    "name": "Blue floral sheath dress",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Dresses",
+    "size": "M",
+    "price_qar": 135,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Bust": 46.0,
+      "Waist": 38.0,
+      "Length": 96.0
+    },
+    "status": "live",
+    "photo": "design/img/lavender-floral-dress.jpg"
+  },
+  {
+    "code": "TQ-0714",
+    "name": "Speckled button-front midi dress",
+    "brand": "Unbranded",
+    "era": "80s",
+    "category": "Dresses",
+    "size": "M",
+    "price_qar": 145,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Bust": 47.0,
+      "Waist": 39.0,
+      "Length": 118.0
+    },
+    "status": "live",
+    "photo": "design/img/polka-button-dress.jpg"
+  },
+  {
+    "code": "TQ-0715",
+    "name": "Butter yellow pinafore dress",
+    "brand": "Unbranded",
+    "era": "Y2K",
+    "category": "Dresses",
+    "size": "S",
+    "price_qar": 110,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Bust": 40.0,
+      "Waist": 33.0,
+      "Length": 84.0
+    },
+    "status": "live",
+    "photo": "design/img/yellow-pinafore.jpg"
+  },
+  {
+    "code": "TQ-0716",
+    "name": "Rigid dark wash straight jeans",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Bottoms",
+    "size": "W30",
+    "price_qar": 140,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Waist": 38.0,
+      "Length": 104.0,
+      "Inseam": 78.0
+    },
+    "status": "live",
+    "photo": "design/img/dark-straight-jeans.jpg"
+  },
+  {
+    "code": "TQ-0717",
+    "name": "Light wash straight jeans",
+    "brand": "Unbranded",
+    "era": "2000s",
+    "category": "Bottoms",
+    "size": "W32",
+    "price_qar": 120,
+    "condition": "Good",
+    "measurements_cm": {
+      "Waist": 41.0,
+      "Length": 106.0,
+      "Inseam": 80.0
+    },
+    "status": "live",
+    "photo": "design/img/light-wash-jeans.jpg"
+  },
+  {
+    "code": "TQ-0718",
+    "name": "Denim midi skirt",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Bottoms",
+    "size": "M",
+    "price_qar": 115,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Waist": 37.0,
+      "Length": 72.0
+    },
+    "status": "live",
+    "photo": "design/img/denim-midi-skirt.jpg"
+  },
+  {
+    "code": "TQ-0719",
+    "name": "Burgundy leather mini skirt",
+    "brand": "Unbranded",
+    "era": "90s",
+    "category": "Bottoms",
+    "size": "S",
+    "price_qar": 155,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Waist": 34.0,
+      "Length": 44.0
+    },
+    "status": "live",
+    "photo": "design/img/leather-mini-skirt.jpg"
+  },
+  {
+    "code": "TQ-0720",
+    "name": "White cut-out heel pumps",
+    "brand": "Unbranded",
+    "era": "2000s",
+    "category": "Shoes",
+    "size": "EU 38",
+    "price_qar": 130,
+    "condition": "Excellent",
+    "measurements_cm": {
+      "Insole": 24.5,
+      "Heel height": 8.0
+    },
+    "status": "live",
+    "photo": "design/img/white-cutout-heels.jpg"
+  },
+  {
+    "code": "TQ-0721",
+    "name": "Black leather Chelsea boots",
+    "brand": "Unbranded",
+    "era": "2010s",
+    "category": "Shoes",
+    "size": "EU 40",
+    "price_qar": 175,
+    "condition": "Very good",
+    "measurements_cm": {
+      "Insole": 25.5,
+      "Heel height": 5.0
+    },
+    "status": "live",
+    "photo": "design/img/chelsea-boots.jpg"
+  }
+]
