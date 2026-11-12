@@ -21,6 +21,7 @@ npx vitest run
 step "local database (the build prerenders from it, e2e reads it)"
 npx supabase status >/dev/null 2>&1 || { echo "Local Supabase isn't running. Start it with: npx supabase start, then npm run seed" >&2; exit 1; }
 npx supabase test db
+npm run seed
 
 step "workers build"
 npx opennextjs-cloudflare build

@@ -179,8 +179,14 @@ test.describe("looks", () => {
 });
 
 test("the open bag and an open look pass axe", async ({ page }) => {
-  const serious = async () => (await new AxeBuilder({ page }).include("[role=dialog]").analyze()).violations
-    .filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id);
+  // Wait for the dialog's open animation to finish: mid-fade text is partly transparent and fails contrast.
+  const settled = () => expect.poll(() => page.locator("[role=dialog]:not([aria-hidden])").evaluate((el) =>
+    el.getAnimations({ subtree: true }).every((a) => a.playState !== "running"))).toBe(true);
+  const serious = async () => {
+    await settled();
+    return (await new AxeBuilder({ page }).include("[role=dialog]:not([aria-hidden])").analyze()).violations
+      .filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id);
+  };
   await page.goto("/");
   await page.getByRole("button", { name: "Add Denim midi skirt to bag" }).click();
   await bagButton(page).click();
@@ -188,6 +194,7 @@ test("the open bag and an open look pass axe", async ({ page }) => {
   expect(await serious()).toEqual([]);
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: /^Denim day/ }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Denim day" })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(1);
   expect(await serious()).toEqual([]);
 });

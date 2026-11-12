@@ -46,7 +46,7 @@ when Ashraf asks.
 - **Accept when:** unit tests cover the message, fees, outfit and look rules. The e2e suites from the mockup (builder and looks)
   are ported and pass on the workerd preview in WebKit and Chromium, plus bag persistence and a well-formed wa.me URL.
 
-## Phase 5: Auth and dashboard
+## Phase 5: Auth and dashboard (done 2026-11-12)
 - `/login` (D-013). Client-side session guard on the dashboard and `getUser()` in every server action (D-020). Sign out.
 - Stats (live, sold, sales total, live stock value, average days to sell), search, status tabs (All, Live, Reserved, Sold, Hidden),
   inline status select, two-tap delete, and the settings editor (WhatsApp number, delivery areas and fees, drop name). Each write

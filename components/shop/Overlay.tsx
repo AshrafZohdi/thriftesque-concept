@@ -42,6 +42,9 @@ export function Overlay<T>({ item, onClose, trigger, kind, labelledBy, label, ch
         aria-modal="true"
         aria-labelledby={labelledBy}
         aria-label={label}
+        // While animating out it's no longer a dialog for assistive tech or keyboard users.
+        inert={leaving}
+        aria-hidden={leaving || undefined}
       >
         {children(shown, closeRef)}
       </div>

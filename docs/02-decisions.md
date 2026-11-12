@@ -258,3 +258,14 @@ well under the 2.5 s budget.
   checks the page stays locked behind the bag, and failed when the counter was removed on purpose.
 - WCAG 2.5.3 (label in name): the Bag button is named "Bag 2 pieces", not "Open your bag", and look cards are named by their
   visible title and total, so voice-control users can say what they see.
+
+### D-035 Team sign-in details and how data-changing tests run. Decided, 2026-11-12
+- Sign out is for this device only (`scope: "local"`), so a team member stays signed in on their other device. The page goes to
+  sign-in even if the request fails.
+- Supabase's email provider must stay on: in local config `[auth.email] enable_signup = false` turned off sign-in as well as
+  signups. Signups are blocked by `[auth] enable_signup = false` (checked: a signup attempt returns `signup_disabled`). The
+  production equivalent is in the runbook.
+- E2E tests that change data (status, delete, settings) run once in Chromium after every read-only suite, then a teardown
+  re-seeds. The gate also re-seeds before building, so every run starts from known data. Local-only team accounts come from
+  `scripts/dev-accounts.ts`, so tests never read env files.
+- Closing overlays are `inert` and `aria-hidden` while they animate out.

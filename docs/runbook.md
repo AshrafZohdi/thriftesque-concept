@@ -18,11 +18,11 @@ Needs Node 24 and npm 11.
 | Install | `npm ci`, then `npx playwright install chromium firefox webkit` the first time |
 | Dev server (Node, fast refresh) | `npm run dev` |
 | Workers build | `npm run cf:build` |
-| Workers preview (workerd on :8787) | `npm run preview` (builds first) |
+| Workers preview (workerd on :8787) | `npm run preview` (builds first). Stop it with `npm run preview:stop` (stops only this repo's processes, parents first) |
 | Compressed Worker size | `npm run cf:size` (after a build). Budget 2.5 MiB, limit 3 MiB |
 | Unit tests | `npm test` |
 | E2E (5 browser configs, starts the preview itself) | `npm run e2e` (after a build) |
-| Full gate | `npm run gate` (needs local Supabase running and seeded: the build prerenders the shop from it and e2e reads it) |
+| Full gate | `caffeinate -i npm run gate` (needs local Supabase running; the gate re-seeds, builds, and runs e2e; `caffeinate` stops the Mac sleeping mid-run) |
 | Regenerate Cloudflare binding types | `npm run cf-typegen` (after editing `wrangler.jsonc`) |
 | Local Supabase | `npx supabase start` (Docker running). API on :55321, Studio on :55323 (D-025). Stop with `npx supabase stop` |
 | Write `.env.local` for local Supabase | `npm run env:local` (keys go to the file, never the terminal) |
@@ -45,6 +45,18 @@ There is deliberately no `deploy` script yet. Deploys get added in Phase 8 with 
 ## Deploy and roll back *(Phase 8)*
 
 Recorded here after the rehearsal: deploy command, how to find the last good version ID, rollback command, and smoke command.
+
+## Local team accounts
+
+`npm run seed` creates two accounts on the **local** database only (`scripts/dev-accounts.ts`): `team@thriftesque.test` (on the
+team) and `stranger@thriftesque.test` (signed in but not on the team). The seed refuses any host other than localhost.
+
+## Supabase Auth settings (production)
+
+- Authentication > Providers > Email: **enabled** (team members sign in with it).
+- Authentication > Sign In / Up: **Allow new users to sign up: off**. Confirm email: on.
+- Don't turn the Email provider off to stop signups: that also blocks sign-in. Locally, `[auth] enable_signup = false` blocks
+  signups and `[auth.email] enable_signup` stays `true` (found in Phase 5).
 
 ## Adding a team member (production)
 

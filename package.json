@@ -18,7 +18,8 @@
     "env:local": "bash scripts/env-local.sh",
     "db:test": "supabase test db",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local --schema public > lib/database.types.ts"
+    "db:types": "supabase gen types typescript --local --schema public > lib/database.types.ts",
+    "preview:stop": "bash scripts/stop-preview.sh"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.13",

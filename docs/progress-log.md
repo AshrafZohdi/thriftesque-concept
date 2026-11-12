@@ -2,6 +2,38 @@
 
 Newest first.
 
+## 2026-11-12: Phase 5, team sign-in and dashboard
+
+**Done**
+- `/login` (email and password, plain error messages) and `/dashboard` (static shell, data loaded with the team member's session,
+  `noindex` on both). Not on the team: a clear message. Signed out: back to sign-in.
+- Dashboard in the F style: stats (live, sold, sales, live stock value, average days to sell), search, status tabs with counts,
+  inline status select, two-tap delete (no `confirm()`), and shop settings (WhatsApp number, drop name, delivery areas and fees).
+- Server actions `setStatus`, `deleteProduct` (removes its photos too) and `saveSettings`. Each checks the session and team
+  membership, validates input, writes under RLS, then refreshes the affected shop pages.
+- Pure logic with unit tests: stats, search, settings validation (`lib/dashboard.ts`).
+- Seed creates local-only team and non-team accounts. `npm run preview:stop` stops only this repo's preview processes.
+
+**Found and fixed**
+- Local Supabase had email sign-in switched off by the `[auth.email]` signup flag. Fixed. Signups are still refused
+  (`signup_disabled`, checked by hand).
+- Closing overlays were still exposed as dialogs during their exit animation.
+- Two flaky e2e checks: axe ran mid-fade on the look sheet (Firefox, 360px), and a WebKit sign-out waited on the network. Fixed
+  (wait for the dialog's animation, sign out this device and always navigate), then 40/40 repeats passed.
+- My process handling: killing only workerd left 4 stale preview stacks running, and a broad `pkill -f workerd` also matched
+  another project's servers (they were not killed). Now `npm run preview:stop`, scoped to this repo. The Mac also idle-slept
+  twice mid-run, which looked like hung tests. Long runs now use `caffeinate`.
+
+**Verified**
+- `caffeinate -i npm run gate` green: audit, typecheck, lint, 62 unit, 43 database, Workers build, size, and 164 e2e: everything
+  before plus dashboard sign-in, wrong password, non-team refusal, stats, search, tabs, noindex, sign out, and (data-changing, in
+  Chromium) status change reaching the shop, two-tap delete with a 404 after, and settings validation with the new drop name on
+  every page. Then the seed was restored.
+- Worker 1,392 KiB gzip (budget 2,560).
+
+**Not verified:** password reset by email (not built; accounts are reset by Nuvai in Supabase for now). Real phones.
+**Needs Ashraf before Phase 6:** how cut-outs are made (D-027) and OK to add React Hook Form and Zod for the editor.
+
 ## 2026-11-12: Phase 4, bag, outfit builder and looks
 
 **Done**

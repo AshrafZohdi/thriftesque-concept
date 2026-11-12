@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import { PHOTO } from "../lib/photo-spec.ts";
+import { DEV_STRANGER, DEV_TEAM } from "./dev-accounts.ts";
 
 type SeedProduct = {
   code: string;
@@ -61,6 +62,20 @@ const SAMPLE_SETTINGS = {
   ],
 };
 
+async function ensureUser(email: string, password: string): Promise<string> {
+  const list = await db.auth.admin.listUsers({ perPage: 200 });
+  if (list.error) throw new Error(`Users: ${list.error.message}`);
+  const found = list.data.users.find((u) => u.email === email);
+  if (found) {
+    const upd = await db.auth.admin.updateUserById(found.id, { password });
+    if (upd.error) throw new Error(`User ${email}: ${upd.error.message}`);
+    return found.id;
+  }
+  const made = await db.auth.admin.createUser({ email, password, email_confirm: true });
+  if (made.error) throw new Error(`User ${email}: ${made.error.message}`);
+  return made.data.user.id;
+}
+
 async function main() {
   const seed: SeedProduct[] = JSON.parse(await readFile("design/seed-products.json", "utf8"));
   let bytes = 0;
@@ -104,6 +119,12 @@ async function main() {
   if (cleared.error) throw new Error(`Looks: ${cleared.error.message}`);
   const looks = await db.from("looks").insert(SAMPLE_LOOKS.map((l) => ({ ...l, source: "team" as const, status: "published" as const })));
   if (looks.error) throw new Error(`Looks: ${looks.error.message}`);
+
+  // Local sign-in accounts: one on the team, one signed in but not on the team (to test that it's refused).
+  const teamId = await ensureUser(DEV_TEAM.email, DEV_TEAM.password);
+  await ensureUser(DEV_STRANGER.email, DEV_STRANGER.password);
+  const member = await db.from("team_members").upsert({ user_id: teamId, name: DEV_TEAM.name });
+  if (member.error) throw new Error(`Team member: ${member.error.message}`);
 
   const seq = await db.rpc("sync_product_code_seq");
   if (seq.error) throw new Error(`Code sequence: ${seq.error.message}`);

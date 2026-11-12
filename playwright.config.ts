@@ -3,6 +3,14 @@ import { defineConfig, devices } from "@playwright/test";
 // E2E runs against the workerd preview (the real runtime), not `next dev`. Build first: `npm run cf:build`.
 const baseURL = process.env.BASE_URL ?? "http://localhost:8787";
 
+const readOnly = [
+  { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+  { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+  { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  { name: "phone-360", use: { ...devices["Galaxy S9+"], viewport: { width: 360, height: 740 } } },
+  { name: "iphone-390", use: { ...devices["iPhone 14"] } },
+];
+
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
@@ -11,11 +19,11 @@ export default defineConfig({
   reporter: [["list"]],
   use: { baseURL, trace: "retain-on-failure" },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
-    { name: "phone-360", use: { ...devices["Galaxy S9+"], viewport: { width: 360, height: 740 } } },
-    { name: "iphone-390", use: { ...devices["iPhone 14"] } },
+    // Read-only suites, in parallel across browsers and phone sizes.
+    ...readOnly.map((p) => ({ ...p, testIgnore: [/team-writes\.spec\.ts/, /restore\.teardown\.ts/] })),
+    // Tests that change data run once, after everything else, then the seed puts the local database back.
+    { name: "team-writes", use: { ...devices["Desktop Chrome"] }, testMatch: /team-writes\.spec\.ts/, dependencies: readOnly.map((p) => p.name), teardown: "restore" },
+    { name: "restore", testMatch: /restore\.teardown\.ts/ },
   ],
   webServer: process.env.BASE_URL
     ? undefined
