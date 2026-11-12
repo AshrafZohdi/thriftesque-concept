@@ -1,6 +1,11 @@
 import { Band, Footer, Header, HowToOrder, Section, Strip } from "@/components/Site";
+import { BagButton } from "@/components/shop/BagDrawer";
 import { Catalog } from "@/components/shop/Catalog";
 import { Hero } from "@/components/shop/Hero";
+import { Looks, LooksIntro } from "@/components/shop/Looks";
+import { OutfitBuilder } from "@/components/shop/OutfitBuilder";
+import { ShopProvider } from "@/components/shop/ShopProvider";
+import { initialOutfit, pools } from "@/lib/outfit";
 import { getShop } from "@/lib/shop";
 import { waLink } from "@/lib/wa";
 
@@ -8,24 +13,40 @@ import { waLink } from "@/lib/wa";
 export const revalidate = false;
 
 export default async function ShopPage() {
-  const { products, settings } = await getShop();
+  const { products, looks, settings } = await getShop();
   const live = products.filter((p) => p.status === "live");
-  const heroPiece = live.find((p) => p.cutout);
+  const hasBuilder = initialOutfit(pools(products)) !== null;
+  const nav: [string, string][] = [
+    ...(looks.length ? [["/#looks", "Looks"] as [string, string]] : []),
+    ...(hasBuilder ? [["/#outfit", "Build an outfit"] as [string, string]] : []),
+    ["/#shop", "The drop"],
+    ["/#how", "How to order"],
+  ];
   return (
-    <>
+    <ShopProvider products={products} settings={settings} hasBuilder={hasBuilder}>
       <div data-page>
         <Strip dropName={settings.dropName} />
-        <Header />
+        <Header nav={nav} right={<BagButton />} />
         <main>
-          <Hero piece={heroPiece} liveCount={live.length} dropName={settings.dropName} />
+          <Hero piece={live.find((p) => p.cutout)} liveCount={live.length} dropName={settings.dropName} firstSection={looks.length ? "looks" : "shop"} />
           <Band dropName={settings.dropName} />
+          {looks.length > 0 && (
+            <Section id="looks" kicker="Looks" title="Looks from this drop" intro={<LooksIntro looks={looks} />}>
+              <Looks looks={looks} />
+            </Section>
+          )}
+          {hasBuilder && (
+            <Section id="outfit" kicker="Build an outfit" title="Make your own look" intro="Tap the arrows or swipe a piece to switch it. Lock what you like and Shuffle the rest. Tap a piece for its measurements.">
+              <OutfitBuilder />
+            </Section>
+          )}
           <Section id="shop" kicker={settings.dropName || "This week"} title="The drop" intro="Tap a piece for measurements and condition.">
-            <Catalog products={products} whatsappNumber={settings.whatsappNumber} />
+            <Catalog />
           </Section>
           <HowToOrder />
         </main>
         <Footer waHref={waLink(settings.whatsappNumber, "Hi Thriftesque!")} />
       </div>
-    </>
+    </ShopProvider>
   );
 }

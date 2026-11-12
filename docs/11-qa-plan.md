@@ -5,7 +5,7 @@
 | What | Budget | Measured with |
 | --- | --- | --- |
 | Worker, compressed | 2.5 MiB or less (hard limit 3 MiB) | `wrangler deploy --dry-run` output |
-| Shop first-load JS | 150 KB gzip or less | build output and a Lighthouse treemap |
+| Shop first-load JS | Our code 40 KB or less, total 200 KB or less, gzip (D-033) | sum of the page's script chunks |
 | Shop LCP | 2.5 s or less, mobile and throttled | Lighthouse on the workerd preview |
 | CLS | 0.05 or less | Lighthouse |
 | INP | 200 ms or less (filter tap, add to bag) | Playwright trace and Performance panel |

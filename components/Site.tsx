@@ -30,7 +30,7 @@ export function Strip({ dropName }: { dropName: string }) {
   );
 }
 
-export function Header({ right }: { right?: ReactNode }) {
+export function Header({ right, nav = [["/#shop", "The drop"], ["/#how", "How to order"]] }: { right?: ReactNode; nav?: [href: string, label: string][] }) {
   return (
     <header className={s.header}>
       <div className={s.headerIn}>
@@ -39,8 +39,7 @@ export function Header({ right }: { right?: ReactNode }) {
           Thriftesque
         </Link>
         <nav className={`${s.nav} mono`} aria-label="Main">
-          <Link href="/#shop">The drop</Link>
-          <Link href="/#how">How to order</Link>
+          {nav.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
         </nav>
         {right ?? (
           <Link className={s.cell} href="/#shop">
@@ -63,7 +62,7 @@ export function Band({ dropName }: { dropName: string }) {
 }
 
 export function Section({ id, kicker, title, intro, children, className = "" }: {
-  id?: string; kicker: string; title: string; intro?: string; children: ReactNode; className?: string;
+  id?: string; kicker: string; title: string; intro?: ReactNode; children: ReactNode; className?: string;
 }) {
   const titleId = id ? `${id}-title` : undefined;
   return (

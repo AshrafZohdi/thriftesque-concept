@@ -244,3 +244,17 @@ lines and needs Next 16.4.5. Forcing major-version overrides under the build too
 `--audit-level=high`, which these don't reach.
 **Revisit when:** OpenNext ships `glob` 14.0.2+ and `minimatch` 11.0.1+, or before launch, whichever is first. Tracked in the
 launch checklist.
+
+### D-033 JavaScript budget corrected to match the stack. Decided, 2026-11-12
+The Phase 0 budget of 150 KB gzip first-load JS was set before measuring Next 16. On `/`, React (70 KB) and the Next.js runtime
+(about 87 KB) come to about 160 KB before any app code. Our own code is about 25 KB, for 185 KB in all. The budget is now
+**our code 40 KB or less, total 200 KB or less**. What shoppers feel was measured directly instead: on a 360px phone with slow
+4G (150 ms, 1.6 Mbps) and a 4x slower CPU, LCP has a median of 1.6 s on `/` and 1.2 s on a product page, with CLS 0. Both are
+well under the 2.5 s budget.
+
+### D-034 Overlays are counted, and accessible names include the visible text. Decided, 2026-11-12
+- "Add to bag" in the product sheet opens the bag while the sheet is still closing. `useOverlay` counts open overlays, so only
+  the last to close unlocks the page and returns focus (falling back to the Bag button when the opener has gone). An e2e test
+  checks the page stays locked behind the bag, and failed when the counter was removed on purpose.
+- WCAG 2.5.3 (label in name): the Bag button is named "Bag 2 pieces", not "Open your bag", and look cards are named by their
+  visible title and total, so voice-control users can say what they see.

@@ -36,7 +36,7 @@ when Ashraf asks.
   OG tags, and 404s. axe is clean. Screenshots at 360, 390, 768 and 1280 reviewed against the F mockup. The Worker stays under
   budget.
 
-## Phase 4: Bag, outfit builder and looks
+## Phase 4: Bag, outfit builder and looks (done 2026-11-12)
 - Bag drawer with receipt, name, delivery or pickup, area and fee from settings, and the WhatsApp message (pure, unit tested).
   localStorage reconcile (D-009).
 - Outfit builder (D-027): vertical cut-out stack, arrows and swipe, lock, Shuffle, Top + bottom or Dress, Add outfit, Ask on

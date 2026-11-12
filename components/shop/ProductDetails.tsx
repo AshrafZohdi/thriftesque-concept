@@ -1,7 +1,7 @@
 // Product details shared by the sheet over the shop and the /p/[code] page. No hooks, so it renders on server or client.
+import type { ReactNode } from "react";
 import { CONDITION_NOTE } from "@/lib/catalog";
 import type { ShopProduct } from "@/lib/shop-model";
-import { askAboutPiece, waLink } from "@/lib/wa";
 import s from "./shop.module.css";
 
 export function Gallery({ product, className = "" }: { product: ShopProduct; className?: string }) {
@@ -20,10 +20,9 @@ export function Gallery({ product, className = "" }: { product: ShopProduct; cla
   );
 }
 
-export function ProductDetails({ product: p, whatsappNumber, titleId, heading = "h1" }: {
-  product: ShopProduct; whatsappNumber: string; titleId?: string; heading?: "h1" | "h2";
+export function ProductDetails({ product: p, titleId, heading = "h1", actions }: {
+  product: ShopProduct; titleId?: string; heading?: "h1" | "h2"; actions: ReactNode;
 }) {
-  const ask = waLink(whatsappNumber, askAboutPiece(p));
   const Title = heading;
   return (
     <div className={s.detail}>
@@ -46,10 +45,7 @@ export function ProductDetails({ product: p, whatsappNumber, titleId, heading = 
       <p className={s.note}>{CONDITION_NOTE[p.condition]} Measured flat. Lay a piece you own flat to compare.</p>
       {p.description && <p>{p.description}</p>}
       {p.stylingTip && <p className={s.note}>Styling tip: {p.stylingTip}</p>}
-      <div className={s.actions}>
-        {p.status !== "live" && <button className={`${s.btn} ${s.primary}`} type="button" disabled>{p.status === "sold" ? "Sold" : "Reserved"}</button>}
-        {ask && <a className={`${s.btn} ${s.secondary}`} href={ask} target="_blank" rel="noopener">Ask about this piece</a>}
-      </div>
+      <div className={s.actions}>{actions}</div>
     </div>
   );
 }

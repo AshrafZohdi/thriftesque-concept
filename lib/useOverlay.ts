@@ -1,6 +1,29 @@
 "use client";
 // Shared overlay behaviour: iOS-safe scroll lock, Escape to close, the page behind made inert, focus in and back out.
+// Counted, because one overlay can open while another is still closing (Add to bag closes the sheet and opens the bag):
+// only the last one to close unlocks the page and returns focus.
 import { useEffect, useRef } from "react";
+
+let openCount = 0;
+let savedY = 0;
+
+function lockPage() {
+  if (openCount++ > 0) return;
+  savedY = window.scrollY;
+  document.body.style.top = `-${savedY}px`;
+  document.body.classList.add("locked");
+  document.querySelector<HTMLElement>("[data-page]")?.setAttribute("inert", "");
+}
+
+function unlockPage(): boolean {
+  if (--openCount > 0) return false;
+  openCount = 0;
+  document.querySelector<HTMLElement>("[data-page]")?.removeAttribute("inert");
+  document.body.classList.remove("locked");
+  document.body.style.top = "";
+  window.scrollTo({ top: savedY, behavior: "instant" });
+  return true;
+}
 
 export function useOverlay(open: boolean, onClose: () => void, trigger: HTMLElement | null) {
   const first = useRef<HTMLButtonElement>(null);
@@ -11,24 +34,17 @@ export function useOverlay(open: boolean, onClose: () => void, trigger: HTMLElem
 
   useEffect(() => {
     if (!open) return;
-    const y = window.scrollY;
-    const body = document.body;
-    body.style.top = `-${y}px`;
-    body.classList.add("locked");
-    const page = document.querySelector<HTMLElement>("[data-page]");
-    page?.setAttribute("inert", "");
+    lockPage();
     const key = (e: KeyboardEvent) => e.key === "Escape" && close.current();
     window.addEventListener("keydown", key);
     const t = setTimeout(() => first.current?.focus({ preventScroll: true }), 60);
     return () => {
       clearTimeout(t);
       window.removeEventListener("keydown", key);
-      page?.removeAttribute("inert");
-      body.classList.remove("locked");
-      body.style.top = "";
-      window.scrollTo({ top: y, behavior: "instant" });
       // Safari doesn't focus a button on click, so the opener is passed in rather than read from document.activeElement.
-      trigger?.focus({ preventScroll: true });
+      // If the opener has gone (a button inside a sheet that closed), fall back to a stable control such as the Bag button.
+      const target = trigger?.isConnected ? trigger : document.querySelector<HTMLElement>("[data-focus-fallback]");
+      if (unlockPage()) target?.focus({ preventScroll: true });
     };
   }, [open, trigger]);
 

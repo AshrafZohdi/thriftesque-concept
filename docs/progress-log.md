@@ -2,6 +2,42 @@
 
 Newest first.
 
+## 2026-11-12: Phase 4, bag, outfit builder and looks
+
+**Done**
+- `ShopProvider`: shared bag (localStorage through `useSyncExternalStore`, with a memory fallback when storage is blocked),
+  product sheet, builder requests and toast. One `Overlay` component for the product sheet, look sheet and bag drawer.
+- Bag drawer in the F style: receipt, remove, name, delivery or pickup, area and fee from settings, and Send order on WhatsApp
+  with a hint for what's missing. Pieces that sold since are named and left out of the order.
+- Add to bag on cards, in the sheet and on the product page. Sold and reserved pieces can't be added.
+- Outfit builder (D-027): vertical cut-out stack, arrows and swipe, lock, Shuffle, Top + bottom or Dress, list and total, sticky
+  Shuffle / Add outfit, Ask on WhatsApp, and "Build an outfit with this" from the sheet. Deterministic first outfit (newest
+  pieces), so server and browser render the same thing.
+- Looks (D-028): boards from published looks, a look sheet with Add look, Remix in the builder and Ask on WhatsApp. The AI label
+  only shows for `source = 'ai'`.
+- Pure logic with unit tests: `lib/order.ts` (fees, totals, the exact message), `lib/outfit.ts` (pools, modes, step, shuffle
+  with locks, load, sanitise) and `lib/bag-store.ts` (parsing junk safely).
+
+**Found and fixed**
+- Overlay race: the sheet closing after the bag opened would have unlocked the page behind the bag. Counted overlays (D-034).
+- Two WCAG 2.5.3 failures found by axe: the Bag button and the look cards had names that didn't contain their visible text.
+- The receipt's bottom border was chopped into dashes by the zigzag mask, and Tailwind's base styles had removed the underline
+  from "Ask about this outfit". Both fixed.
+- The first-load JS budget was unrealistic for Next 16. Corrected with measurements (D-033).
+
+**Verified**
+- `npm run gate` green: 56 unit, 43 database and 130 e2e tests (Chromium, Firefox, WebKit, 360px, 390px). The e2e covers add and
+  remove, persistence across reload, the exact wa.me message for delivery and pickup, missing name or area, sheet to bag with
+  focus and lock, sold pieces, the product page bag, builder arrows, lock, Shuffle, keyboard focus, dress mode, swipe, Add
+  outfit, the sheet shortcut, the four team looks without an AI label, Add look, Remix, and axe on the bag and a look sheet.
+- Mutation check: removing the overlay counter made the sheet-to-bag test fail. Restored.
+- Worker 1,179 KiB gzip. Shop JS 185 KB gzip (our code about 25 KB). LCP median 1.6 s on `/` and 1.2 s on a product page under
+  slow 4G with a 4x slower CPU, CLS 0.
+
+**Not verified:** real phones and a real finger swipe. WhatsApp actually opening (links checked, not opened).
+
+**Next:** Phase 5: team sign-in and the dashboard.
+
 ## 2026-11-12: Phase 3, shop in the F design
 
 **Done**

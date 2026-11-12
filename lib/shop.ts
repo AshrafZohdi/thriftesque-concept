@@ -1,4 +1,5 @@
 // Shop data for server components. Pages that use it are cached and refreshed when the dashboard saves (D-021).
+import { cache } from "react";
 import { publicDb, photoUrl } from "@/lib/supabase/public";
 import {
   SHOP_PRODUCT_COLUMNS, sortForShop, toShopLook, toShopProduct, visibleLooks,
@@ -20,7 +21,8 @@ function toSettings(row: { whatsapp_number: string; drop_name: string; delivery_
   };
 }
 
-export async function getShop(): Promise<{ products: ShopProduct[]; looks: ShopLook[]; settings: ShopSettings }> {
+// cache(): metadata and page share one set of queries per render.
+export const getShop = cache(async function getShop(): Promise<{ products: ShopProduct[]; looks: ShopLook[]; settings: ShopSettings }> {
   const db = publicDb();
   const [products, looks, settings] = await Promise.all([
     db.from("products").select(SHOP_PRODUCT_COLUMNS).neq("status", "hidden"),
@@ -34,17 +36,4 @@ export async function getShop(): Promise<{ products: ShopProduct[]; looks: ShopL
   const list = sortForShop(products.data.map((r) => toShopProduct(r, photoUrl)).filter((p): p is ShopProduct => p !== null));
   const byCode = new Map(list.map((p) => [p.code, p]));
   return { products: list, looks: visibleLooks(looks.data.map(toShopLook), byCode), settings: toSettings(settings.data) };
-}
-
-export async function getProduct(code: string): Promise<{ product: ShopProduct; settings: ShopSettings } | null> {
-  if (!/^TQ-\d{4,}$/.test(code)) return null;
-  const db = publicDb();
-  const [product, settings] = await Promise.all([
-    db.from("products").select(SHOP_PRODUCT_COLUMNS).eq("code", code).neq("status", "hidden").maybeSingle(),
-    db.from("settings").select("whatsapp_number,drop_name,delivery_fees").eq("id", 1).maybeSingle(),
-  ]);
-  if (product.error) fail("the product", product.error);
-  if (settings.error) fail("settings", settings.error);
-  const p = product.data ? toShopProduct(product.data, photoUrl) : null;
-  return p ? { product: p, settings: toSettings(settings.data) } : null;
-}
+});

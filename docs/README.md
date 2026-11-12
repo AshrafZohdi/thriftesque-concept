@@ -1,6 +1,6 @@
 # Thriftesque production app: docs hub
 
-**Status (2026-10-27):** Phase 3 (shop in the F design) done. Next: Phase 4 (bag, outfit builder, looks). Branch `dev`. Branch `dev`.
+**Status (2026-10-27):** Phase 4 (bag, outfit builder, looks) done. Next: Phase 5 (auth and dashboard). Branch `dev`. Branch `dev`.
 
 Start here. `CLAUDE.md` at the repo root is the project brief and wins over anything in this folder if they disagree.
 
