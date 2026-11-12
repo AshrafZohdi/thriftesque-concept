@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "thriftesque",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    // Self-reference used by OpenNext for revalidation. Must match "name".
+    { "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque" }
+  ],
+  // IDs are left out until the client's Cloudflare account exists (Phase 9). Local preview simulates both.
+  "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV" }],
+  "d1_databases": [{ "binding": "NEXT_TAG_CACHE_D1", "database_name": "thriftesque-tag-cache" }],
+  // No "images" binding: Cloudflare image optimisation is paid. Photos are pre-sized (D-011).
+  "observability": { "enabled": true }
+}
