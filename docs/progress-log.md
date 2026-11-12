@@ -2,6 +2,41 @@
 
 Newest first.
 
+## 2026-11-12: Phase 6, product editor
+
+**Done**
+- Editor drawer on the dashboard: "+ Add product" and "Edit" per row. React Hook Form with one Zod schema shared with the save
+  action. Measurement fields follow the category, plus colour, description and styling tip. Errors in plain words, linked to
+  their fields.
+- Photos: up to 4, cropped to 4:5, resized to 720x900 and stepped down to 80 KB or less in the browser (JPEG fallback where WebP
+  can't be encoded). Uploaded with the team member's session. "Make cover" and remove. Uploads from a cancelled edit (Cancel,
+  Escape or the scrim) are deleted.
+- Cut-outs (D-036): "Make cut-out from cover" runs ormbg in a Web Worker in the browser, and "Upload your own cut-out" takes the
+  phone's "lift subject" result. Preview on the sky background.
+- `saveProduct` action: validates, checks the team, inserts (next TQ code) or updates, deletes photos taken out, refreshes the
+  shop pages.
+- Dependencies approved and added (D-037). Dashboard-only CSP for the model download.
+
+**Found and fixed**
+- Licences: the obvious background-removal library is AGPL and several popular models are non-commercial. Picked an
+  Apache-2.0 model after testing quality on all 21 sample photos (D-036).
+- The bundler already emits ONNX Runtime's CPU file, so my extra `public/ort` copy was a 14 MB duplicate. Removed.
+- The local seed didn't remove products added by tests, so a product created by the editor test broke the next run's stats.
+  The seed now resets exactly (local only).
+- React lint: refs read during render, and `watch()` (switched to `useWatch`).
+
+**Verified**
+- `caffeinate -i npm run gate` green: 67 unit, 43 database, 168 e2e. New e2e: an empty save lists what's missing; adding a
+  product uploads a real photo, read back from storage as WebP, 720x900, 80 KB or less; your own cut-out; the new piece shows on
+  `/p/TQ-0722`, in the bag and in the builder; editing a price reaches the shop; and the real in-browser model run makes a new
+  cut-out (14 s, including the model download).
+- Worker 1,491 KiB gzip (budget 2,560). The 14 MB runtime file is a static asset, under the 25 MiB per-file limit.
+
+**Not verified:** cut-out speed on a real phone. Safari's WebP encoding fallback (the code handles it; not exercised in WebKit
+e2e, where the cut-out tests run in Chromium).
+
+**Next:** Phase 7: AI "Fill from photo" and "Suggest looks" (needs a Gemini key for local testing, N-2).
+
 ## 2026-11-12: Phase 5, team sign-in and dashboard
 
 **Done**

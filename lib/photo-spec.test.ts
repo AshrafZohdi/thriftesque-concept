@@ -28,3 +28,17 @@ describe("coverCrop", () => {
     expect(() => coverCrop(0, 100)).toThrow(RangeError);
   });
 });
+
+import { alphaBounds, hardenMask } from "./photo-spec";
+
+describe("cut-out mask", () => {
+  it("hardens the mask: background to 0, piece to 255, smooth between", () => {
+    expect([...hardenMask([0, 0.29, 0.45, 0.61, 1])]).toEqual([0, 0, 128, 255, 255]);
+  });
+  it("finds the box around the piece", () => {
+    const a = new Uint8ClampedArray(5 * 4);
+    a[1 * 5 + 1] = 200; a[2 * 5 + 3] = 255;
+    expect(alphaBounds(a, 5, 4)).toEqual({ x: 1, y: 1, w: 3, h: 2 });
+    expect(alphaBounds(new Uint8ClampedArray(20), 5, 4)).toBeNull();
+  });
+});

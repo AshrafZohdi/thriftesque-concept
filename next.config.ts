@@ -19,6 +19,11 @@ const csp = [
   "object-src 'none'",
 ].join("; ");
 
+const dashboardCsp = csp
+  .replace(/connect-src ([^;]*)/, "connect-src $1 https://huggingface.co https://*.hf.co")
+  .replace(/script-src ([^;]*)/, "script-src $1 'wasm-unsafe-eval'")
+  .concat("; worker-src 'self' blob:");
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
@@ -42,7 +47,12 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // The team editor also downloads the background-removal model from Hugging Face (D-036). Shop pages never do.
+      { source: "/dashboard/:path*", headers: [{ key: "Content-Security-Policy", value: dashboardCsp }] },
+      { source: "/dashboard", headers: [{ key: "Content-Security-Policy", value: dashboardCsp }] },
+    ];
   },
 };
 

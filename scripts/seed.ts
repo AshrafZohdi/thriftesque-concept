@@ -112,6 +112,17 @@ async function main() {
     console.log(`${p.code}  ${(data.length / 1024).toFixed(1).padStart(5)} KB  q${quality}  ${p.name}`);
   }
 
+  // Local resets must be exact: products added by tests or by hand are removed, with their photos.
+  const extra = await db.from("products").select("code, photos, cutout").not("code", "in", `(${seed.map((p) => p.code).join(",")})`);
+  if (extra.error) throw new Error(`Extra products: ${extra.error.message}`);
+  if (extra.data.length) {
+    const paths = extra.data.flatMap((r) => [...r.photos, ...(r.cutout ? [r.cutout] : [])]);
+    if (paths.length) await db.storage.from(PHOTO.bucket).remove(paths);
+    const del = await db.from("products").delete().in("code", extra.data.map((r) => r.code));
+    if (del.error) throw new Error(`Extra products: ${del.error.message}`);
+    console.log(`removed ${extra.data.length} product(s) not in the seed: ${extra.data.map((r) => r.code).join(", ")}`);
+  }
+
   const settings = await db.from("settings").update(SAMPLE_SETTINGS).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
 

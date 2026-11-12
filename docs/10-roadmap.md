@@ -54,7 +54,7 @@ when Ashraf asks.
 - **Accept when:** e2e covers a signed-out redirect, sign in, a status change reaching the shop, delete confirm, and a settings
   change reaching the bag. pgTAP and e2e both prove anon writes fail. The dashboard scrolls correctly on WebKit mobile (old bug 2).
 
-## Phase 6: Product editor (decide the cut-out method first, D-027)
+## Phase 6: Product editor (done 2026-11-12)
 - Drawer form with RHF and zod (shared schema). Category-driven measurement fields. Photo pipeline (D-011) with up to 4 photos and
   "Make cover". Code assigned on create. Unsaved-changes guard without `confirm()`.
 - **Accept when:** e2e creates a product from a fixture photo, edits it and deletes it. The uploaded file is 80 KB or less and

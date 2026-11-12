@@ -269,3 +269,26 @@ well under the 2.5 s budget.
   re-seeds. The gate also re-seeds before building, so every run starts from known data. Local-only team accounts come from
   `scripts/dev-accounts.ts`, so tests never read env files.
 - Closing overlays are `inert` and `aria-hidden` while they animate out.
+
+### D-036 Cut-outs: made automatically in the team's browser, with the phone as fallback. Decided, 2026-11-12
+Ashraf chose automatic background removal in the browser (supersedes the open question in D-027).
+- **Model:** `onnx-community/ormbg-ONNX`, int8 (44 MB, Apache-2.0), run with `onnxruntime-web` (MIT) in a Web Worker on the CPU.
+  It downloads once from Hugging Face and is then cached by the browser. It never runs on our servers and never for shoppers.
+- **Ruled out:** `@imgly/background-removal` (AGPL-3.0, would require publishing the site's source), BRIA RMBG 1.4 and 2.0
+  (non-commercial licences), ISNet builds marked AGPL. BiRefNet-lite (MIT) ran out of memory on the CPU path (`bad_alloc`) and
+  would need WebGPU, which not every team phone has. Transformers.js was skipped because it pulls in `onnxruntime-node`
+  (307 MB with an install script); about 40 lines of our own pre- and post-processing replace it.
+- **Quality, measured on the 21 sample photos:** clean on most pieces; weak on low-contrast ones (white heels on a light floor,
+  the tweed coat) and on background enclosed by the garment (between jean legs). The mask is hardened (smoothstep 0.3 to 0.6),
+  trimmed and saved as WebP with transparency (PNG where a browser can't encode WebP). Speed: about 4 s per photo on a desktop
+  CPU; expect longer on phones.
+- **Fallback:** the editor shows the cut-out on the sky background, and "Upload your own cut-out" takes the phone's built-in
+  "lift subject" result. Photos on a plain, contrasting background make the automatic result much better.
+- **Hosting:** the ONNX Runtime CPU file (14 MB) is emitted by the bundler into `/_next/static/media`, under Cloudflare's 25 MiB
+  per-file limit. The WebGPU build (28 MB) isn't used. Only `/dashboard` widens the CSP (`connect-src` Hugging Face,
+  `'wasm-unsafe-eval'`, `worker-src 'self' blob:`).
+
+### D-037 Dependencies added for the editor. Decided, 2026-11-12
+Approved by Ashraf: `react-hook-form` 7.92.0, `zod` 4.6.7, `@hookform/resolvers` 7.0.6 and `onnxruntime-web` 1.31.1, all MIT, all
+pinned. They load only on the dashboard. `protobufjs`'s install script (a version notice) is denied. One schema
+(`lib/product-schema.ts`) validates in the editor and again in the save action.

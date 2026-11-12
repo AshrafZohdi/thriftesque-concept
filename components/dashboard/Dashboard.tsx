@@ -12,6 +12,7 @@ import { dashboardStats, searchProducts, type SettingsInput, type TeamProduct } 
 import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
+import { ProductEditor, emptyProduct, loadForEdit, type EditTarget } from "./ProductEditor";
 
 type Load = { state: "checking" } | { state: "not-team"; email: string } | { state: "error"; message: string } | {
   state: "ready"; email: string; products: TeamProduct[]; settings: SettingsInput;
@@ -44,7 +45,9 @@ async function loadAll(): Promise<Load | "signed-out"> {
   };
 }
 
-function Row({ p, onStatus, onDelete }: { p: TeamProduct; onStatus: (code: string, s: Status) => void; onDelete: (code: string) => void }) {
+function Row({ p, onStatus, onDelete, onEdit }: {
+  p: TeamProduct; onStatus: (code: string, s: Status) => void; onDelete: (code: string) => void; onEdit: (code: string, el: HTMLElement) => void;
+}) {
   const [confirm, setConfirm] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -61,6 +64,7 @@ function Row({ p, onStatus, onDelete }: { p: TeamProduct; onStatus: (code: strin
         {STATUSES.map((st) => <option key={st} value={st}>{LABEL[st]}</option>)}
       </select>
       <div className={d.acts}>
+        <button className={d.btnSm} type="button" aria-label={`Edit ${p.name}`} onClick={(e) => onEdit(p.code, e.currentTarget)}>Edit</button>
         {/* Two taps instead of a confirm() dialog (CLAUDE.md). The first tap arms it for 3 seconds. */}
         <button className={`${d.btnSm} ${d.danger}`} type="button" data-confirm={confirm}
           aria-label={confirm ? `Confirm delete ${p.name}` : `Delete ${p.name}`}
@@ -134,6 +138,8 @@ export function Dashboard() {
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<Status | "all">("all");
   const [note, setNote] = useState("");
+  const [edit, setEdit] = useState<{ target: EditTarget; trigger: HTMLElement | null } | null>(null);
+  const nonce = useRef(0);
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const say = useCallback((text: string) => {
@@ -182,6 +188,21 @@ export function Dashboard() {
 
   // This device only: a team member signed in on a laptop and a phone stays signed in on the other one.
   // Leaves for the sign-in page even if the request fails, so the page can't get stuck.
+  async function openEditor(code: string | null, trigger: HTMLElement | null) {
+    try {
+      const values = code ? await loadForEdit(code) : emptyProduct();
+      setEdit({ target: { code, values, nonce: ++nonce.current }, trigger });
+    } catch (e) {
+      say(e instanceof Error ? e.message : "Couldn't open that product.");
+    }
+  }
+
+  async function onSaved(code: string, created: boolean) {
+    setEdit(null);
+    say(created ? `${code} added` : `${code} saved`);
+    await refresh();
+  }
+
   async function signOut() {
     try {
       await browserDb().auth.signOut({ scope: "local" });
@@ -210,6 +231,7 @@ export function Dashboard() {
 
   return (
     <>
+      <div data-page>
       <header className={d.bar}>
         <div className={`wrap ${d.barIn}`}>
           <span className={d.brand}><ChromeHeart />Thriftesque</span>
@@ -221,8 +243,11 @@ export function Dashboard() {
       </header>
       <main className={`wrap ${d.main}`}>
         <div className={d.title}>
-          <h1 className="display">Products</h1>
-          <p>Change a status, search the stock and keep the shop settings up to date.</p>
+          <div>
+            <h1 className="display">Products</h1>
+            <p>Add pieces, change a status, search the stock and keep the shop settings up to date.</p>
+          </div>
+          <button className={`${s.btn} ${s.primary}`} type="button" onClick={(e) => openEditor(null, e.currentTarget)}>+ Add product</button>
         </div>
         <section className={d.stats} aria-label="Stats">
           <div className={d.stat}><span>Live in shop</span><b>{stats.live}</b></div>
@@ -242,12 +267,14 @@ export function Dashboard() {
           </div>
         </div>
         <section className={d.table} aria-label="Products">
-          {list.length ? list.map((p) => <Row key={p.code} p={p} onStatus={changeStatus} onDelete={remove} />) : (
+          {list.length ? list.map((p) => <Row key={p.code} p={p} onStatus={changeStatus} onDelete={remove} onEdit={openEditor} />) : (
             <p className={d.empty}>No products match. Try another search or tab.</p>
           )}
         </section>
         <SettingsPanel initial={load.settings} onSaved={() => refresh()} />
       </main>
+      </div>
+      <ProductEditor target={edit?.target ?? null} trigger={edit?.trigger ?? null} onClose={() => setEdit(null)} onSaved={onSaved} />
       <p className={d.toast} role="status" aria-live="polite">{note}</p>
     </>
   );
