@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thriftesque | Option F: Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Option F. Feel: sky backdrop with clouds, chrome objects, neon lime, heavy condensed headlines, thin black frame lines.
+   Adds AI looks (moodboards) and the outfit builder from E. */
+:root {
+  --bg: #f4f7fb; --surface: #ffffff; --ink: #0d0d0f; --soft: #4f5563; --line: #0d0d0f; --tile: #eaf1fa;
+  --lime: #d6f84c; --sky1: #8ecbff; --sky2: #d9efff; --accent: #0d0d0f; --focus: #0d0d0f; --wa: #1a8048;
+  --font-display: "Anton", "Arial Narrow", sans-serif; --font-body: "Instrument Sans", system-ui, sans-serif;
+  --font-label: "Space Mono", ui-monospace, monospace; --font-receipt: "Space Mono", ui-monospace, monospace;
+  --btn-radius: 0; --chip-radius: 0; --card-radius: 0; --sheet-radius: 0; --field-radius: 0;
+  --look-bg: linear-gradient(180deg, var(--sky1), var(--sky2) 70%, #fff); --look-border: 1px solid var(--ink);
+  --look-tag: var(--lime); --look-tag-ink: var(--ink);
+  --ob-stage: radial-gradient(ellipse 60% 30% at 25% 18%, #fff 0%, transparent 70%), radial-gradient(ellipse 50% 22% at 80% 34%, #fff 0%, transparent 70%), linear-gradient(180deg, var(--sky1), var(--sky2) 75%, #fff);
+}
+.mono { font-family: var(--font-label); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.sky {
+  background:
+    radial-gradient(ellipse 34% 14% at 20% 22%, rgb(255 255 255 / .95), transparent 70%),
+    radial-gradient(ellipse 28% 11% at 72% 14%, rgb(255 255 255 / .9), transparent 70%),
+    radial-gradient(ellipse 40% 16% at 60% 70%, rgb(255 255 255 / .85), transparent 70%),
+    linear-gradient(180deg, var(--sky1), var(--sky2) 80%, #f6fbff);
+}
+.chrome { filter: drop-shadow(0 10px 16px rgb(20 40 80 / .3)); }
+@media (prefers-reduced-motion: no-preference) {
+  .float { animation: float 6s ease-in-out infinite; }
+  .float.slow { animation-duration: 8s; animation-delay: -2s; }
+}
+@keyframes float { 50% { transform: translateY(-10px) rotate(4deg); } }
+
+.strip { background: var(--lime); color: var(--ink); border-bottom: 1px solid var(--ink); padding: 7px 0; font: 700 12px/1 var(--font-label); text-transform: uppercase; }
+.top { position: sticky; top: 0; z-index: 30; background: #fff; border-bottom: 1px solid var(--ink); }
+.top .wrap { display: flex; align-items: stretch; height: 56px; padding-inline: 0; }
+.logo { display: flex; align-items: center; gap: 8px; padding-inline: 16px; border-inline-end: 1px solid var(--ink); font: 700 14px/1 var(--font-label); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; }
+.logo svg { width: 24px; height: 22px; }
+.top nav { display: none; align-items: center; gap: 22px; margin-inline-start: auto; padding-inline: 20px; }
+.top nav a { text-decoration: none; }
+.bagbtn { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; padding: 0 16px; border: 0; border-inline-start: 1px solid var(--ink); background: var(--ink); color: #fff; font: 700 13px/1 var(--font-label); text-transform: uppercase; letter-spacing: .06em; }
+.bagbtn b { min-width: 22px; height: 22px; display: grid; place-items: center; background: var(--lime); color: var(--ink); }
+
+.hero { position: relative; display: grid; border-bottom: 1px solid var(--ink); overflow: hidden; }
+.hero-pic { position: relative; min-height: 380px; border-bottom: 1px solid var(--ink); }
+.hero-pic img.piece { position: absolute; inset: 8% 10% 12%; width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 18px 22px rgb(10 30 70 / .35)); }
+.hero-pic .heart { position: absolute; width: 92px; top: 8%; inset-inline-start: 6%; }
+.hero-pic .star { position: absolute; width: 56px; bottom: 10%; inset-inline-end: 8%; }
+.tag-lime { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; background: var(--lime); color: var(--ink); border: 1px solid var(--ink); font: 700 12px/1 var(--font-label); text-transform: uppercase; letter-spacing: .04em; text-decoration: none; }
+.hero-pic .tag-lime { position: absolute; z-index: 2; inset-inline-start: 50%; bottom: 7%; transform: translateX(-50%); white-space: nowrap; }
+.hero-copy { padding: 28px 16px 0; background: #fff; display: grid; align-content: end; }
+.chip-out { justify-self: start; border: 1px solid var(--ink); padding: 5px 10px; }
+.hero h1 { margin: 16px 0 12px; font: 400 clamp(52px, 15vw, 96px)/.92 var(--font-display); text-transform: uppercase; letter-spacing: .005em; }
+.hero p { margin: 0 0 22px; max-width: 36ch; color: var(--soft); }
+.hero .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+.btn { font-family: var(--font-label); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+.btn-primary { --btn-bg: var(--ink); --btn-ink: #fff; }
+.btn-secondary { border-width: 1px; }
+.scrollbar { margin-inline: -16px; display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding-inline: 16px; background: var(--lime); border-top: 1px solid var(--ink); text-decoration: none; }
+
+.band { background: var(--ink); color: #fff; padding: 12px 0; font: 400 clamp(30px, 8vw, 54px)/1 var(--font-display); text-transform: uppercase; }
+.band .ticker-track { animation-duration: 30s; }
+.band .l { color: var(--lime); } .band .g { color: #8a8f99; }
+
+section.blk { border-bottom: 1px solid var(--ink); padding-block: 36px 40px; }
+.blk-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.blk-head h2 { margin: 6px 0 0; font: 400 clamp(38px, 10vw, 64px)/.92 var(--font-display); text-transform: uppercase; }
+.blk-head p { margin: 8px 0 0; max-width: 46ch; color: var(--soft); }
+.ai-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; background: var(--ink); color: var(--lime); }
+.mockflag { margin: 16px 0 0; padding: 10px 12px; border: 1px dashed var(--ink); background: #fffbe0; font-size: 14px; }
+.look-board { border-radius: 0; }
+.look-info h3 { font: 400 20px/1.05 var(--font-display); text-transform: uppercase; letter-spacing: .01em; }
+.look-info p { font-family: var(--font-label); font-size: 12px; }
+
+.ob-modes button { font: 700 12px/1 var(--font-label); text-transform: uppercase; border-color: var(--ink); }
+.ob-stage { border: 1px solid var(--ink); }
+.ob-nav, .ob-lock { border: 1px solid var(--ink); box-shadow: none; }
+.ob-lock[aria-pressed="true"] { background: var(--lime); color: var(--ink); }
+.ob-k { font-family: var(--font-label); }
+.ob-list li { border-color: rgb(13 13 15 / .2); }
+.ob-total b { font-weight: 400; }
+
+.filters { position: sticky; top: 56px; z-index: 20; background: var(--bg); display: flex; gap: 8px; padding: 10px 0; margin-bottom: 18px; }
+.filters .chips { flex: 1; min-width: 0; }
+.chip, .toggle { font: 700 12px/1 var(--font-label); text-transform: uppercase; border-color: var(--ink); }
+.chip-n { font-size: 11px; }
+.grid { gap: 14px 10px; }
+.card { background: #fff; border: 1px solid var(--ink); }
+.card-media { border-bottom: 1px solid var(--ink); background: linear-gradient(180deg, var(--sky2), #fff); }
+.card-info { padding: 10px; }
+.card-name { font-size: 14px; }
+.card-meta { font-family: var(--font-label); font-size: 11px; }
+.card-size { border-radius: 0; border-color: var(--ink); font-family: var(--font-label); }
+.card-amount { background: var(--lime); padding: 1px 6px; border: 1px solid var(--ink); font-family: var(--font-label); font-size: 13px; }
+.card-price { display: none; }
+.card-flag { position: absolute; top: 8px; inset-inline-start: 8px; padding: 5px 9px; background: var(--ink); color: #fff; font: 700 11px/1 var(--font-label); text-transform: uppercase; }
+.is-reserved .card-flag { background: var(--lime); color: var(--ink); border: 1px solid var(--ink); }
+.card-add { border-radius: 0; border: 1px solid var(--ink); box-shadow: none; }
+.card-add.in { background: var(--lime); color: var(--ink); }
+
+.how { padding-block: 40px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; border: 1px solid var(--ink); counter-reset: s; }
+.steps li { counter-increment: s; padding: 18px 16px; border-bottom: 1px solid var(--ink); background: #fff; }
+.steps li:last-child { border-bottom: 0; }
+.steps li::before { content: "0" counter(s); display: block; font: 400 34px/1 var(--font-display); margin-bottom: 8px; }
+.steps h3 { margin: 0 0 4px; font: 700 13px/1.3 var(--font-label); text-transform: uppercase; }
+.steps p, .info p { margin: 0; color: var(--soft); }
+.info { display: grid; gap: 18px; margin-top: 26px; }
+.info h3 { margin: 0 0 4px; }
+
+footer { background: var(--ink); color: #fff; padding-block: 34px; }
+footer .wrap { display: grid; gap: 16px; }
+footer .logo { border: 0; padding: 0; }
+footer nav { display: flex; gap: 8px; flex-wrap: wrap; }
+footer nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border: 1px solid #fff; text-decoration: none; }
+footer small { color: #9aa0ab; }
+
+.sh-title { font-weight: 400; text-transform: uppercase; }
+.sh-price { font-weight: 400; }
+.bag-head h2 { font-weight: 400; text-transform: uppercase; }
+.rc-head b { letter-spacing: .14em; }
+
+.logo { flex: 1; }
+@media (min-width: 860px) {
+  .logo { flex: none; }
+  .top nav { display: flex; }
+  .top .bagbtn { margin-inline-start: 0; }
+  .hero { grid-template-columns: 1fr 1fr; min-height: 620px; }
+  .hero-pic { border-bottom: 0; border-inline-end: 1px solid var(--ink); }
+  .hero-copy { padding: 40px 32px 0; }
+  .scrollbar { margin-inline: -32px; padding-inline: 32px; }
+  .steps { grid-template-columns: repeat(3, 1fr); }
+  .steps li { border-bottom: 0; border-inline-end: 1px solid var(--ink); }
+  .steps li:last-child { border-inline-end: 0; }
+  .info { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="strip ticker" aria-label="Shop notes"><div class="ticker-track" aria-hidden="true">
+  <span>Drop 07 is live +++ Order on WhatsApp +++ Every piece is one of one +++ New drop every Thursday, 8 pm +++</span>
+  <span>Drop 07 is live +++ Order on WhatsApp +++ Every piece is one of one +++ New drop every Thursday, 8 pm +++</span>
+</div><p class="sr">Drop 07 is live. Order on WhatsApp. Every piece is one of one. New drop every Thursday, 8 pm.</p></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#"><svg viewBox="0 0 64 58" aria-hidden="true"><use href="#chromeHeart"/></svg>Thriftesque</a>
+    <nav aria-label="Main" class="mono"><a href="#looks">Looks</a><a href="#outfit">Build an outfit</a><a href="#shop">The drop</a><a href="#how">How to order</a></nav>
+    <button class="bagbtn" type="button" data-open-bag aria-label="Open your bag">Bag <b data-bag-count>0</b></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-pic sky">
+    <svg class="heart chrome float" viewBox="0 0 64 58" aria-hidden="true"><use href="#chromeHeart"/></svg>
+    <svg class="star chrome float slow" viewBox="0 0 24 24" aria-hidden="true"><path fill="url(#chromeG)" stroke="#3d4b66" stroke-opacity=".35" stroke-width=".4" d="M12 0c.6 6.5 5.5 11.4 12 12-6.5.6-11.4 5.5-12 12-.6-6.5-5.5-11.4-12-12C6.5 11.4 11.4 6.5 12 0z"/></svg>
+    <img class="piece" src="../img/cutouts/tiger-souvenir-jacket.webp" alt="Embroidered tiger souvenir jacket" draggable="false">
+    <a class="tag-lime" href="#shop">Check new arrivals</a>
+  </div>
+  <div class="hero-copy">
+    <span class="chip-out mono">Drop 07 · <span data-live-count>0</span> pieces live</span>
+    <h1>Pre-loved pieces, one of each.</h1>
+    <p>Hand-picked secondhand clothing, checked and measured. When a piece is gone, it's gone for good.</p>
+    <div class="cta"><a class="btn btn-primary" href="#looks">See the looks</a><a class="btn btn-secondary" href="#shop">Shop the drop</a></div>
+    <a class="scrollbar mono" href="#looks"><span>Scroll down</span><span aria-hidden="true">↓</span></a>
+  </div>
+</section>
+
+<div class="band ticker" aria-hidden="true"><div class="ticker-track">
+  <span><span class="l">Thriftesque</span> <span class="g">Drop 07</span> One of one <span class="l">+++</span> Doha <span class="g">Pre-loved</span></span>
+  <span><span class="l">Thriftesque</span> <span class="g">Drop 07</span> One of one <span class="l">+++</span> Doha <span class="g">Pre-loved</span></span>
+</div></div>
+
+<section class="blk" id="looks" aria-labelledby="looksTitle">
+  <div class="wrap">
+    <div class="blk-head"><div>
+      <span class="ai-chip mono">✦ AI picks</span>
+      <h2 id="looksTitle">Looks from this drop</h2>
+      <p>Outfits put together with AI from pieces in stock, then checked by the team. Tap a look to shop it, or remix it in the outfit builder.</p>
+    </div></div>
+    <div class="looks" data-looks></div>
+    <p class="mockflag">Mockup: these four looks were picked by hand for this preview. On the live site the team asks AI for looks in the dashboard, approves the good ones, and a look disappears when one of its pieces sells.</p>
+  </div>
+</section>
+
+<section class="blk" id="outfit" aria-labelledby="outfitTitle">
+  <div class="wrap">
+    <div class="blk-head"><div>
+      <span class="chip-out mono">Build an outfit</span>
+      <h2 id="outfitTitle">Make your own look</h2>
+      <p>Tap the arrows or swipe a piece to switch it. Lock what you like and Shuffle the rest.</p>
+    </div></div>
+    <div class="ob" data-outfit></div>
+  </div>
+</section>
+
+<section class="blk wrap" id="shop">
+  <div class="blk-head"><div><span class="chip-out mono">Drop 07</span><h2>The drop</h2></div></div>
+  <div class="filters"><div class="chips" data-chips role="toolbar" aria-label="Categories"></div><button class="toggle" type="button" data-hide-sold aria-pressed="false">Hide sold</button></div>
+  <div class="grid" data-grid></div>
+</section>
+
+<section class="how wrap" id="how">
+  <div class="blk-head"><div><span class="chip-out mono">How to order</span><h2>One WhatsApp message</h2></div></div>
+  <ol class="steps">
+    <li><h3>Add pieces to your bag</h3><p>Each item is a single piece. Adding it doesn't hold it, so send your order soon.</p></li>
+    <li><h3>Send the order on WhatsApp</h3><p>Your bag turns into a ready-made message with every item, size and the total.</p></li>
+    <li><h3>We confirm and deliver</h3><p>We reply to confirm your pieces, then arrange delivery or pickup.</p></li>
+  </ol>
+  <div class="info" id="info">
+    <div><h3 class="mono">Delivery</h3><p>Across Qatar. Doha orders arrive within 24 hours. The fee is added to your order.</p></div>
+    <div><h3 class="mono">Payment</h3><p>Cash on delivery or bank transfer. We share details when we confirm.</p></div>
+    <div><h3 class="mono">Sizing</h3><p>Vintage sizes run differently. Every piece lists flat measurements in cm.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#"><svg viewBox="0 0 64 58" aria-hidden="true"><use href="#chromeHeart"/></svg>Thriftesque</a>
+    <nav aria-label="Links" class="mono"><a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a><a data-wa target="_blank" rel="noopener" href="#">WhatsApp</a><a href="#">Team dashboard</a></nav>
+    <small>Doha, Qatar</small>
+  </div>
+</footer>
+
+<nav class="optbar" aria-label="Design options"><a href="index.html">All</a><a href="a-street.html">A Street</a><a href="b-electric.html">B Electric</a><a href="c-lace.html">C Lace</a><a href="d-mix.html">D Mix</a><a href="e-outfit.html">E Outfit</a><a href="f-sky.html" aria-current="page">F Sky</a></nav>
+<script src="shared.js"></script>
+</body>
+</html>

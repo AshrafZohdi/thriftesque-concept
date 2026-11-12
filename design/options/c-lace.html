@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thriftesque | Option C: Lace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Courier+Prime:wght@400;700&display=swap">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Option C. Feel: cream and brown, handwritten script headings, serif text, lace texture, slow script ticker, soft arches. */
+:root {
+  --bg: #fbf8f3; --surface: #fffdf9; --ink: #33240f; --soft: #6b573f; --line: #e5dacb; --tile: #efe6da;
+  --band: #f2e9de; --accent: #33240f; --focus: #33240f; --wa: #1a8048;
+  --font-script: "Homemade Apple", cursive; --font-display: "Newsreader", Georgia, serif; --font-body: "Newsreader", Georgia, serif;
+  --font-receipt: "Courier Prime", "Courier New", monospace;
+  --receipt-bg: #fffdf8; --card-radius: 0; --sheet-radius: 18px; --field-radius: 999px;
+  --lace: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cdefs%3E%3Cellipse id='p' cx='60' cy='38' rx='5.5' ry='11'/%3E%3C/defs%3E%3Cg fill='none' stroke='%23fffaf2' stroke-width='1.1' stroke-opacity='.9'%3E%3Ccircle cx='60' cy='60' r='9'/%3E%3Ccircle cx='60' cy='60' r='3'/%3E%3Cuse href='%23p' transform='rotate(0 60 60)'/%3E%3Cuse href='%23p' transform='rotate(30 60 60)'/%3E%3Cuse href='%23p' transform='rotate(60 60 60)'/%3E%3Cuse href='%23p' transform='rotate(90 60 60)'/%3E%3Cuse href='%23p' transform='rotate(120 60 60)'/%3E%3Cuse href='%23p' transform='rotate(150 60 60)'/%3E%3Cuse href='%23p' transform='rotate(180 60 60)'/%3E%3Cuse href='%23p' transform='rotate(210 60 60)'/%3E%3Cuse href='%23p' transform='rotate(240 60 60)'/%3E%3Cuse href='%23p' transform='rotate(270 60 60)'/%3E%3Cuse href='%23p' transform='rotate(300 60 60)'/%3E%3Cuse href='%23p' transform='rotate(330 60 60)'/%3E%3Ccircle cx='89.9' cy='68.0' r='3.2'/%3E%3Ccircle cx='81.9' cy='81.9' r='3.2'/%3E%3Ccircle cx='68.0' cy='89.9' r='3.2'/%3E%3Ccircle cx='52.0' cy='89.9' r='3.2'/%3E%3Ccircle cx='38.1' cy='81.9' r='3.2'/%3E%3Ccircle cx='30.1' cy='68.0' r='3.2'/%3E%3Ccircle cx='30.1' cy='52.0' r='3.2'/%3E%3Ccircle cx='38.1' cy='38.1' r='3.2'/%3E%3Ccircle cx='52.0' cy='30.1' r='3.2'/%3E%3Ccircle cx='68.0' cy='30.1' r='3.2'/%3E%3Ccircle cx='81.9' cy='38.1' r='3.2'/%3E%3Ccircle cx='89.9' cy='52.0' r='3.2'/%3E%3Ccircle cx='0' cy='0' r='9'/%3E%3Ccircle cx='0' cy='0' r='15'/%3E%3Ccircle cx='0' cy='120' r='9'/%3E%3Ccircle cx='0' cy='120' r='15'/%3E%3Ccircle cx='120' cy='0' r='9'/%3E%3Ccircle cx='120' cy='0' r='15'/%3E%3Ccircle cx='120' cy='120' r='9'/%3E%3Ccircle cx='120' cy='120' r='15'/%3E%3Cpath d='M0 60h12M108 60h12M60 0v12M60 108v12' stroke-dasharray='2 3'/%3E%3C/g%3E%3C/svg%3E");
+}
+body { font-size: 17px; }
+.script { font-family: var(--font-script); font-weight: 400; line-height: 1.5; letter-spacing: 0; }
+
+.top { position: fixed; z-index: 30; inset-inline: 0; top: 0; transition: background .2s ease; }
+.top.solid { background: rgb(251 248 243 / .95); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 1px 0 var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 64px; }
+.logo { font: 500 22px/1 var(--font-display); text-decoration: none; letter-spacing: .01em; }
+.top nav { display: none; gap: 22px; margin-inline: auto; font-family: var(--font-script); font-size: 15px; }
+.top nav a { text-decoration: none; }
+.bagbtn { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 999px; background: rgb(255 253 249 / .7); font: 500 16px/1 var(--font-body); }
+.bagbtn b { min-width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 600; }
+
+.hero {
+  position: relative; display: grid; place-items: center; text-align: center; min-height: min(82vh, 640px); padding: 96px 16px 64px;
+  background: var(--lace) 0 0 / 96px 96px, radial-gradient(ellipse at 50% 40%, #efe4d4, #e3d4bf);
+  -webkit-mask: radial-gradient(circle 12px at 50% 100%, #0000 97%, #000) 0 0 / 30px 100% repeat-x;
+  mask: radial-gradient(circle 12px at 50% 100%, #0000 97%, #000) 0 0 / 30px 100% repeat-x;
+}
+.hero-in { position: relative; max-width: 640px; padding: 36px 20px 30px; background: rgb(251 248 243 / .82); border-radius: 999px 999px 24px 24px; }
+.hero .kicker { margin: 0 0 10px; font-size: 15px; font-style: italic; color: var(--soft); }
+.hero h1 { margin: 0 0 18px; font-size: clamp(30px, 8.5vw, 58px); line-height: 1.55; }
+.hero p { margin: 0 auto 24px; max-width: 32ch; color: var(--soft); }
+.cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.btn { font-family: var(--font-body); font-weight: 500; font-size: 17px; }
+.btn-primary { --btn-bg: var(--ink); --btn-ink: var(--bg); }
+
+.band { background: var(--band); padding: 16px 0; font-family: var(--font-script); font-size: 15px; }
+.band .ticker-track { animation-duration: 60s; }
+
+.shop { padding-block: 52px 72px; }
+.head { text-align: center; margin-bottom: 20px; }
+.head h2 { margin: 0; font-size: clamp(28px, 7vw, 42px); }
+.head p { margin: 4px 0 0; color: var(--soft); font-style: italic; }
+.filters { position: sticky; top: 64px; z-index: 20; background: var(--bg); display: flex; gap: 8px; padding: 10px 0; margin-bottom: 24px; }
+.filters .chips { flex: 1; min-width: 0; }
+.chip, .toggle { font-family: var(--font-body); font-size: 16px; border-color: var(--line); background: var(--surface); }
+.grid { gap: 34px 12px; }
+.card { text-align: center; }
+.card-media { border-radius: 999px 999px 0 0; }
+.card-price { display: none; }
+.card-flag {
+  position: absolute; top: 18%; inset-inline: 0; margin-inline: auto; width: max-content; padding: 4px 14px; border-radius: 999px;
+  background: var(--surface); color: var(--ink); font: italic 500 15px/1.4 var(--font-body);
+}
+.card-add { background: var(--surface); color: var(--ink); box-shadow: 0 2px 10px rgb(51 36 15 / .18); }
+.card-info { padding-top: 12px; justify-items: center; }
+.card-name { font: 500 17px/1.3 var(--font-display); }
+.card-meta { font-style: italic; font-size: 14px; }
+.card-row { justify-content: center; gap: 10px; }
+.card-size { border-radius: 999px; border-color: var(--line); font-weight: 500; }
+.card-amount { font-weight: 600; }
+.card-amount::before { content: ""; }
+
+.about { background: var(--band); text-align: center; padding-block: 56px; }
+.about h2 { margin: 0 0 14px; font-size: clamp(26px, 6vw, 38px); }
+.about p { margin: 0 auto 10px; max-width: 40ch; }
+
+.how { padding-block: 56px; }
+.how h2 { text-align: center; margin: 0 0 28px; font-size: clamp(26px, 6vw, 38px); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 26px; counter-reset: s; text-align: center; }
+.steps li { counter-increment: s; }
+.steps li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 10px; border: 1px solid var(--ink); border-radius: 50%; font: italic 500 20px/1 var(--font-display); }
+.steps h3 { margin: 0 0 4px; font: 600 19px/1.3 var(--font-display); }
+.steps p, .info p { margin: 0 auto; max-width: 34ch; color: var(--soft); }
+.info { display: grid; gap: 22px; margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); text-align: center; }
+.info h3 { margin: 0 0 4px; font: italic 600 19px/1.3 var(--font-display); }
+
+footer { border-top: 1px solid var(--line); padding-block: 36px 28px; text-align: center; }
+footer .wrap { display: grid; gap: 14px; justify-items: center; }
+footer nav { display: flex; gap: 6px 20px; flex-wrap: wrap; justify-content: center; }
+footer nav a { min-height: 44px; display: inline-flex; align-items: center; }
+footer small { color: var(--soft); }
+
+.sh-title, .bag-head h2, .bag-empty h3 { font-family: var(--font-script); font-weight: 400; line-height: 1.6; font-size: 24px; }
+.sh-price { font-family: var(--font-body); font-weight: 600; }
+.field input, .field select { padding-inline: 18px; }
+.seg button { border-radius: 16px; }
+
+@media (min-width: 860px) {
+  .top nav { display: flex; }
+  .grid { gap: 48px 24px; }
+  .steps, .info { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1100px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<header class="top" data-scroll-header>
+  <div class="wrap">
+    <a class="logo" href="#">Thriftesque</a>
+    <nav aria-label="Main"><a href="#shop">The drop</a><a href="#how">How to order</a><a href="#info">Delivery</a></nav>
+    <button class="bagbtn" type="button" data-open-bag aria-label="Open your bag">Bag <b data-bag-count>0</b></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-in">
+    <p class="kicker">Drop 07 · <span data-live-count>0</span> pieces live</p>
+    <h1 class="script">Pre-loved pieces, one of each.</h1>
+    <p>Hand-picked secondhand clothing, checked and measured. When a piece is gone, it's gone for good.</p>
+    <div class="cta"><a class="btn btn-primary" href="#shop">Shop the drop</a><a class="btn btn-secondary" href="#how">How to order</a></div>
+  </div>
+</section>
+
+<div class="band ticker" aria-label="Shop notes"><div class="ticker-track" aria-hidden="true">
+  <span>Hand-picked · Checked and measured · One of one · New pieces every Thursday ·</span>
+  <span>Hand-picked · Checked and measured · One of one · New pieces every Thursday ·</span>
+</div><p class="sr">Hand-picked. Checked and measured. One of one. New pieces every Thursday.</p></div>
+
+<section class="shop wrap" id="shop">
+  <div class="head"><h2 class="script">This week's drop</h2><p>Tap a piece for measurements and condition.</p></div>
+  <div class="filters"><div class="chips" data-chips role="toolbar" aria-label="Categories"></div><button class="toggle" type="button" data-hide-sold aria-pressed="false">Hide sold</button></div>
+  <div class="grid" data-grid></div>
+</section>
+
+<section class="about">
+  <div class="wrap">
+    <h2 class="script">Our shop</h2>
+    <p>Secondhand clothing in Doha, picked one piece at a time. Every item is checked and measured flat.</p>
+    <p>There's only one of each, so when it's gone, it's gone for good.</p>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <h2 class="script">How to order</h2>
+    <ol class="steps">
+      <li><h3>Add pieces to your bag</h3><p>Each item is a single piece. Adding it doesn't hold it, so send your order soon.</p></li>
+      <li><h3>Send the order on WhatsApp</h3><p>Your bag turns into a ready-made message with every item, size and the total.</p></li>
+      <li><h3>We confirm and deliver</h3><p>We reply to confirm your pieces, then arrange delivery or pickup.</p></li>
+    </ol>
+    <div class="info" id="info">
+      <div><h3>Delivery</h3><p>Across Qatar. Doha orders arrive within 24 hours. The fee is added to your order.</p></div>
+      <div><h3>Payment</h3><p>Cash on delivery or bank transfer. We share details when we confirm.</p></div>
+      <div><h3>Sizing</h3><p>Vintage sizes run differently. Every piece lists flat measurements in cm.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#">Thriftesque</a>
+    <nav aria-label="Links"><a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a><a data-wa target="_blank" rel="noopener" href="#">WhatsApp</a><a href="#">Team dashboard</a></nav>
+    <small>Doha, Qatar</small>
+  </div>
+</footer>
+
+<nav class="optbar" aria-label="Design options"><a href="index.html">All</a><a href="a-street.html">A Street</a><a href="b-electric.html">B Electric</a><a href="c-lace.html" aria-current="page">C Lace</a><a href="d-mix.html">D Mix</a><a href="e-outfit.html">E Outfit</a><a href="f-sky.html">F Sky</a></nav>
+<script src="shared.js"></script>
+</body>
+</html>

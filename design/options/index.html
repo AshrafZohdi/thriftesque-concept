@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thriftesque | Design options</title>
+<style>
+:root { --bg: #f4f4f2; --ink: #141414; --soft: #5b5b5b; --line: #dcdcd8; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1440px; margin: 0 auto; padding: 32px 16px 56px; }
+h1 { margin: 0 0 6px; font-size: clamp(28px, 5vw, 40px); letter-spacing: -.02em; }
+.lead { margin: 0 0 8px; color: var(--soft); max-width: 70ch; }
+.note { margin: 0 0 28px; font-size: 14px; color: var(--soft); max-width: 70ch; }
+.options { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.opt { display: grid; gap: 12px; align-content: start; }
+.phone { width: 300px; height: 620px; margin-inline: auto; border: 10px solid #111; border-radius: 40px; overflow: hidden; background: #fff; box-shadow: 0 18px 40px rgb(0 0 0 / .15); }
+.phone iframe { width: 390px; height: 806px; border: 0; transform: scale(.7179); transform-origin: 0 0; }
+.opt h2 { margin: 6px 0 0; font-size: 20px; }
+.opt p { margin: 0; color: var(--soft); font-size: 15px; }
+.opt ul { margin: 0; padding-inline-start: 18px; color: var(--soft); font-size: 14px; }
+.opt a { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 999px; background: var(--ink); color: #fff; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Thriftesque: design directions</h1>
+  <p class="lead">Each option is a working shop page: filter by category, open a piece, add it to the bag and build the WhatsApp order. They share the same products, copy and ordering flow. Only the look changes.</p>
+  <p class="note">Sample products, the WhatsApp number, delivery fees and claims like "New drop every Thursday, 8 pm" are placeholders until the shop confirms them. Each option takes the feel of a reference site; none copies its logo, text or photos.</p>
+
+  <div class="options">
+    <section class="opt">
+      <div class="phone"><iframe src="a-street.html" title="Option A preview" loading="lazy"></iframe></div>
+      <h2>A. Street</h2>
+      <p>Inspired by y2kdream.com.</p>
+      <ul><li>Light grey, black scrolling ticker</li><li>Slanted photo collage hero</li><li>Bold condensed uppercase type, rounded cards</li></ul>
+      <a href="a-street.html">Open full page</a>
+    </section>
+    <section class="opt">
+      <div class="phone"><iframe src="b-electric.html" title="Option B preview" loading="lazy"></iframe></div>
+      <h2>B. Electric</h2>
+      <p>Inspired by y2k-streetwear.com.</p>
+      <ul><li>White and black, heavy italic wordmark</li><li>Electric blue slanted buttons</li><li>Square product tiles, spaced uppercase labels</li></ul>
+      <a href="b-electric.html">Open full page</a>
+    </section>
+    <section class="opt">
+      <div class="phone"><iframe src="c-lace.html" title="Option C preview" loading="lazy"></iframe></div>
+      <h2>C. Lace</h2>
+      <p>Inspired by laceandflareco.com.</p>
+      <ul><li>Cream and brown, lace pattern</li><li>Handwritten script headings, serif text</li><li>Arched product photos, slow script ticker</li></ul>
+      <a href="c-lace.html">Open full page</a>
+    </section>
+    <section class="opt">
+      <div class="phone"><iframe src="d-mix.html" title="Option D preview" loading="lazy"></iframe></div>
+      <h2>D. Mix</h2>
+      <p>One element from each, kept to a few signature details.</p>
+      <ul><li>From A: grey base, ticker, slanted collage, rounded cards</li><li>From B: italic headlines, blue slanted price tags and buttons</li><li>From C: cream script band, "one of one" stamp, cream receipt</li></ul>
+      <a href="d-mix.html">Open full page</a>
+    </section>
+    <section class="opt">
+      <div class="phone"><iframe src="e-outfit.html#outfit" title="Option E preview" loading="lazy"></iframe></div>
+      <h2>E. Outfit builder</h2>
+      <p>Option D plus a feature: put an outfit together by hand or with Shuffle. Works with any of A to D.</p>
+      <ul><li>Layer, top and bottom or dress, shoes</li><li>Arrows to pick, lock to keep, Shuffle for the rest</li><li>Add the whole outfit to the bag, or ask about it on WhatsApp</li></ul>
+      <a href="e-outfit.html">Open full page</a>
+    </section>
+    <section class="opt">
+      <div class="phone"><iframe src="f-sky.html" title="Option F preview" loading="lazy"></iframe></div>
+      <h2>F. Sky</h2>
+      <p>Inspired by the Collusion concept on Dribbble, with moodboard looks like ShopLook, plus the outfit builder from E.</p>
+      <ul><li>Sky backdrop, chrome heart, neon lime, heavy condensed type, thin frame lines</li><li>AI looks: collage moodboards you can shop or remix</li><li>Outfit builder with cut-out pieces</li></ul>
+      <a href="f-sky.html">Open full page</a>
+    </section>
+  </div>
+</main>
+</body>
+</html>
