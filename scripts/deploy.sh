@@ -33,8 +33,9 @@ work="$(mktemp -d)"
 cleanup() { git worktree remove --force "$work/app" >/dev/null 2>&1 || true; rm -rf "$work"; }
 trap cleanup EXIT
 git worktree add --detach --quiet "$work/app" HEAD
-ln -s "$PWD/node_modules" "$work/app/node_modules"
 cd "$work/app"
+# A fresh install from the lockfile (Turbopack won't build with a node_modules linked from outside the project).
+npm ci --no-audit --no-fund
 npx opennextjs-cloudflare build
 node scripts/check-worker-size.mjs
 node scripts/check-build-secrets.mjs --deploy
