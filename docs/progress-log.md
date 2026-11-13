@@ -2,6 +2,35 @@
 
 Newest first.
 
+## 2026-11-13: Phase 9 (part 2), standards, editable shop details, bulk add
+
+**Live** (version `841819bc`, commit `a301165`): terms and privacy pages, structured data, share card, manifest and icons,
+error pages, editable shop details on the dashboard (D-048, D-050), "Made with Nuvai" (D-049), bulk add (D-051), and the
+deploy's database check (D-052). Still in preview mode with the sample pieces.
+
+**Found and fixed**
+- The scrolling strips left a gap on wide screens (two copies per loop); now five, with a 4K e2e test (fails on the old code).
+- The AI client gave up when the main model timed out; timeouts and 5xx now go to the fallback.
+- A deploy rolled itself back because this Mac's DNS cache still said the new domain didn't exist; the smoke now resolves
+  through Cloudflare's public DNS.
+- `http://thriftesque.com` served the page instead of redirecting; the Worker now redirects http and www.
+- Twice a deploy needed a migration pushed first; the deploy now refuses while the database is behind (D-052).
+- Several e2e checks were timing-sensitive with five browsers on one local Supabase (sign-in, sign-out, looks loading,
+  Firefox axe scans); they got the same realistic waits as the other auth checks, not retries.
+
+**Verified**
+- Gate green: 104 unit, 57 database, 216 e2e. Smoke against production: all ok.
+- No shopper cookies on the live site; LCP 1.61 s home, 1.24 s product on a slow phone profile.
+
+**Not verified**
+- AI suggestions on the live site seen succeeding in the Worker logs (Ashraf reported "perfect"; the log stream showed no
+  call at the time).
+- Bulk add on the live site with real photos (covered by e2e locally).
+
+**Owner actions**
+- Client: WhatsApp number, delivery areas and fees, the terms and privacy details, first real pieces, team emails, logo,
+  and their own review of the terms and privacy pages. Then: remove the samples and turn preview mode off.
+
 ## 2026-11-13: Phase 9 (part 1), thriftesque.com live in preview
 
 **Done**
