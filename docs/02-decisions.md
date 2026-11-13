@@ -292,3 +292,31 @@ Ashraf chose automatic background removal in the browser (supersedes the open qu
 Approved by Ashraf: `react-hook-form` 7.92.0, `zod` 4.6.7, `@hookform/resolvers` 7.0.6 and `onnxruntime-web` 1.31.1, all MIT, all
 pinned. They load only on the dashboard. `protobufjs`'s install script (a version notice) is denied. One schema
 (`lib/product-schema.ts`) validates in the editor and again in the save action.
+
+### D-038 Secrets stay out of the project's env files. Decided, 2026-11-12
+**Found:** OpenNext copies every variable from the project's env files (`.env`, `.env.local`, ...) into
+`.open-next/cloudflare/next-env.mjs`, which is bundled into the Worker. With `SUPABASE_SECRET_KEY` in `.env.local`, a deploy
+from this machine would have shipped the key that bypasses every RLS rule. Nothing was deployed, so nothing leaked.
+- `.env.local` holds only the Supabase URL and publishable key (`npm run env:local` writes exactly those) plus the local
+  `GEMINI_API_KEY` for previews.
+- The seed asks `supabase status` for the local secret key itself and refuses any non-local host.
+- `scripts/check-build-secrets.mjs` runs in the gate after the build and fails if the Supabase secret key is in the bundle
+  (names only, never values). Deploy builds run it with `--deploy`, which also fails on `GEMINI_API_KEY`: production gets the
+  Gemini key as a Worker secret, never baked in.
+
+### D-039 Gemini through plain `fetch`, no SDK. Decided, 2026-11-12
+`lib/gemini.ts` calls the Gemini REST API (`generateContent`, JSON output with a response schema) with `fetch`, so there is no
+new dependency and nothing extra in the Worker (D-012 allowed this switch). The key goes in the `x-goog-api-key` header, not the
+URL. One retry with `GEMINI_FALLBACK_MODEL` on 429 or 503 (Google returned "high demand" 503s for the main model during
+testing); thinking level `low` on the main model (Flash defaults to medium, which was too slow, and refuses `minimal`); the
+Flash-Lite fallback keeps its `minimal` default; 30 s timeout per call (45 s for looks). Google's
+error text goes to the server log only, never to the team.
+- **Autofill:** `POST /api/autofill` takes only a storage path from our bucket (pattern-checked, so it can't fetch other URLs),
+  checks the origin (403), body size (413), sign-in (401) and team (403), sends the cover photo and a fixed prompt, and returns
+  cleaned fields. Off-list category or era is dropped, em dashes are replaced. Price, size, condition and measurements are never
+  suggested. Nothing is saved until the team saves the form.
+- **Looks:** `suggestLooks` sends live pieces with cut-outs as text (code, category, name, colour, era, size). Answers are kept
+  only if every code is one we sent and the slot rules hold (a dress plus shoes, or one top-layer piece plus one bottom with
+  optional shoes; 2 to 4 pieces, matching the table's check), and if the set isn't a repeat. They are saved as `source='ai'`, `status='draft'`. The team publishes them.
+- Only product photos and product facts are sent, never customer data (free tier inputs may be used by Google).
+- Real Gemini calls in e2e are opt-in (`E2E_AI=1`) so the gate doesn't use the free quota.

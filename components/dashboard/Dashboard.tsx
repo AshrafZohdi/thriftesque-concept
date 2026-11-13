@@ -1,5 +1,5 @@
 "use client";
-// Team dashboard: stats, product table (search, status tabs, inline status, two-tap delete) and shop settings.
+// Team dashboard: stats, product table (search, status tabs, inline status, two-tap delete), looks and shop settings.
 // Reads with the signed-in session in the browser; writes go through server actions that check the team first.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import { dashboardStats, searchProducts, type SettingsInput, type TeamProduct } 
 import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
+import { LooksPanel } from "./LooksPanel";
 import { ProductEditor, emptyProduct, loadForEdit, type EditTarget } from "./ProductEditor";
 
 type Load = { state: "checking" } | { state: "not-team"; email: string } | { state: "error"; message: string } | {
@@ -28,7 +29,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
   const team = await db.rpc("is_team");
   if (team.data !== true) return { state: "not-team", email };
   const [products, settings] = await Promise.all([
-    db.from("products").select("code,name,brand,era,category,size,price_qar,status,photos,created_at,sold_at"),
+    db.from("products").select("code,name,brand,era,category,size,price_qar,status,photos,cutout,created_at,sold_at"),
     db.from("settings").select("whatsapp_number,drop_name,delivery_fees").eq("id", 1).single(),
   ]);
   if (products.error || settings.error) return { state: "error", message: (products.error ?? settings.error)!.message };
@@ -271,6 +272,7 @@ export function Dashboard() {
             <p className={d.empty}>No products match. Try another search or tab.</p>
           )}
         </section>
+        <LooksPanel say={say} products={products} />
         <SettingsPanel initial={load.settings} onSaved={() => refresh()} />
       </main>
       </div>

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { useForm, useWatch, type FieldErrors } from "react-hook-form";
 import { saveProduct } from "@/app/dashboard/actions";
+import type { AutofillFields } from "@/lib/ai";
 import { Overlay } from "@/components/shop/Overlay";
 import s from "@/components/shop/shop.module.css";
 import { CATEGORIES, CONDITIONS, ERAS, MEASURE, STATUSES, type Category } from "@/lib/catalog";
@@ -94,6 +95,31 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
     }
   }
 
+  // "Fill from photo" (D-012): suggestions only, the team checks them before saving. Off-list category or era stays as it is.
+  async function fillFromPhoto() {
+    if (!photos[0]) return setProblem("Add a photo first. The AI reads the cover photo.");
+    setProblem("");
+    setBusy("Reading the cover photo…");
+    try {
+      const res = await fetch("/api/autofill", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ path: photos[0] }) });
+      const body = (await res.json().catch(() => ({}))) as { fields?: AutofillFields; error?: string };
+      if (!res.ok || !body.fields) return setProblem(body.error ?? "The AI couldn't help with this one. Fill it in by hand.");
+      const f = body.fields;
+      const opts = { shouldDirty: true, shouldValidate: true };
+      setValue("name", f.name, opts);
+      if (f.category) setValue("category", f.category, opts);
+      if (f.era) setValue("era", f.era, opts);
+      if (f.colour) setValue("colour", f.colour, opts);
+      if (f.description) setValue("description", f.description, opts);
+      if (f.stylingTip) setValue("stylingTip", f.stylingTip, opts);
+      setProblem("Filled from the photo. Check every field before saving.");
+    } catch {
+      setProblem("Couldn't reach the AI. Check your connection, or fill it in by hand.");
+    } finally {
+      setBusy("");
+    }
+  }
+
   async function cancel() {
     // Uploads from an edit that's thrown away would otherwise sit in storage forever.
     const orphans = fresh.current;
@@ -170,6 +196,11 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
             onChange={(e) => { makeCutout("own", e.target.files?.[0]); e.target.value = ""; }} />
           <p className={d.muted}>Check it looks right on the blue. If parts are missing, use your phone&apos;s &quot;lift subject&quot; (long-press the piece in Photos) and upload that instead.</p>
         </section>
+
+        <div className={d.aiRow}>
+          <button type="button" className={d.btnSm} disabled={!!busy || !photos.length} onClick={fillFromPhoto}>Fill from photo</button>
+          <p className={d.muted}>Suggests the name, category, era, colour, description and styling tip from the cover photo. Price, size, condition and measurements stay yours.</p>
+        </div>
 
         <div className={d.field}>
           <label htmlFor={ids.name}>Product name</label>

@@ -2,6 +2,48 @@
 
 Newest first.
 
+## 2026-11-13: Phase 7, AI autofill and AI looks
+
+**Done**
+- "Fill from photo" in the product editor: `POST /api/autofill` sends the cover photo and a fixed prompt to Gemini and fills
+  name, category, era, colour, description and styling tip. Price, size, condition and measurements stay with the team, and
+  nothing is saved until they press Save.
+- Looks panel on the dashboard: "Suggest looks" sends live pieces with cut-outs (product facts only), keeps answers that pass
+  the outfit rules and saves them as AI drafts. Publish, unpublish and two-tap delete. The shop labels them "AI pick".
+- Gemini over plain `fetch` (D-039), no new dependency. Falls back to Flash-Lite on 429 or 503. Errors are logged on the server
+  with Google's message and timing; the team sees plain messages.
+- The local seed now resets every look, including AI drafts made while testing.
+
+**Found and fixed**
+- Security (D-038): OpenNext bakes every variable in the project's env files into the Worker bundle, so the Supabase secret key
+  in `.env.local` would have shipped on a deploy. Nothing was deployed. The seed now reads the key from `supabase status`,
+  `env:local` no longer writes it, Ashraf removed the line, and a new gate step fails the build if it comes back.
+- Google returned "high demand" 503s for `gemini-3.8-flash` on every call during testing (one after 18 s). The client only fell
+  back on 429, so the button failed. It now falls back on 503 too.
+- Flash's default thinking level made calls slow. The main model now asks for `low` (it refuses `minimal`, despite the docs
+  page); the fallback keeps its `minimal` default. Fallback answers came back in 1.5 to 1.8 s.
+- A real-Gemini test caught that a dress-only look (1 piece) passed my validator but broke the `looks` table's 2 to 4 piece
+  check, which failed the whole insert. The validator now matches the table, and the prompt asks for shoes with a dress.
+- A first e2e run took 3.1 hours with 63 failures because the Mac slept on battery in 15-minute stretches. Not a code problem;
+  the run was thrown away.
+
+**Verified**
+- `npm run gate` green: 81 unit, 43 database, 189 e2e (2 opt-in AI tests skipped), Worker 1,578 KiB gzip (was 1,491), build
+  secrets check ok.
+- Real Gemini, `E2E_AI=1`, both pass: Fill from photo on the striped tee filled the form (category Tops, no em dashes, price and
+  size left empty); Suggest looks saved drafts, and the published one ("Yellow pinafore style": TQ-0715 dress with TQ-0721
+  Chelsea boots) shows in the shop with the AI label.
+- Route security in all 5 browser projects: 405 on GET, 403 without or with a foreign origin, 413 over 1 KB, 400 for a bad body
+  or a path outside our bucket, 401 signed out, 403 not on the team, 404 for a missing photo.
+
+**Not verified**
+- `gemini-3.8-flash` never answered successfully (503 every time), so its output quality and the `low` thinking setting are
+  only checked against the API's validation, not a real answer.
+- No phone check of the new panel and button beyond the 360 and 390 e2e projects.
+
+**Next**
+- Phase 8: keep-alive cron, robots and sitemap, CSP final pass, deploy and a rehearsed rollback.
+
 ## 2026-11-12: Phase 6, product editor
 
 **Done**

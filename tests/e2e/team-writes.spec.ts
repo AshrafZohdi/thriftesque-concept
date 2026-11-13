@@ -135,3 +135,70 @@ test.describe("product editor", () => {
     await expect(editor.getByRole("status")).toHaveText("");
   });
 });
+
+test.describe("looks", () => {
+  test("unpublish hides a look from the shop, publish brings it back, delete takes two taps", async ({ page }) => {
+    await signIn(page);
+    const looks = page.getByRole("region", { name: "Looks" });
+    await looks.getByRole("button", { name: "Unpublish Florals for dinner" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Florals for dinner is a draft again" })).toBeVisible();
+    await expect(looks).toContainText("Drafts (1)");
+    await page.goto("/");
+    await expect(page.locator("#looks article", { hasText: "Florals for dinner" })).toHaveCount(0);
+
+    await signIn(page);
+    await looks.getByRole("button", { name: "Publish Florals for dinner" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Florals for dinner published" })).toBeVisible();
+    await page.goto("/");
+    await expect(page.locator("#looks article", { hasText: "Florals for dinner" })).toHaveCount(1);
+
+    await signIn(page);
+    await looks.getByRole("button", { name: "Delete Leather and light wash" }).click();
+    await looks.getByRole("button", { name: "Confirm delete Leather and light wash" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Leather and light wash deleted" })).toBeVisible();
+    await expect(looks.getByRole("article")).toHaveCount(3);
+  });
+});
+
+// Real Gemini calls use the free quota, so they run only when asked: E2E_AI=1 npm run e2e -- --project=team-writes
+test.describe("AI (real Gemini)", () => {
+  test.skip(!process.env.E2E_AI, "Set E2E_AI=1 to call Gemini");
+
+  test("Fill from photo fills the form for the team to check", async ({ page }) => {
+    test.slow();
+    await signIn(page);
+    await page.getByRole("button", { name: "+ Add product" }).click();
+    const editor = page.getByRole("dialog", { name: "Add product" });
+    await editor.locator('input[type=file][accept="image/*"]').setInputFiles("design/img/striped-tee.jpg");
+    await expect(editor.getByRole("img", { name: "Photo 1, cover" })).toBeVisible({ timeout: 20_000 });
+    await editor.getByRole("button", { name: "Fill from photo" }).click();
+    await expect(editor.getByRole("status")).toHaveText("Filled from the photo. Check every field before saving.", { timeout: 60_000 });
+    await expect(editor.getByLabel("Product name")).not.toHaveValue("");
+    await expect(editor.getByLabel("Category")).toHaveValue("Tops");
+    for (const label of ["Product name", "Description (optional)", "Styling tip (optional)"]) {
+      expect(await editor.getByLabel(label).inputValue()).not.toContain("—");
+    }
+    // Price, size and condition stay with the team.
+    await expect(editor.getByLabel("Price (QAR)")).toHaveValue("");
+    await expect(editor.getByLabel("Size")).toHaveValue("");
+    await editor.getByRole("button", { name: "Cancel" }).click();
+  });
+
+  test("Suggest looks adds drafts that only use live pieces", async ({ page }) => {
+    test.slow();
+    await signIn(page);
+    const looks = page.getByRole("region", { name: "Looks" });
+    await looks.getByRole("button", { name: "Suggest looks" }).click();
+    await expect(looks.getByRole("status")).toHaveText(/new looks? added as drafts|No new looks/, { timeout: 90_000 });
+    await expect(looks).not.toContainText("Hidden in the shop:");
+    const drafts = looks.locator("article", { hasText: "Draft" });
+    if (await drafts.count()) {
+      await expect(drafts.first()).toContainText("AI");
+      const title = (await drafts.first().getByRole("heading").textContent())!;
+      await drafts.first().getByRole("button", { name: `Publish ${title}` }).click();
+      await expect(page.getByRole("status").filter({ hasText: `${title} published` })).toBeVisible();
+      await page.goto("/");
+      await expect(page.locator("#looks article", { hasText: title })).toContainText("AI pick");
+    }
+  });
+});

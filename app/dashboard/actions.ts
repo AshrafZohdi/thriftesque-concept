@@ -3,6 +3,8 @@
 // signed-in user's session (so RLS applies too), then refreshes the cached shop pages it affects (D-021).
 import { revalidatePath } from "next/cache";
 import { isCode, isStatus, validateSettings, type SettingsInput } from "@/lib/dashboard";
+import { looksPrompt, LOOKS_SCHEMA, validLooks, type LookPiece } from "@/lib/ai";
+import { geminiJson } from "@/lib/gemini";
 import { productSchema, toProductRow, type ProductInput } from "@/lib/product-schema";
 import { PHOTO } from "@/lib/photo-spec";
 import { requireTeam } from "@/lib/supabase/server";
@@ -84,4 +86,50 @@ export async function saveProduct(code: string | null, input: ProductInput): Pro
   if (gone.length) await t.db.storage.from(PHOTO.bucket).remove(gone);
   refreshProduct(code);
   return { ok: true, code };
+}
+
+// "Suggest looks" (D-028): sends live stock as text (product facts only, never customer data), keeps only suggestions that pass
+// the slot rules, and saves them as drafts for the team to publish. Costs one Gemini call per press, nothing per shopper.
+export async function suggestLooks(): Promise<{ ok: true; added: number; rejected: number } | { ok: false; error: string }> {
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const [stock, existing] = await Promise.all([
+    t.db.from("products").select("code,name,category,colour,era,size").eq("status", "live").not("cutout", "is", null),
+    t.db.from("looks").select("product_codes"),
+  ]);
+  if (stock.error || existing.error) return { ok: false, error: "Couldn't read the stock. Try again." };
+  const pieces = stock.data as LookPiece[];
+  if (pieces.length < 2) return { ok: false, error: "Add more live pieces with cut-outs first." };
+
+  const r = await geminiJson([{ text: looksPrompt(pieces) }], LOOKS_SCHEMA, { maxOutputTokens: 4096, timeoutMs: 45_000 });
+  if (!r.ok) return { ok: false, error: r.error };
+  const { looks, rejected } = validLooks(r.json, pieces, existing.data.map((l) => l.product_codes));
+  if (looks.length) {
+    const ins = await t.db.from("looks").insert(looks.map((l) => ({ title: l.title, note: l.note, product_codes: l.codes, source: "ai" as const, status: "draft" as const })));
+    if (ins.error) return { ok: false, error: `Couldn't save the suggestions: ${ins.error.message}` };
+  }
+  return { ok: true, added: looks.length, rejected };
+}
+
+const isUuid = (v: unknown): v is string => typeof v === "string" && /^[0-9a-f-]{36}$/i.test(v);
+
+export async function setLookStatus(id: string, status: "draft" | "published"): Promise<Result> {
+  if (!isUuid(id) || (status !== "draft" && status !== "published")) return { ok: false, error: "That change isn't valid." };
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const { data, error } = await t.db.from("looks").update({ status }).eq("id", id).select("id");
+  if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
+  if (!data.length) return { ok: false, error: "That look wasn't found. Refresh the page." };
+  revalidatePath("/");
+  return { ok: true };
+}
+
+export async function deleteLook(id: string): Promise<Result> {
+  if (!isUuid(id)) return { ok: false, error: "That look isn't valid." };
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const { error } = await t.db.from("looks").delete().eq("id", id);
+  if (error) return { ok: false, error: `Couldn't delete: ${error.message}` };
+  revalidatePath("/");
+  return { ok: true };
 }

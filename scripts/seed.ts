@@ -1,5 +1,6 @@
 // Seeds the LOCAL database with the 21 sample products and photos from design/. Safe to run repeatedly.
-// Usage: npm run seed   (reads .env.local; refuses to run against a non-local Supabase)
+// Usage: npm run seed   (asks the local Supabase for its URL and secret key; refuses to run against anything else)
+import { execSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
@@ -20,9 +21,20 @@ type SeedProduct = {
   photo: string;
 };
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const secret = process.env.SUPABASE_SECRET_KEY;
-if (!url || !secret) throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY must be set (run npm run env:local).");
+// The secret key comes straight from the local stack, never from an env file: OpenNext bakes every variable in the
+// project's env files into the Worker bundle, and the secret key must never be there (D-038).
+function localStack(): { url: string; secret: string } {
+  let out = "";
+  try {
+    out = execSync("npx supabase status -o env", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    throw new Error("Local Supabase isn't running. Start it with: npx supabase start");
+  }
+  const get = (k: string) => out.match(new RegExp(`^${k}="?([^"\\n]*)"?$`, "m"))?.[1] ?? "";
+  return { url: get("API_URL"), secret: get("SECRET_KEY") };
+}
+const { url, secret } = localStack();
+if (!url || !secret) throw new Error("Couldn't read the local Supabase URL and secret key from `supabase status`.");
 
 const host = new URL(url).hostname;
 if (!["127.0.0.1", "localhost"].includes(host)) {
@@ -126,7 +138,8 @@ async function main() {
   const settings = await db.from("settings").update(SAMPLE_SETTINGS).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
 
-  const cleared = await db.from("looks").delete().eq("source", "team");
+  // Local data resets exactly, including AI drafts made while testing.
+  const cleared = await db.from("looks").delete().not("id", "is", null);
   if (cleared.error) throw new Error(`Looks: ${cleared.error.message}`);
   const looks = await db.from("looks").insert(SAMPLE_LOOKS.map((l) => ({ ...l, source: "team" as const, status: "published" as const })));
   if (looks.error) throw new Error(`Looks: ${looks.error.message}`);

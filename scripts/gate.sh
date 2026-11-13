@@ -29,6 +29,9 @@ npx opennextjs-cloudflare build
 step "worker size"
 node scripts/check-worker-size.mjs
 
+step "no secrets in the Worker bundle (D-038)"
+node scripts/check-build-secrets.mjs
+
 step "e2e on the workerd preview"
 npx playwright test
 

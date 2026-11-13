@@ -61,7 +61,7 @@ when Ashraf asks.
   720x900. Validation messages match the mockup copy. The dashboard chunk doesn't load on shop routes (checked in the build
   output).
 
-## Phase 7: AI autofill and AI looks
+## Phase 7: AI autofill and AI looks (done 2026-11-13)
 - `/api/autofill` (D-012) and a "Fill from photo" button with loading, error and "review before saving" states.
 - "Suggest looks" in the dashboard (D-028): Gemini gets live stock as text, the server validates codes and slot rules, and
   results are saved as drafts the team approves.

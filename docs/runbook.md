@@ -46,6 +46,9 @@ There is deliberately no `deploy` script yet. Deploys get added in Phase 8 with 
 
 Recorded here after the rehearsal: deploy command, how to find the last good version ID, rollback command, and smoke command.
 
+Already fixed: a deploy build must pass `npm run check:build-secrets -- --deploy` (no Supabase secret key and no Gemini key in the
+bundle, D-038). Build from a checkout whose `.env*` files hold only public values.
+
 ## Local team accounts
 
 `npm run seed` creates two accounts on the **local** database only (`scripts/dev-accounts.ts`): `team@thriftesque.test` (on the
@@ -74,7 +77,7 @@ team) and `stranger@thriftesque.test` (signed in but not on the team). The seed 
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | build env | no | |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | build env | no (public by design, RLS protects data) | `sb_publishable_...` (D-024) |
-| `SUPABASE_SECRET_KEY` | `.env.local` only | **yes** | `sb_secret_...`. Local scripts only. Never set on the Worker |
-| `GEMINI_API_KEY` | Worker secret | **yes** | set with `wrangler versions secret put`, piped from stdin |
+| `SUPABASE_SECRET_KEY` | nowhere in the repo | **yes** | `sb_secret_...`. Never in `.env*` (OpenNext bakes those into the Worker, D-038). The local seed reads it from `supabase status` |
+| `GEMINI_API_KEY` | Worker secret | **yes** | set with `wrangler versions secret put`, piped from stdin. May sit in `.env.local` for local previews only; deploy builds must pass `npm run check:build-secrets -- --deploy` |
 | `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` | Worker vars | no | `gemini-3.8-flash` / `gemini-3.5-flash-lite` |
 | `NEXT_PUBLIC_SITE_URL` | build env | no | used for OG URLs |

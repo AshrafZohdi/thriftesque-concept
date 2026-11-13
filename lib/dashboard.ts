@@ -3,7 +3,7 @@ import { STATUSES, type Status } from "./catalog";
 
 export type TeamProduct = {
   code: string; name: string; brand: string; era: string; category: string; size: string; price_qar: number;
-  status: Status; photos: string[]; created_at: string; sold_at: string | null;
+  status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
 };
 
 const DAY = 86_400_000;

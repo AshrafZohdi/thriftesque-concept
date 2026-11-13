@@ -71,3 +71,46 @@ test("sign out returns to sign in and the dashboard is closed again", async ({ p
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test("the team sees the looks, and Fill from photo waits for a photo", async ({ page }) => {
+  await signIn(page, DEV_TEAM);
+  const looks = page.getByRole("region", { name: "Looks" });
+  await expect(looks.getByRole("article")).toHaveCount(4);
+  await expect(looks).toContainText("Drafts (0)");
+  await expect(looks).toContainText("Published (4)");
+  await expect(looks.getByRole("button", { name: "Suggest looks" })).toBeEnabled();
+  await page.getByRole("button", { name: "+ Add product" }).click();
+  const editor = page.getByRole("dialog", { name: "Add product" });
+  await expect(editor.getByRole("button", { name: "Fill from photo" })).toBeDisabled();
+});
+
+test.describe("the autofill route only answers the team, from this site", () => {
+  const ok = { path: "p/00000000-0000-0000-0000-000000000000.webp" };
+  const post = (page: Page, data: unknown, origin: string | null) =>
+    page.request.post("/api/autofill", { data: typeof data === "string" ? data : JSON.stringify(data), headers: { "content-type": "application/json", ...(origin ? { origin } : {}) } });
+
+  test("signed out", async ({ page, baseURL }) => {
+    expect((await page.request.get("/api/autofill")).status()).toBe(405);
+    expect((await post(page, ok, null)).status()).toBe(403);
+    expect((await post(page, ok, "https://evil.example")).status()).toBe(403);
+    expect((await post(page, "x".repeat(5000), baseURL!)).status()).toBe(413);
+    expect((await post(page, "{not json", baseURL!)).status()).toBe(400);
+    expect((await post(page, { path: "../settings" }, baseURL!)).status()).toBe(400);
+    expect((await post(page, { path: "https://evil.example/a.webp" }, baseURL!)).status()).toBe(400);
+    const res = await post(page, ok, baseURL!);
+    expect(res.status()).toBe(401);
+    expect(res.headers()["cache-control"]).toContain("no-store");
+  });
+
+  test("signed in but not on the team", async ({ page, baseURL }) => {
+    await signIn(page, DEV_STRANGER);
+    await expect(page.getByRole("heading", { name: "Not on the team" })).toBeVisible();
+    expect((await post(page, ok, baseURL!)).status()).toBe(403);
+  });
+
+  test("the team, with a photo that doesn't exist", async ({ page, baseURL }) => {
+    await signIn(page, DEV_TEAM);
+    await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+    expect((await post(page, ok, baseURL!)).status()).toBe(404);
+  });
+});

@@ -13,6 +13,7 @@
 - [ ] Cloudflare Worker on the client's account. KV and D1 bound. Cron trigger active
 - [ ] Gemini key on the client's AI Studio account, billing disabled, model IDs re-checked
 - [ ] Secrets set with the non-deploying command (`wrangler versions secret put`). Table in `runbook.md` complete
+- [ ] The deploy build passed `npm run check:build-secrets -- --deploy` (D-038)
 - [ ] Domain connected over HTTPS. `NEXT_PUBLIC_SITE_URL` set to it
 
 ## Quality (see `11-qa-plan.md`)
