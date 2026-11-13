@@ -34,6 +34,16 @@ Newest first.
   refusals. robots.txt is `Disallow: /` and pages carry `noindex, nofollow`.
 - Production signups refused (`signup_disabled`).
 
+**After going live**
+- `http://thriftesque.com` served the page instead of redirecting: the Worker now redirects http and www to
+  `https://thriftesque.com`; production has no workers.dev or preview URL.
+- Ashraf's network couldn't resolve the domain for about 15 minutes: his router had cached "no address" from before the
+  records existed (Cloudflare's negative-cache time is 30 minutes). Every public resolver had it; nothing to fix.
+- Suggest looks on the live dashboard said "The AI didn't answer in time": a timeout on the main model returned an error
+  without trying the fallback. Timeouts, network errors and 5xx now go to the fallback, and the main model gets half the time.
+- Open: one Firefox e2e run lost the name typed into the bag ("Your name" empty after `fill`). Seen once in about ten runs;
+  cause not found yet. Watch for it.
+
 **Not verified yet**
 - The cron's first run (06:00 Doha tomorrow): check the Worker's logs for `keep-alive: ok`.
 - Signing in to the live dashboard and the Gemini key on the live site (the key isn't set yet).

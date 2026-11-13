@@ -102,7 +102,7 @@ export async function suggestLooks(): Promise<{ ok: true; added: number; rejecte
   const pieces = stock.data as LookPiece[];
   if (pieces.length < 2) return { ok: false, error: "Add more live pieces with cut-outs first." };
 
-  const r = await geminiJson([{ text: looksPrompt(pieces) }], LOOKS_SCHEMA, { maxOutputTokens: 4096, timeoutMs: 45_000 });
+  const r = await geminiJson([{ text: looksPrompt(pieces) }], LOOKS_SCHEMA, { maxOutputTokens: 4096, timeoutMs: 40_000 });
   if (!r.ok) return { ok: false, error: r.error };
   const { looks, rejected } = validLooks(r.json, pieces, existing.data.map((l) => l.product_codes));
   if (looks.length) {

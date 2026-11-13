@@ -312,8 +312,8 @@ from this machine would have shipped the key that bypasses every RLS rule. Nothi
 ### D-039 Gemini through plain `fetch`, no SDK. Decided, 2026-11-12
 `lib/gemini.ts` calls the Gemini REST API (`generateContent`, JSON output with a response schema) with `fetch`, so there is no
 new dependency and nothing extra in the Worker (D-012 allowed this switch). The key goes in the `x-goog-api-key` header, not the
-URL. One retry with `GEMINI_FALLBACK_MODEL` on 429 or 503 (Google returned "high demand" 503s for the main model during
-testing); thinking level `low` on the main model (Flash defaults to medium, which was too slow, and refuses `minimal`); the
+URL. One retry with `GEMINI_FALLBACK_MODEL` on 429, any 5xx, a timeout or a network error (Google returned "high demand" 503s
+during testing, and on the live site Suggest looks timed out with no fallback; the main model now gets half the time); thinking level `low` on the main model (Flash defaults to medium, which was too slow, and refuses `minimal`); the
 Flash-Lite fallback keeps its `minimal` default; 30 s timeout per call (45 s for looks). Google's
 error text goes to the server log only, never to the team.
 - **Autofill:** `POST /api/autofill` takes only a storage path from our bucket (pattern-checked, so it can't fetch other URLs),

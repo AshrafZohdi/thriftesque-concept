@@ -59,11 +59,24 @@ describe("geminiJson", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("handles a broken answer and a network failure", async () => {
+  it("handles a broken answer", async () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "not json" }] } }] })));
     expect(await geminiJson([{ text: "hi" }], {})).toMatchObject({ ok: false, status: 502 });
-    fetchMock.mockRejectedValueOnce(new Error("timeout"));
-    expect(await geminiJson([{ text: "hi" }], {})).toMatchObject({ ok: false, status: 504 });
+  });
+
+  it("when the main model is silent or erroring, the fallback answers (found live: Suggest looks timed out)", async () => {
+    fetchMock.mockRejectedValueOnce(new Error("timeout")).mockResolvedValueOnce(answer({ looks: [] }));
+    expect(await geminiJson([{ text: "hi" }], {})).toMatchObject({ ok: true, model: "small-model" });
+    fetchMock.mockResolvedValueOnce(new Response("", { status: 500 })).mockResolvedValueOnce(answer({ ok: 1 }));
+    expect(await geminiJson([{ text: "hi" }], {})).toMatchObject({ ok: true, model: "small-model" });
+  });
+
+  it("gives the main model half the time and the fallback all of it", async () => {
+    const spy = vi.spyOn(AbortSignal, "timeout");
+    fetchMock.mockRejectedValueOnce(new Error("timeout")).mockRejectedValueOnce(new Error("timeout"));
+    expect(await geminiJson([{ text: "hi" }], {}, { timeoutMs: 40_000 })).toMatchObject({ ok: false, status: 504 });
+    expect(spy.mock.calls.map((c) => c[0])).toEqual([20_000, 40_000]);
+    spy.mockRestore();
   });
 
   it("without a key it says AI isn't set up and calls nothing", async () => {
