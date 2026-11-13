@@ -44,6 +44,8 @@ host="${base#*://}"
 if [[ "$host" != www.* && "$host" != localhost* && "$host" != 127.* && "$host" != *.workers.dev ]]; then
   loc="$(curl -s -o /dev/null -D - --max-time 20 "https://www.$host/p/TQ-0000?x=1" | tr -d '\r' | grep -i '^location:' | cut -d' ' -f2 || true)"
   [[ "$loc" == "https://$host/p/TQ-0000?x=1" ]] && ok "www redirects to $host" || bad "www.$host doesn't redirect to $host (got: ${loc:-nothing})"
+  loc="$(curl -s -o /dev/null -D - --max-time 20 "http://$host/p/TQ-0000?x=1" | tr -d '\r' | grep -i '^location:' | cut -d' ' -f2 || true)"
+  [[ "$loc" == "https://$host/p/TQ-0000?x=1" ]] && ok "http redirects to https" || bad "http://$host doesn't redirect to https (got: ${loc:-nothing})"
 fi
 
 # The AI route must refuse anyone who isn't a signed-in team member, before doing anything.
