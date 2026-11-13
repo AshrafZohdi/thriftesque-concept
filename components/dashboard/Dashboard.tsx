@@ -324,7 +324,7 @@ export function Dashboard() {
       </div>
       <ProductEditor target={edit?.target ?? null} trigger={edit?.trigger ?? null} onClose={() => setEdit(null)} onSaved={onSaved} />
       <BulkUpload open={bulk?.n ?? null} trigger={bulk?.trigger ?? null} onClose={() => setBulk(null)}
-        onDone={(added) => { if (added) { setTab("hidden"); refresh(); } }} />
+        onDone={(added) => { if (added) { setTab("hidden"); refresh(); } }} onEdit={openEditor} products={products} />
       <p className={d.toast} role="status" aria-live="polite">{note}</p>
     </>
   );

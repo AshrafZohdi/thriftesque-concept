@@ -643,3 +643,42 @@
 .bulkPick span {
   font-size: 20px;
 }
+/* A saved piece in the Bulk add list: tap to open it in the editor. */
+.bulkList li:has(.bulkEdit) {
+  padding: 0;
+}
+.bulkList li[data-state="ready"] {
+  background: var(--color-lime);
+}
+.bulkEdit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 64px;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.bulkEdit img {
+  flex: none;
+  object-fit: cover;
+  background: var(--color-sky2);
+}
+.bulkText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.bulkGo {
+  flex: none;
+  padding: 6px 10px;
+  border: 1px solid var(--color-ink);
+  font: 700 12px/1 var(--font-mono);
+  text-transform: uppercase;
+}

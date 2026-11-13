@@ -34,9 +34,10 @@ Forgot the password? Ask Nuvai to reset it.
 2. Leave "Suggest names and descriptions" on to let the AI fill in each draft's name and description. Tick "Make cut-outs too"
    if you want the outfit cut-outs made now (slower).
 3. **Add drafts**. Keep the screen open until it says it's done.
-4. Each photo is now a hidden draft marked "Needs price, size, ...". Open each with **Edit**, add the missing details, extra
-   photos and measurements, set Visibility to "Live in shop" and save. A draft can't go live until it has a price, size,
-   category, era and condition.
+4. When it's done, the list shows each photo with what it still needs. Tap one to open it, add the price, size, condition,
+   measurements and any extra photos, set Visibility to "Live in shop" and save. You land back on the list, ready for the
+   next one. A piece can't go live until it has a price, size, category, era and condition.
+5. Drafts you don't finish now stay under **Hidden** in the product list, marked "Needs ...".
 
 ## When someone orders
 

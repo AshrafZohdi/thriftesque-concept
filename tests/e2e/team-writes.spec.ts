@@ -225,7 +225,7 @@ test.describe("AI (real Gemini)", () => {
 });
 
 // After the editor tests, which expect the next product code to be TQ-0722.
-test("bulk add turns photos into hidden drafts that can't go live until they're finished", async ({ page }) => {
+test("bulk add turns photos into drafts you can finish one by one from the list", async ({ page }) => {
   test.slow();
   await signIn(page);
   await page.getByRole("button", { name: "Bulk add" }).click();
@@ -234,20 +234,24 @@ test("bulk add turns photos into hidden drafts that can't go live until they're 
   await bulk.locator('input[type=file][accept="image/*"]').setInputFiles(["design/img/striped-tee.jpg", "design/img/mint-sweater.jpg"]);
   await bulk.getByRole("button", { name: "Add 2 drafts" }).click();
   await expect(bulk.getByRole("status")).toContainText("2 drafts added", { timeout: 60_000 });
-  await bulk.getByRole("button", { name: "Done" }).click();
 
-  // The list switches to Hidden, where both drafts say what they still need.
-  const drafts = page.getByRole("region", { name: "Products" }).locator("div", { hasText: "Untitled draft" }).filter({ hasText: "Needs price, size, category, era, condition" });
-  await expect(drafts.first()).toBeVisible();
-  const first = await page.getByRole("region", { name: "Products" }).getByRole("combobox", { name: "Status of Untitled draft" }).first();
-
-  // Making a draft live too early is refused in plain words.
-  await first.selectOption("live");
-  await expect(page.getByRole("status").filter({ hasText: /needs price, size, category, era, condition before it can show in the shop/ })).toBeVisible();
-
-  // Finishing it in the editor lets it go live.
-  await page.getByRole("button", { name: "Edit Untitled draft" }).first().click();
+  // Each saved photo opens in the editor, on top of the list.
+  const rows = bulk.getByRole("button", { name: /^TQ-\d+ · Untitled draft .*Edit$/ });
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText("Needs price, size, category, era, condition");
+  await rows.first().click();
   const editor = page.getByRole("dialog", { name: /^Edit TQ-/ });
+  await expect(editor).toBeVisible();
+
+  // Escape closes only the editor, and focus goes back to the piece in the list.
+  await expect(editor.getByRole("button", { name: "Close editor" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(editor).toHaveCount(0);
+  await expect(bulk).toBeVisible();
+  await expect(rows.first()).toBeFocused();
+
+  // Finish the first piece; its line in the list updates.
+  await rows.first().click();
   await expect(editor.getByLabel("Category")).toHaveValue("");
   await editor.getByRole("button", { name: "Save changes" }).click();
   await expect(editor).toContainText("Choose a category.");
@@ -259,7 +263,13 @@ test("bulk add turns photos into hidden drafts that can't go live until they're 
   await editor.getByLabel("Price (QAR)").fill("55");
   await editor.getByLabel("Visibility").selectOption("live");
   await editor.getByRole("button", { name: "Save changes" }).click();
-  await expect(page.getByRole("status").filter({ hasText: /TQ-\d+ saved/ })).toBeVisible();
+  await expect(editor).toHaveCount(0);
+  await expect(bulk.getByRole("button", { name: /^TQ-\d+ · Bulk striped tee .*Edit$/ })).toContainText("Live in the shop");
+  await bulk.getByRole("button", { name: "Done" }).click();
+
+  // The unfinished one still can't go live.
+  await page.getByRole("region", { name: "Products" }).getByRole("combobox", { name: "Status of Untitled draft" }).selectOption("live");
+  await expect(page.getByRole("status").filter({ hasText: /needs price, size, category, era, condition before it can show in the shop/ })).toBeVisible();
   await page.goto("/");
   await expect(page.locator("#shop article", { hasText: "Bulk striped tee" })).toContainText("55");
 });

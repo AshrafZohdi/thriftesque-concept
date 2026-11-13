@@ -453,6 +453,10 @@ if the limit runs out the rest are saved without suggestions) and optionally cut
   by mistake. Additive for existing data (every current product is complete).
 - The product list marks drafts "Needs price, size, ..."; making one live early gets a plain message; the editor asks for the
   missing choices ("Choose a category.").
+- After a batch, each saved photo in the list opens in the editor on top (2026-11-13, asked for by Ashraf); saving returns to
+  the list, which shows what each piece still needs or "Live in the shop". `useOverlay` now keeps a stack: only the top
+  overlay answers Escape, the ones below are inert, and closing the top one returns focus to its opener (the shop's
+  sheet-to-bag handoff is unchanged).
 - Not done: several photos per piece in one go (add extra photos per draft in the editor), and spreadsheet import (the team
   works from phones; can be added if they ask).
 

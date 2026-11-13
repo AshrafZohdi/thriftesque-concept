@@ -9,7 +9,9 @@ import s from "@/components/shop/shop.module.css";
 import type { AutofillFields } from "@/lib/ai";
 import { toCutout, toProductPhoto } from "@/lib/image";
 import { PHOTO } from "@/lib/photo-spec";
+import { missingForShop, type TeamProduct } from "@/lib/dashboard";
 import { browserDb } from "@/lib/supabase/browser";
+import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
 import { upload } from "./ProductEditor";
 
@@ -17,11 +19,11 @@ export const MAX_BULK = 30;
 // Space between AI calls, so a batch stays under the free tier's requests-per-minute limit.
 const AI_GAP_MS = 4000;
 
-type Item = { file: File; state: "waiting" | "working" | "done" | "failed"; note: string };
+type Item = { file: File; state: "waiting" | "working" | "done" | "failed"; note: string; code?: string };
 
-function Bulk({ onClose, onDone, closeRef, cancelRef }: {
-  onClose: () => void; onDone: (added: number) => void;
-  closeRef: RefObject<HTMLButtonElement | null>; cancelRef: RefObject<(() => void) | null>;
+function Bulk({ onClose, onDone, onEdit, products, closeRef, cancelRef }: {
+  onClose: () => void; onDone: (added: number) => void; onEdit: (code: string, trigger: HTMLElement) => void;
+  products: TeamProduct[]; closeRef: RefObject<HTMLButtonElement | null>; cancelRef: RefObject<(() => void) | null>;
 }) {
   const ids = { ai: useId(), cut: useId() };
   const input = useRef<HTMLInputElement>(null);
@@ -89,7 +91,7 @@ function Bulk({ onClose, onDone, closeRef, cancelRef }: {
         });
         if (!r.ok) throw new Error(r.error);
         added++;
-        set(i, { state: "done", note: `${r.code}${fields.name ? `: ${fields.name}` : ""}` });
+        set(i, { state: "done", note: `${r.code}${fields.name ? `: ${fields.name}` : ""}`, code: r.code });
       } catch (e) {
         // Don't leave orphan files in storage (1 GB on the free plan).
         if (uploaded.length) await browserDb().storage.from(PHOTO.bucket).remove(uploaded);
@@ -142,16 +144,42 @@ function Bulk({ onClose, onDone, closeRef, cancelRef }: {
             </label>
           </>
         )}
+        {phase === "done" && items.some((it) => it.code) && (
+          <p className={d.muted}>Tap a piece to add its details. You come back here when you save.</p>
+        )}
         {items.length > 0 && (
           <ol className={d.bulkList} aria-label="Photos">
-            {items.map((it, i) => (
-              <li key={`${it.file.name}-${i}`} data-state={it.state}>
-                <span className={d.bulkName}>{it.file.name}</span>
-                <span className={d.bulkNote}>
-                  {it.state === "waiting" ? "Waiting" : it.state === "done" ? `Saved as ${it.note}` : it.state === "failed" ? `Not saved: ${it.note}` : it.note}
-                </span>
-              </li>
-            ))}
+            {items.map((it, i) => {
+              // Once the batch is done, a saved piece opens in the editor; its line follows the dashboard's live data.
+              const p = phase === "done" && it.code ? products.find((x) => x.code === it.code) : undefined;
+              if (p) {
+                const missing = missingForShop(p);
+                return (
+                  <li key={`${it.file.name}-${i}`} data-state={missing.length ? "done" : "ready"}>
+                    {/* Named by its visible text (code, name, what it needs, "Edit"), so voice control can say what it sees (WCAG 2.5.3). */}
+                    <button type="button" className={d.bulkEdit} onClick={(e) => onEdit(p.code, e.currentTarget)}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.photos[0] ? photoUrl(p.photos[0]) : ""} alt="" width={44} height={55} />
+                      <span className={d.bulkText}>
+                        <span className={d.bulkName}>{p.code} · {p.name}</span>
+                        <span className={d.bulkNote}>
+                          {missing.length ? `Needs ${missing.join(", ")}` : p.status === "live" ? "Live in the shop" : "Details done, still hidden"}
+                        </span>
+                      </span>
+                      <span className={d.bulkGo} aria-hidden="true">Edit</span>
+                    </button>
+                  </li>
+                );
+              }
+              return (
+                <li key={`${it.file.name}-${i}`} data-state={it.state}>
+                  <span className={d.bulkName}>{it.file.name}</span>
+                  <span className={d.bulkNote}>
+                    {it.state === "waiting" ? "Waiting" : it.state === "done" ? `Saved as ${it.note}` : it.state === "failed" ? `Not saved: ${it.note}` : it.note}
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         )}
       </div>
@@ -176,13 +204,14 @@ function Bulk({ onClose, onDone, closeRef, cancelRef }: {
   );
 }
 
-export function BulkUpload({ open, trigger, onClose, onDone }: {
+export function BulkUpload({ open, trigger, onClose, onDone, onEdit, products }: {
   open: number | null; trigger: HTMLElement | null; onClose: () => void; onDone: (added: number) => void;
+  onEdit: (code: string, trigger: HTMLElement) => void; products: TeamProduct[];
 }) {
   const cancelRef = useRef<(() => void) | null>(null);
   return (
     <Overlay item={open} onClose={() => (cancelRef.current ?? onClose)()} trigger={trigger} kind="drawer" labelledBy="bulkTitle">
-      {(n, closeRef) => <Bulk key={n} onClose={onClose} onDone={onDone} closeRef={closeRef} cancelRef={cancelRef} />}
+      {(n, closeRef) => <Bulk key={n} onClose={onClose} onDone={onDone} onEdit={onEdit} products={products} closeRef={closeRef} cancelRef={cancelRef} />}
     </Overlay>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 // One overlay for the product sheet, the look sheet and the bag drawer. Keeps the last content on screen while it animates out,
 // then unmounts it, so a closed overlay can never sit invisibly over the page and swallow taps (mockup bug 1).
-import { useEffect, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useOverlay } from "@/lib/useOverlay";
 import s from "./shop.module.css";
@@ -31,12 +31,14 @@ export function Overlay<T>({ item, onClose, trigger, kind, labelledBy, label, ch
     }, 260);
     return () => clearTimeout(t);
   }, [leaving]);
-  const closeRef = useOverlay(item !== null, onClose, trigger);
+  const panel = useRef<HTMLDivElement>(null);
+  const closeRef = useOverlay(item !== null, onClose, trigger, panel);
   if (shown === null) return null;
   return createPortal(
     <>
       <div className={`${s.scrim} ${leaving ? s.leaving : ""}`} onClick={onClose} />
       <div
+        ref={panel}
         className={`${kind === "sheet" ? s.sheet : s.drawer} ${leaving ? s.leaving : ""}`}
         role="dialog"
         aria-modal="true"
