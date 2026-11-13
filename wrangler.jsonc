@@ -21,25 +21,6 @@
   "observability": { "enabled": true },
   // Every response carries x-worker-version, so deploys and rollbacks can be checked from outside (worker.ts).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
-
-  // Deploy targets (npm run deploy -- <name>). Bindings and vars don't inherit, so each target lists them all.
-  // Only public values here; secrets go in with `wrangler versions secret put` (runbook).
-  "env": {
-    // Throwaway target on Nuvai's account for rehearsing deploy and rollback (Phase 8). Deleted afterwards.
-    "rehearsal": {
-      "vars": {
-        "NEXT_PUBLIC_SITE_URL": "https://thriftesque-rehearsal.mentalovertime2001.workers.dev",
-        "NEXT_PUBLIC_SUPABASE_URL": "https://kpqjdxhfbyzxxeqkbgiy.supabase.co",
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_RVbQQ82p8Vv7m2EhOVWIKw_8EJMNh26",
-        "GEMINI_MODEL": "gemini-3.8-flash",
-        "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite"
-      },
-      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque-rehearsal" }],
-      "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "7ab3df90f50049f2b329ea5cd32e48ed" }],
-      "d1_databases": [{ "binding": "NEXT_TAG_CACHE_D1", "database_name": "thriftesque-rehearsal-tag-cache", "database_id": "a3ae30f3-27cd-48d1-b8bf-5cd2f7f029f3" }],
-      "version_metadata": { "binding": "CF_VERSION_METADATA" },
-      // Every 5 minutes here, so the cron can be seen working during the rehearsal.
-      "triggers": { "crons": ["*/5 * * * *"] }
-    }
-  }
+  // Deploy targets go under "env" (npm run deploy -- <name>). Bindings and vars don't inherit, so each target lists them
+  // all; the runbook ("Deploy and roll back") has the block to add for production in Phase 9. Only public values here.
 }

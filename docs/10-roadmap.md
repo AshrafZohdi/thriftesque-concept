@@ -69,7 +69,7 @@ when Ashraf asks.
   signed-out calls (401) and oversized bodies (413). One manual run with the real key on a sample photo is recorded. The Worker
   size is re-checked (switch to `fetch` if `@google/genai` costs too much).
 
-## Phase 8: Hardening and ops
+## Phase 8: Hardening and ops (done 2026-11-13)
 - Keep-alive cron (D-015), robots and sitemap, CSP finalised, `npm audit`, Lighthouse on the preview, full cross-browser e2e,
   runbook filled in, and a rollback rehearsed on a throwaway Worker.
 - **Accept when:** the full gate including e2e on the workerd preview is green, budgets are met, and the rollback has been

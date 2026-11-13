@@ -1,6 +1,6 @@
 # Thriftesque production app: docs hub
 
-**Status (2026-11-13):** Phase 7 (AI autofill and AI looks) done. Next: Phase 8 (hardening and ops). Branch `dev`.
+**Status (2026-11-13):** Phase 8 (hardening and ops) done. Next: Phase 9 (launch), which needs the client's accounts and content. Branch `dev`.
 
 Start here. `CLAUDE.md` at the repo root is the project brief and wins over anything in this folder if they disagree.
 

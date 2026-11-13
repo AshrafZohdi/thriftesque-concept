@@ -2,6 +2,54 @@
 
 Newest first.
 
+## 2026-11-13: Phase 8, hardening and ops
+
+**Done**
+- Keep-alive (D-015): `worker.ts` wraps OpenNext's handler and adds a daily cron (06:00 Doha) that reads one Supabase row.
+- `robots.txt` (team pages and the API blocked) and `sitemap.xml` (home plus pieces for sale), refreshed on every dashboard save.
+- Malformed product codes 404 before any database read (D-041).
+- Headers: added `X-Frame-Options: DENY` and `Cross-Origin-Opener-Policy: same-origin`. Every response carries
+  `x-worker-version`.
+- `npm run smoke -- <url>`: 21 read-only checks (pages, 404s, robots, sitemap, OG tags, headers, AI route refusals).
+- `npm run deploy -- <target>`: gate, clean build, deploy checks, deploy, smoke, automatic rollback (D-042). Runbook has
+  deploy, rollback, secrets, the production block to add, and what to watch in the logs.
+- `.env.example` no longer suggests putting the Supabase secret key in an env file.
+
+**Rehearsal (throwaway Worker and Supabase project on Nuvai's accounts, all deleted afterwards)**
+- Deploy 1 from a clean build: deploy checks passed, smoke all ok against real Cloudflare and Supabase.
+- Cron seen in the live logs: `*/5 * * * *`, outcome ok, `keep-alive: ok`.
+- Deploy 2, then `wrangler rollback` to version 1: the command took 5 s and version 1 was answering 7 s after it started
+  (checked with `x-worker-version`), smoke all ok.
+- Deleted the Worker, KV and D1 (URL returns 404) and unlinked the Supabase CLI. The rehearsal Supabase project is still in
+  Ashraf's Supabase account.
+
+**Found and fixed**
+- Every made-up product URL ran a full shop query and used one of KV's 1,000 free daily writes (D-041).
+- Checked the "Dummy queue" errors: leftovers from local runs, not a production problem (D-040).
+- Deploy script, found by the rehearsal: Turbopack won't build with a linked `node_modules` (now `npm ci`); a first deploy has
+  no live version, which `pipefail` treated as fatal; OpenNext doesn't forward wrangler flags.
+- A new e2e test flaked once in Firefox (dashboard still checking the sign-in after 5 s with five browsers on one local
+  Supabase). Post-sign-in waits are now 15 s.
+
+**Verified**
+- Gate green: 83 unit, 43 database, 194 e2e (2 opt-in AI tests skipped). Worker 1,652 KiB gzip (budget 2,560).
+- Phone profile (390 px, slow 4G, 4x slower CPU, median of 5): LCP 1.60 s on `/`, 1.18 s on a product page (budget 2.5 s),
+  CLS 0. Shop JS 147 KB gzip (budget 200).
+- Keep-alive on the local preview (Supabase gateway logged the read) and on Cloudflare (above).
+
+**Not verified**
+- Lighthouse itself isn't installed (it would be a new dependency); budgets were measured with Playwright and Chrome's
+  throttling, as in Phase 4.
+- The automatic rollback branch of the deploy script didn't fire (both deploys passed). It runs the same `wrangler rollback`
+  command that was rehearsed by hand.
+- INP not measured.
+
+**Owner actions**
+- Delete the `thriftesque-rehearsal` Supabase project (Project Settings > General > Delete project).
+
+**Next**
+- Phase 9: needs the client's Supabase, Cloudflare and AI Studio accounts, the domain, and content (`content-inventory.md`).
+
 ## 2026-11-13: Phase 7, AI autofill and AI looks
 
 **Done**

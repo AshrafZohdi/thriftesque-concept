@@ -7,7 +7,7 @@ Filled in as each phase lands. Commands marked *(Phase N)* don't exist yet.
 | Branch | What deploys from it |
 | --- | --- |
 | `main` | The concept mockup (`index.html`) on Vercel, the client demo. Becomes production at launch |
-| `dev` | The production app. Nothing deploys from it automatically yet |
+| `dev` | The production app until launch. Nothing deploys automatically; deploys are manual (`npm run deploy`) |
 
 ## Local
 
@@ -34,7 +34,7 @@ Needs Node 24 and npm 11.
 | Database tests (RLS, codes, triggers) | `npm run db:test` |
 | Regenerate DB types | `npm run db:types` (after changing a migration) |
 
-There is deliberately no `deploy` script yet. Deploys get added in Phase 8 with a rehearsed rollback.
+Deploying is `npm run deploy -- <target>`. See "Deploy and roll back" below.
 
 ## Cloudflare bindings (`wrangler.jsonc`)
 
@@ -45,12 +45,93 @@ There is deliberately no `deploy` script yet. Deploys get added in Phase 8 with 
 | `NEXT_INC_CACHE_KV` | KV | page cache (D-005). ID added in Phase 9 |
 | `NEXT_TAG_CACHE_D1` | D1 `thriftesque-tag-cache` | revalidation records (D-021). ID added in Phase 9 |
 
-## Deploy and roll back *(Phase 8)*
+## Deploy and roll back
 
-Recorded here after the rehearsal: deploy command, how to find the last good version ID, rollback command, and smoke command.
+Rehearsed on 2026-11-13 on a throwaway Worker (`thriftesque-rehearsal`, Nuvai's Cloudflare account) against a throwaway Supabase
+project: two deploys, a cron run seen in the live logs, a rollback, then everything deleted (progress log, Phase 8).
 
-Already fixed: a deploy build must pass `npm run check:build-secrets -- --deploy` (no Supabase secret key and no Gemini key in the
-bundle, D-038). Build from a checkout whose `.env*` files hold only public values.
+**Deploys are manual, from this machine, one commit at a time.** Nothing deploys on push.
+
+### Deploy
+
+```
+npx wrangler login                      # once per machine, as the client's Cloudflare account member
+git switch main && git pull             # the branch that is live (main from launch)
+npm run deploy -- production            # runs the full gate first; ~10 min
+```
+
+What `scripts/deploy.sh` does, in order (any failure stops it):
+1. Refuses uncommitted changes. Reads the target's public config from `env.<target>.vars` in `wrangler.jsonc`.
+2. Runs `npm run gate` (skip only with `--skip-gate`, and only for a commit that just passed it).
+3. Builds a clean copy of the commit (`git worktree` plus `npm ci`). Local env files are never in it, so local URLs and the
+   Gemini key can't be baked in (D-038).
+4. Checks the Worker size and runs `check:build-secrets --deploy` (https site and Supabase URLs, the live Supabase URL inside the
+   bundle, no local URL, no secrets).
+5. Notes the live version ID (the rollback target), deploys (this also uploads the prerendered cache to KV and creates the D1
+   tag table if needed), and prints the new version ID with the commit.
+6. Waits until the site answers with the new `x-worker-version`, then runs `npm run smoke -- <site>`.
+7. If the smoke fails, rolls back to the noted version on its own and smokes again.
+
+It ends with the rollback command for this deploy. Keep it in the deploy notes.
+
+### Roll back
+
+```
+npx wrangler deployments status --env production          # what's live now
+npx wrangler deployments list --env production            # earlier versions, newest last
+npx wrangler rollback <version-id> --env production -m "<reason>" -y
+curl -sI https://<domain>/robots.txt | grep -i x-worker-version   # must show <version-id>
+npm run smoke -- https://<domain>
+```
+
+Rehearsal timing: the rollback command took 5 s and the old version was answering 7 s after it started. Roll back first,
+investigate second. A rollback restores code and Worker config, not data: Supabase changes stay as they are.
+
+### Secrets (don't trigger a deploy)
+
+```
+npx wrangler versions secret put GEMINI_API_KEY --env production   # paste when asked; never as an argument
+```
+
+Then the next `npm run deploy` picks it up. `wrangler secret put` (without `versions`) deploys the latest uploaded version
+immediately, so don't use it.
+
+### The production target (add in Phase 9)
+
+Create the stores once on the client's account, then add this block under `"env"` in `wrangler.jsonc` with the real values:
+
+```
+npx wrangler kv namespace create thriftesque-cache
+npx wrangler d1 create thriftesque-tag-cache
+```
+
+```jsonc
+"production": {
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://<domain>",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://<project-ref>.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_...",
+    "GEMINI_MODEL": "gemini-3.8-flash",
+    "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite"
+  },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque-production" }],
+  "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "<kv id>" }],
+  "d1_databases": [{ "binding": "NEXT_TAG_CACHE_D1", "database_name": "thriftesque-tag-cache", "database_id": "<d1 id>" }],
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "triggers": { "crons": ["0 3 * * *"] },
+  "routes": [{ "pattern": "<domain>", "custom_domain": true }]
+}
+```
+
+The Worker is named `thriftesque-production` (wrangler adds the env name). The self-reference must match it.
+
+### Watching it
+
+- Worker logs (requests, errors, cron runs): Cloudflare dashboard > Workers > thriftesque-production > Logs, or
+  `npx wrangler tail --env production --format pretty`.
+- `gemini <model> <status>` lines are AI errors with Google's reason. `keep-alive: ok` should appear once a day.
+- "Failed to set to cache" means the KV free write limit ran out for the day (D-041); "Failed to revalidate stale page" means
+  a queue is needed after all (D-040).
 
 ## Local team accounts
 
@@ -78,9 +159,9 @@ team) and `stranger@thriftesque.test` (signed in but not on the team). The seed 
 
 | Name | Where | Secret? | Notes |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | build env | no | |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | build env | no (public by design, RLS protects data) | `sb_publishable_...` (D-024) |
+| `NEXT_PUBLIC_SUPABASE_URL` | `env.production.vars` in `wrangler.jsonc` (local: `.env.local`) | no | Exported into the build by the deploy script, and a Worker var |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | same as above | no (public by design, RLS protects data) | `sb_publishable_...` (D-024). Also used by the keep-alive cron |
 | `SUPABASE_SECRET_KEY` | nowhere in the repo | **yes** | `sb_secret_...`. Never in `.env*` (OpenNext bakes those into the Worker, D-038). The local seed reads it from `supabase status` |
-| `GEMINI_API_KEY` | Worker secret | **yes** | set with `wrangler versions secret put`, piped from stdin. May sit in `.env.local` for local previews only; deploy builds must pass `npm run check:build-secrets -- --deploy` |
-| `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` | Worker vars | no | `gemini-3.8-flash` / `gemini-3.5-flash-lite` |
-| `NEXT_PUBLIC_SITE_URL` | build env | no | used for OG URLs |
+| `GEMINI_API_KEY` | Worker secret | **yes** | `wrangler versions secret put GEMINI_API_KEY --env production` (pasted at the prompt). May sit in `.env.local` for local previews only; the deploy build refuses it |
+| `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` | `env.production.vars` | no | `gemini-3.8-flash` / `gemini-3.5-flash-lite` |
+| `NEXT_PUBLIC_SITE_URL` | `env.production.vars` | no | Open Graph URLs, robots.txt, sitemap. The deploy check refuses http or localhost |

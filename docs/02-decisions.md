@@ -340,3 +340,19 @@ day. When that runs out, OpenNext logs the failed write and the site keeps worki
 - Malformed codes (anything but `TQ-` plus digits) now 404 before any database read.
 - Well-formed made-up codes are an accepted risk: nothing links to them, and crawlers don't invent URLs.
 - At launch, add Cloudflare's free rate-limiting rule on `/p/*` (launch checklist).
+
+### D-042 Manual deploys from a clean build, with automatic rollback on a failed smoke. Decided, 2026-11-13
+`npm run deploy -- <target>` (`scripts/deploy.sh`) is the only way to deploy. No CI: one person deploys a few times a month,
+and a script is easier to hand over than a pipeline plus its secrets.
+- **Clean build:** the commit is checked out with `git worktree` and installed with `npm ci`, so the developer's local env
+  files can't leak into the Worker (D-038). Turbopack refused a symlinked `node_modules`, hence the full install.
+- **Config:** public values live in `wrangler.jsonc` under `env.<target>.vars`. The script exports them into the build (Next
+  inlines `NEXT_PUBLIC_` values) and Cloudflare also sets them as Worker vars. Secrets only via `wrangler versions secret put`.
+- **Proof of what's live:** `worker.ts` adds `x-worker-version` (version metadata binding) to every response. The script waits
+  for the new ID before smoking, and a rollback can be checked the same way.
+- **Rollback:** the script notes the live version before deploying and runs `wrangler rollback` itself if the smoke fails.
+- **Found in the rehearsal and fixed:** OpenNext forwards only positional arguments to `wrangler deploy` (my `--tag` turned into
+  a bogus entry point), so the commit is printed next to the version ID instead of tagged; a first deploy has no live version,
+  which `pipefail` treated as fatal.
+- **Rejected:** Cloudflare Workers Builds (Git-connected CI). It builds with whatever env Cloudflare holds and can't run our
+  gate (local Supabase, Playwright), and it would deploy on every push.

@@ -27,7 +27,8 @@
 - [ ] `npm audit --omit=dev` clean, including the moderate build-time advisories waived in D-032
 
 ## Operations
-- [ ] Rollback rehearsed on a throwaway Worker. Command and target in `runbook.md`
+- [x] Rollback rehearsed on a throwaway Worker. Command and target in `runbook.md` (2026-11-13: back on the old version in 7 s)
+- [ ] Deployed with `npm run deploy -- production` (runs the gate, clean build, smoke, rollback on failure)
 - [ ] Smoke run against production after deploy: `npm run smoke -- https://<domain>`
 - [ ] Keep-alive cron seen succeeding once in the Worker's logs (Cron events)
 - [ ] `dev` merged into `main`. The mockup's Vercel demo retired or left as-is (ask the client)
