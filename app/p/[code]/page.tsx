@@ -8,7 +8,10 @@ import { Gallery, ProductDetails } from "@/components/shop/ProductDetails";
 import { ShopProvider } from "@/components/shop/ShopProvider";
 import s from "@/components/shop/shop.module.css";
 import { isCode } from "@/lib/dashboard";
+import { JsonLd } from "@/components/JsonLd";
 import { getShop } from "@/lib/shop";
+import { siteUrl } from "@/lib/site";
+import { productJsonLd } from "@/lib/structured-data";
 import { waLink } from "@/lib/wa";
 
 // Rendered on first visit, then cached until the dashboard changes the shop (D-021).
@@ -55,6 +58,7 @@ export default async function ProductPage({ params }: PageProps<"/p/[code]">) {
         <Strip dropName={shop.settings.dropName} />
         <Header right={<BagButton />} />
         <main className={`wrap ${s.page}`}>
+          <JsonLd data={productJsonLd(product, siteUrl)} />
           <Link className={`${s.back} mono`} href="/#shop">← Back to the drop</Link>
           <Gallery product={product} className={s.pagePhotos} />
           <ProductDetails product={product} actions={<ProductActions product={product} />} />

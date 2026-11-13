@@ -77,3 +77,35 @@ test("the scrolling strips never run out, even on a 4K screen", async ({ page })
   expect(shown.length).toBe(2);
   for (const w of shown) expect(w).toBeGreaterThanOrEqual(3840);
 });
+
+test("terms and privacy are linked from every page and pass axe", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Privacy" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
+  await expect(page.getByRole("main")).toContainText("Law No. 13 of 2016");
+  for (const path of ["/privacy", "/terms"]) {
+    await page.goto(path);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`${path}$`));
+    const { violations } = await new AxeBuilder({ page }).analyze();
+    expect(violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
+  }
+  await page.goto("/p/TQ-0705");
+  await page.getByRole("contentinfo").getByRole("link", { name: "Terms" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Terms" })).toBeVisible();
+});
+
+test("search engines get structured data, a share card and a manifest", async ({ page, request }) => {
+  await page.goto("/");
+  const home = await page.locator('script[type="application/ld+json"]').allTextContents();
+  expect(home.map((t) => JSON.parse(t)).flat().map((d) => d["@type"])).toEqual(["OnlineStore", "WebSite"]);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\.jpg$/);
+  expect((await request.get("/og.jpg")).headers()["content-type"]).toContain("image/jpeg");
+
+  await page.goto("/p/TQ-0705");
+  const [product] = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((t) => JSON.parse(t)).flat();
+  expect(product).toMatchObject({ "@type": "Product", sku: "TQ-0705", offers: { priceCurrency: "QAR" } });
+
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  expect(manifest).toMatchObject({ name: "Thriftesque", start_url: "/" });
+  for (const icon of manifest.icons) expect((await request.get(icon.src)).status()).toBe(200);
+});

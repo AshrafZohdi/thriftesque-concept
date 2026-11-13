@@ -19,6 +19,7 @@
     "check:build-secrets": "node scripts/check-build-secrets.mjs",
     "smoke": "bash scripts/smoke.sh",
     "deploy": "bash scripts/deploy.sh",
+    "backup": "bash scripts/backup.sh",
     "env:local": "bash scripts/env-local.sh",
     "db:test": "supabase test db",
     "db:reset": "supabase db reset",

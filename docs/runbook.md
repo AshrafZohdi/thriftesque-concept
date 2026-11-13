@@ -156,6 +156,29 @@ The Worker is named `thriftesque-production` (wrangler adds the env name). The s
 
 The loader signs in as a team member, so your account must be in `team_members` first (see "Adding a team member").
 
+## Backups (weekly, D-047)
+
+The free Supabase plan keeps no downloadable backups, so:
+
+```
+npx supabase link --project-ref pexllnnfemgdutonpdqw   # once per machine; asks for the database password
+npm run backup                                         # schema, data and photos into backups/<date>/
+```
+
+Copy the folder somewhere safe and private (it holds team sign-in records). To restore into a fresh project: push the
+migrations, then load `data.sql` with `psql` and copy the photos back with `npx supabase storage cp -r`.
+
+## Content that has to be confirmed before launch (D-046)
+
+`lib/shop-facts.ts` holds the shop facts shown on the home page, the terms and the privacy page. When the client confirms one,
+set its text and `confirmed: true`, and update `LEGAL_UPDATED` if the legal pages changed. `node scripts/check-facts.ts` lists
+what's still open; `npm run deploy` runs it whenever preview mode is off.
+
+## Share card
+
+After a design change, run `node scripts/make-og-image.mjs` to remake `public/og.jpg` (needs the internet for the fonts while it
+runs), check the image, commit it.
+
 ## Local team accounts
 
 `npm run seed` creates two accounts on the **local** database only (`scripts/dev-accounts.ts`): `team@thriftesque.test` (on the

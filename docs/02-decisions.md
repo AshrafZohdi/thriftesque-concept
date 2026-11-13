@@ -386,3 +386,33 @@ Mumbai or UAE. Supabase has no Middle East region, so the project was recreated 
   `https://thriftesque.com`, the `admin@thriftesque.com` login (password set by Ashraf, in his password manager) added to
   `team_members`. The schema went in with `supabase db push`.
 - `admin@thriftesque.com` has no mailbox. A forgotten password is reset in the Supabase dashboard.
+
+### D-046 Terms and privacy pages from one set of shop facts. Decided, 2026-11-13
+`/terms` and `/privacy`, linked in every footer, describe what the site actually does: the bag lives in the browser, orders
+are a WhatsApp message the customer sends, no analytics or advertising, cookies only on the team pages (checked on the live
+site: no cookies after browsing and adding to the bag), and each outside service with its role (Cloudflare, Supabase in
+Mumbai, Gemini for product photos only, WhatsApp). Privacy rights reference Qatar's Law No. 13 of 2016.
+- Facts the client hasn't confirmed live in `lib/shop-facts.ts` with `confirmed: false` (operator name, contact email,
+  delivery, payment, returns, how long reserved pieces are held, how long order chats are kept). The home page reads the
+  same file, and the legal pages mark unconfirmed facts "To be confirmed" instead of inventing them.
+- `npm run deploy` runs `scripts/check-facts.ts` whenever preview mode is off, so the shop can't launch with an unconfirmed
+  fact on its terms.
+- These are honest drafts, not legal advice. The client should have them reviewed before launch (launch checklist).
+
+### D-047 SEO and operations standards. Decided, 2026-11-13
+- **Structured data** (`lib/structured-data.ts`): `OnlineStore` and `WebSite` on the home page; `Product` with an `Offer`
+  (price in QAR, availability from the status: live InStock, reserved OutOfStock, sold SoldOut, `UsedCondition`) and a
+  `BreadcrumbList` on product pages. Built only from real data: no ratings, reviews or stock counts. Escaped so a product name
+  can't close the script tag.
+- **Metadata**: canonical URLs on every public page, a share card for the home page (`public/og.jpg`, 1200x630, 49 KB, made by
+  `scripts/make-og-image.mjs`), a web manifest and app icons from option F's chrome heart (the favicon was still the old pink
+  dot), terms and privacy in the sitemap.
+- **Performance**: photos uploaded from the editor are cached for a year (random, never-overwritten file names); the browser
+  connects to Supabase early. Measured on a slow phone profile: LCP 1.61 s home, 1.24 s product, 0.61 s privacy; CLS 0.016 or
+  less.
+- **Errors**: friendly error pages for failed renders (`app/error.tsx`, `app/global-error.tsx`); details go to the Worker logs.
+- **Backups**: the free Supabase plan has no downloadable backups. `npm run backup` dumps the schema, the data and the photos
+  to `backups/<date>/` (git-ignored, holds team sign-in records). Weekly, run by Nuvai.
+- **Dependencies**: Dependabot opens weekly update pull requests against `dev`; nothing merges or deploys by itself.
+- **Not done**: `security.txt` needs a public contact email (C-14). Lighthouse and uptime monitoring wait on Ashraf's go-ahead
+  (a dev dependency and an outside account).

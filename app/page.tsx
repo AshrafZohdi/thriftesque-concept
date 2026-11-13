@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
 import { Band, Footer, Header, HowToOrder, Section, Strip } from "@/components/Site";
 import { BagButton } from "@/components/shop/BagDrawer";
 import { Catalog } from "@/components/shop/Catalog";
@@ -7,10 +9,23 @@ import { OutfitBuilder } from "@/components/shop/OutfitBuilder";
 import { ShopProvider } from "@/components/shop/ShopProvider";
 import { initialOutfit, pools } from "@/lib/outfit";
 import { getShop } from "@/lib/shop";
+import { siteUrl } from "@/lib/site";
+import { shopJsonLd } from "@/lib/structured-data";
 import { waLink } from "@/lib/wa";
 
 // Cached and refreshed only when the dashboard saves (revalidatePath, D-021).
 export const revalidate = false;
+
+const description = "Hand-picked secondhand clothing in Qatar. Every piece is one of one. Browse the drop and order on WhatsApp.";
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  // The share card WhatsApp and TikTok show for the home page (scripts/make-og-image.mjs makes it).
+  openGraph: {
+    type: "website", siteName: "Thriftesque", title: "Thriftesque | Pre-loved pieces, one of each", description, url: "/",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Thriftesque: pre-loved pieces, one of each" }],
+  },
+  twitter: { card: "summary_large_image", title: "Thriftesque | Pre-loved pieces, one of each", description, images: ["/og.jpg"] },
+};
 
 export default async function ShopPage() {
   const { products, looks, settings } = await getShop();
@@ -28,6 +43,7 @@ export default async function ShopPage() {
         <Strip dropName={settings.dropName} />
         <Header nav={nav} right={<BagButton />} />
         <main>
+          <JsonLd data={shopJsonLd(siteUrl)} />
           <Hero piece={live.find((p) => p.cutout)} liveCount={live.length} dropName={settings.dropName} firstSection={looks.length ? "looks" : "shop"} />
           <Band dropName={settings.dropName} />
           {looks.length > 0 && (

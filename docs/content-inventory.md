@@ -28,6 +28,10 @@ Anything not confirmed here stays as a visible placeholder or is left out. Nothi
 | C-9 | Current drop name (the mockup says "Drop 07") | Phase 9 | owner to confirm. Editable in settings |
 | C-10 | Any returns or exchange policy? The mockup has none, and none will be written without one | Phase 9 | ask |
 | C-11 | Footer credit. The mockup says "Concept by Nuvai Solutions". Proposed: "Site by Nuvai Solutions" | Phase 9 | ask |
+| C-13 | Who runs the shop, as shown on the terms and privacy pages: a registered business name, or "Thriftesque, Doha" | before launch | ask (lib/shop-facts.ts) |
+| C-14 | A public contact email for privacy requests and security.txt | before launch | ask |
+| C-15 | How long a reserved piece is held while payment is pending | before launch | ask |
+| C-16 | How long order chats and delivery details are kept | before launch | ask |
 | C-12 | The condition definitions in the mockup ("Barely worn, no flaws we could find.", etc.). Are these accurate for how they grade? | Phase 9 | owner to confirm |
 
 ## Accounts (created under the client's email, Nuvai added as a member)

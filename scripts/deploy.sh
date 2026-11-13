@@ -30,6 +30,8 @@ fi
 
 eval "$exports"
 site="${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL missing from env.$target.vars}"
+# Leaving preview mode means real customers: every shop fact on the terms and privacy pages must be confirmed (D-046).
+if [[ "${NEXT_PUBLIC_SHOP_PREVIEW:-}" != "1" ]]; then node scripts/check-facts.ts; fi
 
 step "clean build of $sha for $target"
 work="$(mktemp -d)"

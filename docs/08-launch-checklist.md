@@ -20,6 +20,11 @@
 - [ ] Cloudflare rate-limiting rule on `/p/*` (free plan includes one rule), per D-041
 - [ ] Sitemap submitted in Google Search Console (optional, ask the client)
 
+- [ ] Every shop fact confirmed (`node scripts/check-facts.ts` passes; the deploy enforces it outside preview mode)
+- [ ] Terms and privacy read and approved by the client (ideally reviewed by a lawyer in Qatar)
+- [ ] `security.txt` added once there's a public contact email
+- [ ] First backup taken with `npm run backup` and stored somewhere safe
+
 ## Quality (see `11-qa-plan.md`)
 - [ ] Gate green on the production build, including e2e against the workerd preview
 - [ ] Budgets met (Worker size, LCP, CLS, INP, JS, photo size)

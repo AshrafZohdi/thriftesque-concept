@@ -1,0 +1,45 @@
+/* Terms and privacy: readable long-form text on the shop's frame. */
+.page {
+  padding-block: 40px 72px;
+}
+.page h1 {
+  margin: 8px 0 8px;
+  font-size: clamp(44px, 11vw, 76px);
+}
+.updated {
+  margin: 0 0 28px;
+  color: var(--color-soft);
+}
+.body {
+  max-width: 68ch;
+  font-size: 17px;
+  line-height: 1.6;
+}
+.body h2 {
+  margin: 36px 0 8px;
+  font-size: clamp(26px, 6vw, 34px);
+}
+.body p,
+.body ul {
+  margin: 0 0 14px;
+}
+.body ul {
+  padding-inline-start: 1.2em;
+  list-style: disc;
+}
+.body li + li {
+  margin-top: 6px;
+}
+.body a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tbc {
+  padding: 1px 6px;
+  background: var(--color-mockflag);
+  border: 1px dashed var(--color-ink);
+  font: 700 13px/1.6 var(--font-mono);
+  text-transform: uppercase;
+  white-space: nowrap;
+}

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { preconnect } from "react-dom";
 import { Anton, Instrument_Sans, Space_Mono } from "next/font/google";
 import { ChromeDefs } from "@/components/Chrome";
 import { PreviewStrip } from "@/components/PreviewStrip";
@@ -27,6 +28,8 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Product photos come from Supabase Storage: open that connection while the page is still loading, not at the first image.
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) preconnect(new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin);
   return (
     <html lang="en" className={`${anton.variable} ${instrument.variable} ${spaceMono.variable}`}>
       <body>

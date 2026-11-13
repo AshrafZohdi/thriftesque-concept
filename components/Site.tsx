@@ -2,6 +2,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChromeHeart } from "./Chrome";
+import { FACTS } from "@/lib/shop-facts";
 import s from "./site.module.css";
 
 // Endless scrolling strip. Each half holds several copies so it's wider than any screen (one copy of the strip is about
@@ -98,9 +99,9 @@ export function HowToOrder() {
         <li><h3>We confirm and deliver</h3><p>We reply to confirm your pieces, then arrange delivery or pickup.</p></li>
       </ol>
       <div className={s.info} id="info">
-        <div><h3 className="mono">Delivery</h3><p>Across Qatar. Doha orders arrive within 24 hours. The fee is added to your order.</p></div>
-        <div><h3 className="mono">Payment</h3><p>Cash on delivery or bank transfer. We share details when we confirm.</p></div>
-        <div><h3 className="mono">Sizing</h3><p>Vintage sizes run differently. Every piece lists flat measurements in cm.</p></div>
+        <div><h3 className="mono">Delivery</h3><p>{FACTS.delivery.text}</p></div>
+        <div><h3 className="mono">Payment</h3><p>{FACTS.payment.text}</p></div>
+        <div><h3 className="mono">Sizing</h3><p>{FACTS.sizing.text}</p></div>
       </div>
     </Section>
   );
@@ -117,10 +118,12 @@ export function Footer({ waHref }: { waHref: string | null }) {
         <nav className={`${s.footerNav} mono`} aria-label="Links">
           <a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a>
           {waHref && <a href={waHref} target="_blank" rel="noopener">WhatsApp</a>}
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
           {/* Plain link: the dashboard shouldn't be prefetched on every shopper's visit. */}
           <a href="/login">Team dashboard</a>
         </nav>
-        <small>Doha, Qatar</small>
+        <small>{FACTS.location.text}</small>
       </div>
     </footer>
   );

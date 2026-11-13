@@ -20,3 +20,6 @@ next-env.d.ts
 # Client screenshots, regenerate from design/options
 design/options/screenshots/
 
+
+# Production backups (scripts/backup.sh): private, never committed
+backups/

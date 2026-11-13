@@ -1,0 +1,16 @@
+# Weekly dependency updates as pull requests against dev (D-047). Security fixes arrive as they're published. Every update
+# still goes through the gate and a reviewed merge; nothing auto-merges or deploys.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: sunday
+      time: "06:00"
+      timezone: Asia/Qatar
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]

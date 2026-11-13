@@ -20,7 +20,7 @@ const STATUS_LABEL = { live: "Live in shop", reserved: "Reserved", sold: "Sold",
 
 async function upload(folder: "p" | "c", blob: Blob, ext: string): Promise<string> {
   const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await browserDb().storage.from(PHOTO.bucket).upload(path, blob, { contentType: blob.type, upsert: false });
+  const { error } = await browserDb().storage.from(PHOTO.bucket).upload(path, blob, { contentType: blob.type, upsert: false, cacheControl: PHOTO.cacheSeconds });
   if (error) throw new Error(`Upload failed: ${error.message}`);
   return path;
 }

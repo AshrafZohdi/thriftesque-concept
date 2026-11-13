@@ -7,6 +7,8 @@ export const PHOTO = {
   qualities: [0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4],
   maxPerProduct: 4,
   bucket: "product-photos",
+  // Editor uploads get a random file name and are never overwritten, so browsers and the CDN may keep them for a year.
+  cacheSeconds: "31536000",
 } as const;
 
 // Background removal for cut-outs (D-036): ormbg, Apache-2.0, int8 (44 MB), run in the team's browser, never on our servers.
