@@ -41,7 +41,8 @@ node scripts/check-worker-size.mjs
 node scripts/check-build-secrets.mjs --deploy
 
 step "rollback target"
-version_now() { npx wrangler deployments status --env "$target" --json 2>/dev/null | node -e '
+# No live version yet (first deploy) is fine, so wrangler's error doesn't stop the script here.
+version_now() { { npx wrangler deployments status --env "$target" --json 2>/dev/null || true; } | node -e '
   let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
     try { const v = JSON.parse(s).versions ?? []; console.log(v.length === 1 && v[0].percentage === 100 ? v[0].version_id : ""); } catch { console.log(""); }
   });'; }
