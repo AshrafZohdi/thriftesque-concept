@@ -13,7 +13,7 @@
 - [ ] Team accounts created and each person has signed in
 - [x] Cloudflare Worker on the client's account. KV and D1 bound. Cron trigger active (2026-11-13)
 - [ ] Gemini key on the client's AI Studio account, billing disabled, model IDs re-checked
-- [ ] Secrets set with the non-deploying command (`wrangler versions secret put`). Table in `runbook.md` complete
+- [x] Secrets set with the non-deploying command (`wrangler versions secret put`). Table in `runbook.md` complete (Gemini key, 2026-11-13)
 - [ ] The deploy build passed `npm run check:build-secrets -- --deploy` (D-038)
 - [x] Domain connected over HTTPS. `NEXT_PUBLIC_SITE_URL` set to it (the deploy check refuses localhost or http)
 - [x] `www.thriftesque.com` redirects to `thriftesque.com` (smoke checks it)

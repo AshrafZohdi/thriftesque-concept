@@ -97,8 +97,16 @@ investigate second. A rollback restores code and Worker config, not data: Supaba
 npx wrangler versions secret put GEMINI_API_KEY --env production   # paste when asked; never as an argument
 ```
 
-Then the next `npm run deploy` picks it up. `wrangler secret put` (without `versions`) deploys the latest uploaded version
-immediately, so don't use it.
+That makes a new version (the live code plus the secret) without deploying it. Make it live and check:
+
+```
+npx wrangler versions list --env production            # the newest one says: Updated secret "GEMINI_API_KEY"
+npx wrangler versions deploy <version-id>@100% --env production -y --message "Add the Gemini key"
+npm run smoke -- https://thriftesque.com               # "Worker version" must show <version-id>
+```
+
+`--message` must be spelled out here (`-m` is a usage error for this command). `wrangler secret put` (without `versions`)
+deploys the latest uploaded version immediately, so don't use it. Done for production on 2026-11-13 (version `9fab1e83`).
 
 ### The production target (add in Phase 9)
 
