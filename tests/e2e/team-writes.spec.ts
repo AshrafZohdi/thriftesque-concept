@@ -236,7 +236,7 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   await expect(bulk.getByRole("status")).toContainText("2 drafts added", { timeout: 60_000 });
 
   // Each saved photo opens in the editor, on top of the list.
-  const rows = bulk.getByRole("button", { name: /^TQ-\d+ · Untitled draft .*Edit$/ });
+  const rows = bulk.getByRole("button", { name: /^TQ-\d+ · Untitled draft Needs / });
   await expect(rows).toHaveCount(2);
   await expect(rows.first()).toContainText("Needs price, size, category, era, condition");
   await rows.first().click();
@@ -264,7 +264,7 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   await editor.getByLabel("Visibility").selectOption("live");
   await editor.getByRole("button", { name: "Save changes" }).click();
   await expect(editor).toHaveCount(0);
-  await expect(bulk.getByRole("button", { name: /^TQ-\d+ · Bulk striped tee .*Edit$/ })).toContainText("Live in the shop");
+  await expect(bulk.getByRole("button", { name: /^TQ-\d+ · Bulk striped tee / })).toContainText("Live in the shop");
   await bulk.getByRole("button", { name: "Done" }).click();
 
   // The unfinished one still can't go live.
