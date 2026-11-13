@@ -55,10 +55,11 @@ test("settings: a bad number is refused, a new drop name reaches every page", as
   await expect(page.getByRole("note")).toHaveAttribute("aria-label", /^Drop 99 is live/);
 });
 
-test("a shop detail filled in on the dashboard replaces 'To be confirmed' on the terms", async ({ page }) => {
+test("a shop detail filled in on the dashboard appears on the terms; empty ones are left off", async ({ page }) => {
   const returns = page.locator("h2:has-text('Returns and exchanges') + p");
   await page.goto("/terms");
-  await expect(returns).toContainText("To be confirmed");
+  await expect(page.getByRole("heading", { name: "Returns and exchanges" })).toHaveCount(0);
+  await expect(page.getByRole("main")).not.toContainText("To be confirmed");
 
   await signIn(page);
   await page.getByLabel("Returns and exchanges", { exact: true }).fill("All sales are final. Check the measurements before you order.");

@@ -1,5 +1,6 @@
-// Refuses to continue while any shop detail is empty on the target's database (D-046, D-048). The deploy runs it whenever
-// preview mode is off, so the live shop can't launch with "To be confirmed" on its terms or privacy page.
+// Lists shop details still empty on the target's database (D-048). Empty ones are left off the terms and privacy pages, so
+// this is a reminder, not a blocker (D-050). The deploy runs it before every deploy, and it does fail if the details can't be
+// read at all: that means the migration hasn't been pushed, and the new code would break the live site.
 // Reads the public settings row with the publishable key the deploy exported (NEXT_PUBLIC_SUPABASE_URL and _KEY).
 import { DETAIL_COLUMNS, detailsFromRow, missingDetails } from "../lib/shop-facts.ts";
 
@@ -18,8 +19,9 @@ if (!res.ok) {
 const [row] = (await res.json()) as Parameters<typeof detailsFromRow>[0][];
 const missing = missingDetails(detailsFromRow(row));
 if (missing.length) {
-  console.error("Not ready to leave preview mode. Fill these in on the dashboard (Shop settings > Terms and privacy details):");
-  for (const m of missing) console.error(`  - ${m}`);
-  process.exit(1);
+  console.log("Note: these shop details are empty, so they're left off the terms and privacy pages. Fill them in on the dashboard");
+  console.log("(Shop settings > Terms and privacy details):");
+  for (const m of missing) console.log(`  - ${m}`);
+  process.exit(0);
 }
 console.log("shop details: all filled in");

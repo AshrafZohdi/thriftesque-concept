@@ -1,6 +1,6 @@
-// Facts about how the shop works, shown on the home page, the terms and the privacy page (D-046, D-048). The team edits
-// them in the dashboard's settings; they're stored on the settings row. An empty one isn't confirmed yet: the legal pages
-// say "To be confirmed", and the deploy refuses to leave preview mode (scripts/check-facts.ts).
+// Facts about how the shop works, shown on the home page, the terms and the privacy page (D-046, D-048, D-050). The team
+// edits them in the dashboard's settings; they're stored on the settings row. An empty one is left off the legal pages, and
+// the deploy lists it as a note (scripts/check-facts.ts).
 export type ShopFact = { text: string; confirmed: boolean };
 
 export type ShopDetails = {
@@ -21,7 +21,7 @@ export const EMPTY_DETAILS: ShopDetails = {
 export const LOCATION = "Doha, Qatar";
 export const SIZING = "Vintage sizes run differently. Every piece lists flat measurements in cm.";
 
-// The approved mockup's wording, shown until the team writes their own. Still marked unconfirmed on the legal pages.
+// The approved mockup's wording, shown until the team writes their own.
 const FALLBACK = {
   operator: "Thriftesque, a secondhand clothing shop in Doha, Qatar",
   delivery: "Across Qatar. Doha orders arrive within 24 hours. The fee is added to your order.",

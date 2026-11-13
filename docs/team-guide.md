@@ -48,7 +48,7 @@ drop name shown at the top of the shop, and the delivery areas with their fees. 
 
 **Terms and privacy details** (same panel): who runs the shop, a contact email, delivery, payment, returns, how long you hold
 a reserved piece, and how long you keep order chats. They appear on the Terms and Privacy pages (delivery and payment also on
-the shop). Until a box is filled in, those pages say "To be confirmed", and the shop stays in preview mode.
+the shop). Anything you leave empty is simply left off those pages.
 
 ## Looks
 

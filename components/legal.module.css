@@ -35,11 +35,3 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.tbc {
-  padding: 1px 6px;
-  background: var(--color-mockflag);
-  border: 1px dashed var(--color-ink);
-  font: 700 13px/1.6 var(--font-mono);
-  text-transform: uppercase;
-  white-space: nowrap;
-}

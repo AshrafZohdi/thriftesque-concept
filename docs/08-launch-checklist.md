@@ -20,8 +20,8 @@
 - [ ] Cloudflare rate-limiting rule on `/p/*` (free plan includes one rule), per D-041
 - [ ] Sitemap submitted in Google Search Console (optional, ask the client)
 
-- [ ] All seven shop details filled in on the dashboard (the deploy checks the live database outside preview mode)
-- [ ] Terms and privacy read and approved by the client (ideally reviewed by a lawyer in Qatar)
+- [ ] Shop details filled in on the dashboard (optional: empty ones are left off the pages, and the deploy lists them; D-050)
+- [~] Terms and privacy reviewed by the client's team, not a lawyer (Ashraf's decision, D-050)
 - [ ] `security.txt` added once there's a public contact email
 - [ ] First backup taken with `npm run backup` and stored somewhere safe
 

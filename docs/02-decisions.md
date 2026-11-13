@@ -435,3 +435,10 @@ A small "Made with" plus Nuvai's wordmark, linking to https://nuvai.qa, beside t
 on phones) and at the bottom of the footer. The logo is drawn the way nuvai.qa draws it: two CSS masks from Nuvai's own files
 (`public/brand/nuvai-wordmark-{paper,ink}.svg`, copied from the Nuvai landing page) painted with the site's tokens, so it reads
 on the white header and the black footer. Accessible name "Made with Nuvai", 24 px tap target. Resolves C-11.
+
+### D-050 No draft markers; launch doesn't wait on the details or a legal review. Decided by Ashraf, 2026-11-13
+Supersedes the "To be confirmed" markers and the launch block in D-046 and D-048. A shop detail the team hasn't filled in is
+left off the terms and privacy pages (its sentence or section isn't shown); delivery, payment and "who runs the shop" keep the
+approved wording until the team writes their own. `scripts/check-facts.ts` only lists empty details, but still fails if it
+can't read them, which is what stops code from going out before its migration. The client's team reviews the two pages
+themselves instead of a lawyer.

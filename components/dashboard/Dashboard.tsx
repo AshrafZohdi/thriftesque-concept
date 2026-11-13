@@ -143,9 +143,9 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
       <fieldset className={d.areas} style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={`${detailsId}-hint`}>
         <legend className={d.fieldLegend}>Terms and privacy details</legend>
         <p className={d.muted} id={`${detailsId}-hint`}>
-          Shown on the Terms and Privacy pages (and delivery and payment on the shop). Until a box is filled in, those pages say
-          &quot;To be confirmed&quot;, and the shop can&apos;t leave preview mode.{" "}
-          {missing.length ? `Still to fill in: ${missing.join(", ")}.` : "All filled in."}
+          Shown on the Terms and Privacy pages (and delivery and payment on the shop). Anything left empty is simply left off
+          those pages.{" "}
+          {missing.length ? `Not filled in yet: ${missing.join(", ")}.` : "All filled in."}
         </p>
         {DETAIL_FIELDS.map(([key, hint, rows]) => (
           <div className={d.field} key={key}>

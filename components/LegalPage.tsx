@@ -27,25 +27,19 @@ export async function LegalPage({ title, children }: { title: string; children: 
   );
 }
 
-// A shop fact in running text. Until the team fills it in (dashboard settings), a visible note says so instead of pretending.
+// A shop fact in running text. Details the team hasn't filled in are left off the page (D-050), so render nothing then.
 export function Fact({ fact }: { fact: ShopFact }) {
-  if (fact.confirmed) return <>{fact.text}</>;
-  return (
-    <>
-      {fact.text ? `${fact.text} ` : ""}
-      <span className={s.tbc}>To be confirmed</span>
-    </>
-  );
+  return fact.text ? <>{fact.text}</> : null;
 }
 
-// How to reach the shop: WhatsApp when the number is set, TikTok, and the contact email once it's filled in.
+// How to reach the shop: WhatsApp when the number is set, TikTok, and the contact email when the team has added one.
 export function ContactLine({ whatsappNumber, email }: { whatsappNumber: string; email: ShopFact }) {
   const wa = waLink(whatsappNumber, "Hi Thriftesque, a question about my data or an order.");
   return (
     <>
-      {wa ? <>Message us on <a href={wa} target="_blank" rel="noopener">WhatsApp</a></> : "Message us on WhatsApp (number coming soon)"}
-      {" "}or on <a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a>, or email{" "}
-      {email.confirmed ? <a href={`mailto:${email.text}`}>{email.text}</a> : <Fact fact={email} />}.
+      {wa ? <>Message us on <a href={wa} target="_blank" rel="noopener">WhatsApp</a> or</> : "Message us"} on{" "}
+      <a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a>
+      {email.text ? <>, or email <a href={`mailto:${email.text}`}>{email.text}</a></> : null}.
     </>
   );
 }

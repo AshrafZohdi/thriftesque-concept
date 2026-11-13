@@ -41,8 +41,8 @@ export default async function TermsPage() {
           piece has gone in the meantime, we tell you and you don&apos;t pay for it.
         </li>
         <li>
-          While payment is pending we may mark a piece as reserved. We hold it for{" "}
-          <Fact fact={facts.reservedHold} />.
+          While payment is pending we may mark a piece as reserved.
+          {facts.reservedHold.text && <> We hold it for {facts.reservedHold.text}.</>}
         </li>
       </ul>
 
@@ -55,8 +55,12 @@ export default async function TermsPage() {
       <h2 className="display">Payment</h2>
       <p><Fact fact={facts.payment} /></p>
 
-      <h2 className="display">Returns and exchanges</h2>
-      <p><Fact fact={facts.returns} /></p>
+      {facts.returns.text && (
+        <>
+          <h2 className="display">Returns and exchanges</h2>
+          <p>{facts.returns.text}</p>
+        </>
+      )}
 
       <h2 className="display">Using this website</h2>
       <p>

@@ -45,8 +45,8 @@ export default async function PrivacyPage() {
         policy.
       </p>
       <p>
-        We use what you send us to confirm your order, arrange delivery or pickup and answer your questions. We keep it for{" "}
-        <Fact fact={facts.orderRetention} />.
+        We use what you send us to confirm your order, arrange delivery or pickup and answer your questions.
+        {facts.orderRetention.text && <> We keep it for {facts.orderRetention.text}.</>}
       </p>
 
       <h2 className="display">Cookies</h2>

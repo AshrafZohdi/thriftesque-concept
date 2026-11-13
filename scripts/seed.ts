@@ -91,7 +91,7 @@ async function main() {
     console.log(`removed ${extra.data.length} product(s) not in the seed: ${extra.data.map((r) => r.code).join(", ")}`);
   }
 
-  // Shop details reset to empty, so the dashboard and legal pages start from "To be confirmed" (tests fill them in).
+  // Shop details reset to empty, so the dashboard and legal pages start empty (tests fill them in).
   const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS) }).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
 

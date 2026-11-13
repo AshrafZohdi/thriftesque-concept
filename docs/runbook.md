@@ -170,8 +170,9 @@ migrations, then load `data.sql` with `psql` and copy the photos back with `npx 
 
 ## Shop details on the terms and privacy pages (D-046, D-048)
 
-The team fills them in on the dashboard (Shop settings > Terms and privacy details). Empty ones show "To be confirmed".
-`npm run deploy` checks them against the live database whenever preview mode is off and stops until all seven are filled in.
+The team fills them in on the dashboard (Shop settings > Terms and privacy details). Empty ones are left off the pages.
+`npm run deploy` lists any that are empty (a note, not a blocker), and fails if it can't read them at all (migration not
+pushed yet).
 To check by hand: `NEXT_PUBLIC_SUPABASE_URL=... NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=... node scripts/check-facts.ts`.
 Change `LEGAL_UPDATED` in `lib/shop-facts.ts` when the fixed wording of `app/terms` or `app/privacy` changes.
 

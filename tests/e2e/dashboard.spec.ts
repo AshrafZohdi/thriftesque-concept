@@ -70,9 +70,10 @@ test("sign out returns to sign in and the dashboard is closed again", async ({ p
   await signIn(page, DEV_TEAM);
   await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
   await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  // Signing out and the dashboard's sign-in check each make an auth round-trip; with five browsers on one local Supabase that can pass 5 s.
+  await expect(page).toHaveURL(/\/login$/, { timeout: SIGNED_IN });
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login$/, { timeout: SIGNED_IN });
 });
 
 test("the team sees the looks, and Fill from photo waits for a photo", async ({ page }) => {
@@ -126,5 +127,5 @@ test("the team can see which terms and privacy details are still missing", async
   for (const label of ["Who runs the shop", "Contact email", "Delivery", "Payment", "Returns and exchanges", "How long a reserved piece is held", "How long order chats are kept"]) {
     await expect(details.getByLabel(label, { exact: true })).toBeVisible();
   }
-  await expect(details).toContainText("Still to fill in: Who runs the shop, Contact email");
+  await expect(details).toContainText("Not filled in yet: Who runs the shop, Contact email");
 });
