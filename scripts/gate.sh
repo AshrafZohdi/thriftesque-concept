@@ -5,6 +5,13 @@ cd "$(dirname "$0")/.."
 
 step() { printf '\n== %s\n' "$1"; }
 
+# The gate always runs against the local stack. Shell variables would override the local env file and point the build at
+# another database (found 2026-11-13: a deploy exported production values before running the gate).
+for v in $(compgen -e | grep -E '^(NEXT_PUBLIC_|GEMINI_)' || true); do
+  echo "ignoring $v from the shell"
+  unset "$v"
+done
+
 step "audit (production deps, high and above)"
 npm audit --omit=dev --audit-level=high
 

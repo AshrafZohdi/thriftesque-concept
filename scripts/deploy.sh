@@ -15,9 +15,9 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 1
 fi
 sha="$(git rev-parse --short HEAD)"
+# Read the target's config now so a typo fails fast, but export it only after the gate: the gate builds and tests against
+# local Supabase, and these values would point that build at the live database instead.
 exports="$(node scripts/wrangler-env.mjs "$target")"
-eval "$exports"
-site="${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL missing from env.$target.vars}"
 
 step() { printf '\n== %s\n' "$1"; }
 
@@ -27,6 +27,9 @@ else
   step "gate"
   npm run gate
 fi
+
+eval "$exports"
+site="${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL missing from env.$target.vars}"
 
 step "clean build of $sha for $target"
 work="$(mktemp -d)"
