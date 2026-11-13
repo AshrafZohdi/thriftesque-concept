@@ -50,9 +50,10 @@ previous="$(version_now)"
 echo "live before this deploy: ${previous:-none (first deploy)}"
 
 step "deploy"
-npx opennextjs-cloudflare deploy --env "$target" -- --tag "$sha" --message "deploy $sha"
+# OpenNext only forwards positional arguments to wrangler, so the commit is recorded in this output, not as a version tag.
+npx opennextjs-cloudflare deploy --env "$target"
 current="$(version_now)"
-echo "live now: $current"
+echo "live now: $current (commit $sha)"
 
 step "smoke $site"
 # Wait until the new version answers, then smoke it.
