@@ -3,13 +3,18 @@
   overflow: hidden;
   white-space: nowrap;
 }
+/* track > two halves > copies > items. Copies and halves are spaced the same, so the loop point can't be seen. */
 .track {
   display: inline-flex;
   gap: 2.5em;
   padding-inline-end: 2.5em;
-  animation: tick 38s linear infinite;
+  animation: tick linear infinite;
 }
 .track > span {
+  display: inline-flex;
+  gap: 2.5em;
+}
+.track > span > span {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
@@ -20,6 +25,15 @@
   }
 }
 
+/* The strip's messages each end in "+++", so copies sit as close as the messages do. */
+.strip .track,
+.strip .track > span {
+  gap: 0.6em;
+  padding-inline-end: 0;
+}
+.strip .track {
+  padding-inline-end: 0.6em;
+}
 .strip {
   background: var(--color-lime);
   color: var(--color-ink);
@@ -89,9 +103,6 @@
   padding: 12px 0;
   font: 400 clamp(30px, 8vw, 54px)/1 var(--font-display);
   text-transform: uppercase;
-}
-.band .track {
-  animation-duration: 30s;
 }
 .lime {
   color: var(--color-lime);

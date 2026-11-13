@@ -66,3 +66,14 @@ test("no serious or critical accessibility issues", async ({ page }) => {
     expect(bad.map((v) => `${path} ${v.id}: ${v.help}`)).toEqual([]);
   }
 });
+
+test("the scrolling strips never run out, even on a 4K screen", async ({ page }) => {
+  await page.setViewportSize({ width: 3840, height: 900 });
+  await page.goto("/");
+  // At the loop point the track has moved by one half, so what's left (track minus one half) must still fill the screen.
+  const shown = await page.locator("[aria-hidden='true']").evaluateAll((tracks) => tracks
+    .filter((t) => t.parentElement?.className.includes("ticker"))
+    .map((t) => t.getBoundingClientRect().width - t.firstElementChild!.getBoundingClientRect().width));
+  expect(shown.length).toBe(2);
+  for (const w of shown) expect(w).toBeGreaterThanOrEqual(3840);
+});

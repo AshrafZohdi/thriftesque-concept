@@ -41,6 +41,11 @@ Newest first.
   records existed (Cloudflare's negative-cache time is 30 minutes). Every public resolver had it; nothing to fix.
 - Suggest looks on the live dashboard said "The AI didn't answer in time": a timeout on the main model returned an error
   without trying the fallback. Timeouts, network errors and 5xx now go to the fallback, and the main model gets half the time.
+- The scrolling strips showed an empty gap before restarting on screens wider than one copy (strip 771 px, band 1,184 px).
+  Each half now holds 5 copies, evenly spaced, at the same speed; an e2e test at 3840 px fails on the old code and passes now.
+- The deploy for the AI fix rolled itself back: this Mac's DNS cache still said the new domain didn't exist, so the smoke
+  couldn't reach the site. The site was fine and the previous version kept serving. The deploy's smoke now resolves through
+  Cloudflare's public DNS.
 - Open: one Firefox e2e run lost the name typed into the bag ("Your name" empty after `fill`). Seen once in about ten runs;
   cause not found yet. Watch for it.
 

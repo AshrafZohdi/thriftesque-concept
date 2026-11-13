@@ -62,6 +62,11 @@ echo "live now: $current (commit $sha)"
 ((deploy_ok)) || echo "The deploy command reported an error (see above). Checking what is live anyway." >&2
 
 step "smoke $site"
+# Look the site up through Cloudflare's public DNS: this machine's cache can still hold "no such domain" from before a new
+# domain's records existed, which made a healthy deploy look broken and triggered a needless rollback (2026-11-13).
+curl_home="$(mktemp -d)"
+echo 'doh-url = "https://1.1.1.1/dns-query"' > "$curl_home/.curlrc"
+export CURL_HOME="$curl_home"
 # Wait until the new version answers, then smoke it.
 for _ in $(seq 1 30); do
   served="$(curl -s -o /dev/null -D - --max-time 10 "$site/robots.txt" | tr -d '\r' | grep -i '^x-worker-version:' | cut -d' ' -f2 || true)"

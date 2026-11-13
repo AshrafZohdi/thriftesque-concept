@@ -4,12 +4,21 @@ import type { ReactNode } from "react";
 import { ChromeHeart } from "./Chrome";
 import s from "./site.module.css";
 
-function Ticker({ className, items, label }: { className: string; items: ReactNode; label?: string }) {
+// Endless scrolling strip. Each half holds several copies so it's wider than any screen (one copy of the strip is about
+// 770 px, the band about 1,180 px), then the track slides by exactly one half, so there's never an empty gap.
+// The time scales with the copies, so the speed stays the same.
+const COPIES = 5;
+function Ticker({ className, items, label, secondsPerCopy }: { className: string; items: ReactNode; label?: string; secondsPerCopy: number }) {
+  const half = (
+    <span>
+      {Array.from({ length: COPIES }, (_, i) => <span key={i}>{items}</span>)}
+    </span>
+  );
   return (
     <div className={`${s.ticker} ${className}`} aria-label={label} role={label ? "note" : undefined}>
-      <div className={s.track} aria-hidden="true">
-        <span>{items}</span>
-        <span>{items}</span>
+      <div className={s.track} aria-hidden="true" style={{ animationDuration: `${secondsPerCopy * COPIES}s` }}>
+        {half}
+        {half}
       </div>
     </div>
   );
@@ -20,6 +29,7 @@ export function Strip({ dropName }: { dropName: string }) {
   return (
     <Ticker
       className={s.strip}
+      secondsPerCopy={38}
       label={notes.join(". ")}
       items={notes.map((n) => (
         <span key={n}>
@@ -58,7 +68,7 @@ export function Band({ dropName }: { dropName: string }) {
       <span className={s.lime}>+++</span> Doha <span className={s.grey}>Pre-loved</span>
     </>
   );
-  return <Ticker className={s.band} items={words} />;
+  return <Ticker className={s.band} secondsPerCopy={30} items={words} />;
 }
 
 export function Section({ id, kicker, title, intro, children, className = "" }: {
