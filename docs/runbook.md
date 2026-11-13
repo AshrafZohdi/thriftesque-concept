@@ -74,6 +74,10 @@ What `scripts/deploy.sh` does, in order (any failure stops it):
 
 It ends with the rollback command for this deploy. Keep it in the deploy notes.
 
+**First deploy on a new Cloudflare account:** open Workers & Pages in the dashboard once before deploying. Until then the
+account has no workers.dev subdomain and Cloudflare refuses cron triggers (code 10063; hit on 2026-11-13, fixed with
+`npx wrangler triggers deploy --env production`).
+
 ### Roll back
 
 ```

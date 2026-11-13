@@ -54,9 +54,12 @@ echo "live before this deploy: ${previous:-none (first deploy)}"
 
 step "deploy"
 # OpenNext only forwards positional arguments to wrangler, so the commit is recorded in this output, not as a version tag.
-npx opennextjs-cloudflare deploy --env "$target"
+# A partial failure (for example the cron failing after the code went live) must still reach the smoke and rollback below.
+deploy_ok=1
+npx opennextjs-cloudflare deploy --env "$target" || deploy_ok=0
 current="$(version_now)"
 echo "live now: $current (commit $sha)"
+((deploy_ok)) || echo "The deploy command reported an error (see above). Checking what is live anyway." >&2
 
 step "smoke $site"
 # Wait until the new version answers, then smoke it.
@@ -69,6 +72,8 @@ echo "serving: ${served:-unknown}"
 if [[ "$served" == "$current" ]] && bash scripts/smoke.sh "$site"; then
   printf '\ndeployed %s to %s as version %s\n' "$sha" "$target" "$current"
   [[ -n "$previous" ]] && echo "roll back with: npx wrangler rollback $previous --env $target -m \"<reason>\""
+  # The site works, but something in the deploy didn't finish (often triggers): say so and fail, so it gets fixed.
+  ((deploy_ok)) || { echo "The site passed the smoke test, but the deploy step failed. Fix the error above, then run: npx wrangler triggers deploy --env $target" >&2; exit 1; }
   exit 0
 fi
 

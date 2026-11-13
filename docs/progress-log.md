@@ -2,6 +2,46 @@
 
 Newest first.
 
+## 2026-11-13: Phase 9 (part 1), thriftesque.com live in preview
+
+**Done**
+- Accounts (D-043): the client's Gmail holds the domain, Cloudflare (Ashraf a Super Administrator) and Supabase. The Gemini
+  key stays on Ashraf's account.
+- Supabase moved to Mumbai before any data went in (D-045): 658 ms to first byte from Qatar in Sydney, against about 60 ms to
+  Mumbai. Set up in Ashraf's browser: project, signups off, Site URL, the `admin@thriftesque.com` login on the team. Sydney
+  project deleted.
+- Preview mode (D-044): the 21 sample pieces loaded with `npm run demo`, a "Preview" strip on every page, noindex, robots.txt
+  disallows everything, no WhatsApp number.
+- Production target in `wrangler.jsonc` (client's account, KV and D1 there, cron, thriftesque.com and www as custom domains).
+  www redirects to the bare domain from `worker.ts`.
+- Deployed version `9403b0d4` of commit `e2884a5`.
+
+**Went wrong, and fixed**
+- The first production deploy run exported the production values before the gate, so the gate's local build and e2e talked to
+  production Supabase. Sign-ins failed (the local test accounts don't exist there), I stopped the run, and nothing was written
+  (checked: still 21 products, 4 looks, same settings) or deployed. The values are now exported after the gate, and the gate
+  ignores `NEXT_PUBLIC_` and `GEMINI_` shell variables.
+- The second run deployed the code and the domains, then failed on the cron: the client's account had no workers.dev
+  subdomain yet. The script stopped before its own smoke test while the new code was live. I smoked it by hand (all ok),
+  opened the Workers page once, and set the cron with `wrangler triggers deploy`. The script now smokes, and rolls back if
+  needed, even when the deploy step reports an error.
+- Auto mode blocked me from reading the Supabase CLI's stored login to create the project through the API. Done through the
+  dashboard in the browser instead.
+
+**Verified**
+- Gate green before the deploy (87 unit, 43 database, 194 e2e).
+- Smoke against https://thriftesque.com: all ok, including the www redirect, the 404s, the headers and the AI route
+  refusals. robots.txt is `Disallow: /` and pages carry `noindex, nofollow`.
+- Production signups refused (`signup_disabled`).
+
+**Not verified yet**
+- The cron's first run (06:00 Doha tomorrow): check the Worker's logs for `keep-alive: ok`.
+- Signing in to the live dashboard and the Gemini key on the live site (the key isn't set yet).
+
+**Owner actions**
+- Set the Gemini key on the Worker (runbook, "Secrets").
+- Real content: WhatsApp number, delivery areas and fees, team logins, first products (content inventory).
+
 ## 2026-11-13: Phase 8, hardening and ops
 
 **Done**
