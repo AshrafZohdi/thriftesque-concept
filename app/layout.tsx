@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Instrument_Sans, Space_Mono } from "next/font/google";
 import { ChromeDefs } from "@/components/Chrome";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted at build time, so no request goes to Google (D-018). Families from option F (D-029).
 const anton = Anton({ variable: "--font-anton", subsets: ["latin"], weight: "400" });
 const instrument = Instrument_Sans({ variable: "--font-instrument", subsets: ["latin"] });
 const spaceMono = Space_Mono({ variable: "--font-spacemono", subsets: ["latin"], weight: ["400", "700"] });
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -14,6 +14,7 @@ type Result = { ok: true } | { ok: false; error: string };
 function refreshProduct(code: string) {
   revalidatePath("/");
   revalidatePath(`/p/${code}`);
+  revalidatePath("/sitemap.xml");
 }
 
 export async function setStatus(code: string, status: string): Promise<Result> {

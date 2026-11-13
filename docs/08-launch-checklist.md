@@ -14,7 +14,9 @@
 - [ ] Gemini key on the client's AI Studio account, billing disabled, model IDs re-checked
 - [ ] Secrets set with the non-deploying command (`wrangler versions secret put`). Table in `runbook.md` complete
 - [ ] The deploy build passed `npm run check:build-secrets -- --deploy` (D-038)
-- [ ] Domain connected over HTTPS. `NEXT_PUBLIC_SITE_URL` set to it
+- [ ] Domain connected over HTTPS. `NEXT_PUBLIC_SITE_URL` set to it (the deploy check refuses localhost or http)
+- [ ] Cloudflare rate-limiting rule on `/p/*` (free plan includes one rule), per D-041
+- [ ] Sitemap submitted in Google Search Console (optional, ask the client)
 
 ## Quality (see `11-qa-plan.md`)
 - [ ] Gate green on the production build, including e2e against the workerd preview
@@ -26,6 +28,7 @@
 
 ## Operations
 - [ ] Rollback rehearsed on a throwaway Worker. Command and target in `runbook.md`
-- [ ] Smoke run against production after deploy
+- [ ] Smoke run against production after deploy: `npm run smoke -- https://<domain>`
+- [ ] Keep-alive cron seen succeeding once in the Worker's logs (Cron events)
 - [ ] `dev` merged into `main`. The mockup's Vercel demo retired or left as-is (ask the client)
 - [ ] Team guide handed over (add a product, mark sold, change settings)

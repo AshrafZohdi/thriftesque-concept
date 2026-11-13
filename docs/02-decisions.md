@@ -97,9 +97,14 @@ case. One shared login is possible, but personal logins are recommended.
 The AI returns a colour, but the data model has nowhere to keep it. Adding `colour text` (nullable) is one small change. It shows
 as a "Colour" row in the product details. The alternative is folding colour into the name only.
 
-### D-015 Daily keep-alive from a Cron Trigger. Proposed (verify in Phase 8)
-A `scheduled` handler on the same Worker (custom Worker entry that wraps the OpenNext handler) runs once a day and does a single
-`select` on `settings`. This stops the Supabase free project pausing after 7 idle days.
+### D-015 Daily keep-alive from a Cron Trigger. Decided, verified locally 2026-11-13
+`worker.ts` is the Worker entry: it passes requests to OpenNext's handler and adds a `scheduled` handler. The cron (`0 3 * * *`,
+06:00 in Doha) runs `lib/keep-alive.ts`, which reads one `settings` row with the publishable key. This stops the Supabase free
+project pausing after 7 idle days. A failed read throws, so the run shows as failed in Cloudflare's logs.
+- OpenNext doesn't load its env for scheduled events, so the handler takes the public Supabase URL and key from Worker vars,
+  or else from the build's baked public env. No public endpoint is involved, so visitors can't trigger it.
+- Verified on the workerd preview: the scheduled event returned `ok` and Supabase's gateway logged
+  `GET /rest/v1/settings?select=id&limit=1 200`.
 
 ### D-016 Test tooling. Decided
 Vitest for pure logic (message builder, fees, code formatting, zod schemas, image sizing maths). Playwright for e2e in Chromium,
@@ -320,3 +325,18 @@ error text goes to the server log only, never to the team.
   optional shoes; 2 to 4 pieces, matching the table's check), and if the set isn't a repeat. They are saved as `source='ai'`, `status='draft'`. The team publishes them.
 - Only product photos and product facts are sent, never customer data (free tier inputs may be used by Google).
 - Real Gemini calls in e2e are opt-in (`E2E_AI=1`) so the gate doesn't use the free quota.
+
+### D-040 No revalidation queue. Decided, 2026-11-13
+OpenNext only needs a queue for time-based revalidation. Shop pages use `revalidate = false` and dashboard saves call
+`revalidatePath`, which makes the next visit render fresh (checked on the preview: after a save, all 21 product pages came back
+MISS and then HIT with the new content). The "Dummy queue is not implemented" errors seen locally came from cache entries left
+over from earlier runs combined with the seed writing straight to the database, which skips revalidation. Production data only
+changes through the dashboard. If "Failed to revalidate stale page" ever shows up in production logs, add OpenNext's memory
+queue (no Durable Objects needed).
+
+### D-041 Made-up product URLs. Decided, 2026-11-13
+Every unknown `/p/<code>` renders once (a full shop query) and is cached as a 404 in KV. The KV free plan allows 1,000 writes a
+day. When that runs out, OpenNext logs the failed write and the site keeps working, just uncached (more Supabase reads).
+- Malformed codes (anything but `TQ-` plus digits) now 404 before any database read.
+- Well-formed made-up codes are an accepted risk: nothing links to them, and crawlers don't invent URLs.
+- At launch, add Cloudflare's free rate-limiting rule on `/p/*` (launch checklist).

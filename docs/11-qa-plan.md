@@ -23,7 +23,7 @@
 | E2E | Playwright: Chromium, Firefox, WebKit, Pixel 7 (412), iPhone 14-like (390), and a custom 360px viewport | user flows in the roadmap's accept criteria, keyboard paths, overlay taps (old bug 1), dashboard scroll (old bug 2), add button on touch (old bug 3) |
 | Visual | Playwright screenshots at 360/390/768/1280, reviewed by eye | every page and overlay |
 | Runtime | `opennextjs-cloudflare preview` (workerd) | e2e runs against this, not `next dev` |
-| Smoke | `scripts/smoke.sh <base-url>` | 200s, 404s, headers, OG tags, `/api/autofill` 401 when signed out. Read-only |
+| Smoke | `npm run smoke -- <base-url>` (`scripts/smoke.sh`) | 200s, 404s, robots and sitemap, headers, OG tags, `/api/autofill` 405/403/401. Read-only |
 
 Each fix gets a test that fails on the old code and passes on the new one.
 

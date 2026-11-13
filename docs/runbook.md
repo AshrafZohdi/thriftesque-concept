@@ -22,8 +22,11 @@ Needs Node 24 and npm 11.
 | Compressed Worker size | `npm run cf:size` (after a build). Budget 2.5 MiB, limit 3 MiB |
 | Unit tests | `npm test` |
 | E2E (5 browser configs, starts the preview itself) | `npm run e2e` (after a build) |
-| Full gate | `caffeinate -i npm run gate` (needs local Supabase running; the gate re-seeds, builds, and runs e2e; `caffeinate` stops the Mac sleeping mid-run) |
+| Full gate | `caffeinate -dim npm run gate` (needs local Supabase running; the gate re-seeds, builds, and runs e2e). On battery the Mac can still sleep: plug in or keep the lid open |
+| Real Gemini e2e (uses free quota) | `E2E_AI=1 npx playwright test --project=team-writes --no-deps -g "AI"` with the preview running, then `npm run seed` |
 | Regenerate Cloudflare binding types | `npm run cf-typegen` (after editing `wrangler.jsonc`) |
+| Smoke test (read-only) | `npm run smoke` (the running preview) or `npm run smoke -- https://<domain>` |
+| Run the keep-alive cron on the preview | `curl -X POST "http://localhost:8787/cdn-cgi/local/explorer/api/local/scheduled?worker=thriftesque"` |
 | Local Supabase | `npx supabase start` (Docker running). API on :55321, Studio on :55323 (D-025). Stop with `npx supabase stop` |
 | Write `.env.local` for local Supabase | `npm run env:local` (keys go to the file, never the terminal) |
 | Reset local DB and re-apply migrations | `npm run db:reset`, then `npm run seed` |

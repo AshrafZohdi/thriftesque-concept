@@ -7,6 +7,9 @@ const seed: { status: string; price_qar: number }[] = JSON.parse(readFileSync("d
 
 // Read-only team checks. Changing data is in team-writes.spec.ts, which runs after everything else.
 
+// After signing in, the dashboard makes two auth round-trips. With five browsers sharing one local Supabase that can pass 5 s.
+const SIGNED_IN = 15_000;
+
 async function signIn(page: Page, who: { email: string; password: string }) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(who.email);
@@ -29,13 +32,13 @@ test("a wrong password says so", async ({ page }) => {
 
 test("a signed-in account that isn't on the team is refused", async ({ page }) => {
   await signIn(page, DEV_STRANGER);
-  await expect(page.getByRole("heading", { name: "Not on the team" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Not on the team" })).toBeVisible({ timeout: SIGNED_IN });
   await expect(page.getByRole("table")).toHaveCount(0);
 });
 
 test("the team sees stats, every product, search and status tabs", async ({ page }) => {
   await signIn(page, DEV_TEAM);
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
   const live = seed.filter((p) => p.status === "live");
   const sold = seed.filter((p) => p.status === "sold");
   const stats = page.getByRole("region", { name: "Stats" });
@@ -58,14 +61,14 @@ test("the team sees stats, every product, search and status tabs", async ({ page
 
 test("team pages aren't indexed and the dashboard has no horizontal scroll", async ({ page }) => {
   await signIn(page, DEV_TEAM);
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
 });
 
 test("sign out returns to sign in and the dashboard is closed again", async ({ page }) => {
   await signIn(page, DEV_TEAM);
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/dashboard");
@@ -104,13 +107,13 @@ test.describe("the autofill route only answers the team, from this site", () => 
 
   test("signed in but not on the team", async ({ page, baseURL }) => {
     await signIn(page, DEV_STRANGER);
-    await expect(page.getByRole("heading", { name: "Not on the team" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Not on the team" })).toBeVisible({ timeout: SIGNED_IN });
     expect((await post(page, ok, baseURL!)).status()).toBe(403);
   });
 
   test("the team, with a photo that doesn't exist", async ({ page, baseURL }) => {
     await signIn(page, DEV_TEAM);
-    await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
     expect((await post(page, ok, baseURL!)).status()).toBe(404);
   });
 });

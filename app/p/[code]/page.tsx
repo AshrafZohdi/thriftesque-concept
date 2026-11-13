@@ -7,6 +7,7 @@ import { ProductActions } from "@/components/shop/ProductActions";
 import { Gallery, ProductDetails } from "@/components/shop/ProductDetails";
 import { ShopProvider } from "@/components/shop/ShopProvider";
 import s from "@/components/shop/shop.module.css";
+import { isCode } from "@/lib/dashboard";
 import { getShop } from "@/lib/shop";
 import { waLink } from "@/lib/wa";
 
@@ -17,7 +18,9 @@ export function generateStaticParams() {
 }
 
 // The whole shop is loaded (one cached set of queries) so the bag works here too. Hidden pieces aren't in it, so they 404.
+// Junk codes are refused before any database read, so made-up URLs cost nothing (D-041).
 async function find(code: string) {
+  if (!isCode(code)) return null;
   const shop = await getShop();
   const product = shop.products.find((p) => p.code === code);
   return product ? { product, shop } : null;
