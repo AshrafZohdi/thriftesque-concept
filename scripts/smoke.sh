@@ -39,6 +39,13 @@ grep -qi "^x-powered-by:" <<<"$headers" && bad "x-powered-by is exposed" || ok "
 version="$(grep -i '^x-worker-version:' <<<"$headers" | cut -d' ' -f2 || true)"
 echo "  info Worker version: ${version:-not reported (local preview)}"
 
+# On the real domain, www must send people to the bare domain (lib/canonical-host.ts).
+host="${base#*://}"
+if [[ "$host" != www.* && "$host" != localhost* && "$host" != 127.* && "$host" != *.workers.dev ]]; then
+  loc="$(curl -s -o /dev/null -D - --max-time 20 "https://www.$host/p/TQ-0000?x=1" | tr -d '\r' | grep -i '^location:' | cut -d' ' -f2 || true)"
+  [[ "$loc" == "https://$host/p/TQ-0000?x=1" ]] && ok "www redirects to $host" || bad "www.$host doesn't redirect to $host (got: ${loc:-nothing})"
+fi
+
 # The AI route must refuse anyone who isn't a signed-in team member, before doing anything.
 expect 405 "autofill refuses GET" "$base/api/autofill"
 expect 403 "autofill refuses another origin" -X POST -H "origin: https://example.org" -H "content-type: application/json" -d '{"path":"p/x.webp"}' "$base/api/autofill"

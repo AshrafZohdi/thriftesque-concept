@@ -21,7 +21,7 @@ Anything not confirmed here stays as a visible placeholder or is left out. Nothi
 | C-2 | Delivery areas and the fee for each. Is pickup offered, and where? | Phase 9 | waiting. The mockup uses 10 sample areas at 15 or 25 QAR |
 | C-3 | Payment methods. The mockup says "Cash on delivery or bank transfer" | Phase 9 | owner to confirm |
 | C-4 | Logo, if any | Phase 3 ideally | waiting. F's chrome heart and wordmark are used until then. Colours now come from option F |
-| C-5 | Team member names and emails (one account each is recommended) | Phase 9 | waiting |
+| C-5 | Team member names and emails (one account each is recommended) | Phase 9 | one shared login for now: `admin@thriftesque.com` |
 | C-6 | Domain | Phase 9 | **thriftesque.com**, bought on the client's Gmail (2026-11-13) |
 | C-7 | First batch of real product photos and details | Phase 9 | waiting |
 | C-8 | Mockup claims to confirm: "New drop every Thursday, 8 pm", "Doha orders arrive within 24 hours", "Delivery across Qatar" | Phase 9 | owner to confirm |
@@ -36,8 +36,8 @@ Anything not confirmed here stays as a visible placeholder or is left out. Nothi
 
 | # | Account | Used for | Status |
 | --- | --- | --- | --- |
-| A-1 | Supabase | DB, Auth, Storage (production project) | created on the client's Gmail, Ashraf a member (2026-11-13) |
-| A-2 | Cloudflare | Worker, KV or R2, D1, Cron, DNS if the domain moves there | not created |
+| A-1 | Supabase | DB, Auth, Storage (production project) | `pexllnnfemgdutonpdqw`, Mumbai, on the client's Gmail (D-045) |
+| A-2 | Cloudflare | Worker, KV, D1, Cron, DNS | client's account `674d3c1a...`, Ashraf a Super Administrator; KV and D1 created (2026-11-13) |
 | A-3 | Google AI Studio | Gemini API key, billing left disabled | Nuvai's own account, not the client's (D-043) |
 | A-4 | Domain registrar | Custom domain | bought on the client's Gmail (2026-11-13) |
 

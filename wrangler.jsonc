@@ -21,6 +21,31 @@
   "observability": { "enabled": true },
   // Every response carries x-worker-version, so deploys and rollbacks can be checked from outside (worker.ts).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
-  // Deploy targets go under "env" (npm run deploy -- <name>). Bindings and vars don't inherit, so each target lists them
-  // all; the runbook ("Deploy and roll back") has the block to add for production in Phase 9. Only public values here.
+  // Deploy targets (npm run deploy -- <name>). Bindings and vars don't inherit, so each target lists them all.
+  // Only public values here; the Gemini key is a Worker secret (runbook).
+  "env": {
+    // The live shop: the client's Cloudflare account (D-043), thriftesque.com, Supabase in Mumbai.
+    "production": {
+      "account_id": "674d3c1aa8bf00f5e5af2c36c1916e5b",
+      "vars": {
+        "NEXT_PUBLIC_SITE_URL": "https://thriftesque.com",
+        "NEXT_PUBLIC_SUPABASE_URL": "https://pexllnnfemgdutonpdqw.supabase.co",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_DeXQiuEGG7XjQfWz7SWIrw_RK51gztf",
+        "GEMINI_MODEL": "gemini-3.8-flash",
+        "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite",
+        // Sample pieces and a "Preview" strip until the real content is in (D-044). Delete this line at launch.
+        "NEXT_PUBLIC_SHOP_PREVIEW": "1"
+      },
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque-production" }],
+      "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "048438e3cf854beb908a693a4a886e5f" }],
+      "d1_databases": [{ "binding": "NEXT_TAG_CACHE_D1", "database_name": "thriftesque-tag-cache", "database_id": "5d4b04f2-973b-4c11-8866-c00680c028b0" }],
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "triggers": { "crons": ["0 3 * * *"] },
+      // The Worker answers on both; www redirects to the bare domain (lib/canonical-host.ts).
+      "routes": [
+        { "pattern": "thriftesque.com", "custom_domain": true },
+        { "pattern": "www.thriftesque.com", "custom_domain": true }
+      ]
+    }
+  }
 }

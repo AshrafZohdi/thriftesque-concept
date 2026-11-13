@@ -377,3 +377,12 @@ arrives. To keep that honest:
 - At launch: remove the samples, add the real settings and products, delete `NEXT_PUBLIC_SHOP_PREVIEW` and deploy.
 - Found while building it: a new Tailwind `@utility` class was silently not generated, so the strip moved to a CSS Module like
   the other components (D-031). Checked by screenshot, not just by markup.
+
+### D-045 Production Supabase in Mumbai. Decided by Ashraf, 2026-11-13
+The first production project was created in Sydney. Measured from Qatar: 658 ms to first byte, against about 60 ms to AWS
+Mumbai or UAE. Supabase has no Middle East region, so the project was recreated in Mumbai (`ap-south-1`,
+`pexllnnfemgdutonpdqw`) while it was still empty, and the Sydney one deleted. The D1 tag cache is in `apac`.
+- Set up through the dashboard in Ashraf's browser: signups off (a signup attempt returns `signup_disabled`), Site URL
+  `https://thriftesque.com`, the `admin@thriftesque.com` login (password set by Ashraf, in his password manager) added to
+  `team_members`. The schema went in with `supabase db push`.
+- `admin@thriftesque.com` has no mailbox. A forgotten password is reset in the Supabase dashboard.
