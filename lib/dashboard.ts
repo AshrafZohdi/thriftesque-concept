@@ -1,5 +1,6 @@
 // Pure dashboard logic: stats, search and status tabs, and settings validation. Unit tested.
 import { STATUSES, type Status } from "./catalog";
+import { EMPTY_DETAILS, validateDetails, type ShopDetails } from "./shop-facts";
 
 export type TeamProduct = {
   code: string; name: string; brand: string; era: string; category: string; size: string; price_qar: number;
@@ -35,7 +36,7 @@ export function searchProducts(list: TeamProduct[], query: string, tab: Status |
 export const isStatus = (v: unknown): v is Status => typeof v === "string" && (STATUSES as readonly string[]).includes(v);
 export const isCode = (v: unknown): v is string => typeof v === "string" && /^TQ-\d{4,}$/.test(v);
 
-export type SettingsInput = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[] };
+export type SettingsInput = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails };
 
 // Returns cleaned settings, or the first problem in plain words.
 export function validateSettings(input: SettingsInput): { ok: true; value: SettingsInput } | { ok: false; error: string } {
@@ -53,5 +54,7 @@ export function validateSettings(input: SettingsInput): { ok: true; value: Setti
     seen.add(f.area.toLowerCase());
     if (!Number.isInteger(f.fee) || f.fee < 0 || f.fee > 1000) return { ok: false, error: `Fee for ${f.area}: a whole number of QAR from 0 to 1000.` };
   }
-  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees } };
+  const details = validateDetails(input.details ?? EMPTY_DETAILS);
+  if (!details.ok) return details;
+  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees, details: details.value } };
 }

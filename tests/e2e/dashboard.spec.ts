@@ -78,7 +78,8 @@ test("sign out returns to sign in and the dashboard is closed again", async ({ p
 test("the team sees the looks, and Fill from photo waits for a photo", async ({ page }) => {
   await signIn(page, DEV_TEAM);
   const looks = page.getByRole("region", { name: "Looks" });
-  await expect(looks.getByRole("article")).toHaveCount(4);
+  // The looks load in their own request after sign-in.
+  await expect(looks.getByRole("article")).toHaveCount(4, { timeout: SIGNED_IN });
   await expect(looks).toContainText("Drafts (0)");
   await expect(looks).toContainText("Published (4)");
   await expect(looks.getByRole("button", { name: "Suggest looks" })).toBeEnabled();
@@ -116,4 +117,14 @@ test.describe("the autofill route only answers the team, from this site", () => 
     await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
     expect((await post(page, ok, baseURL!)).status()).toBe(404);
   });
+});
+
+test("the team can see which terms and privacy details are still missing", async ({ page }) => {
+  await signIn(page, DEV_TEAM);
+  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: SIGNED_IN });
+  const details = page.getByRole("group", { name: "Terms and privacy details" });
+  for (const label of ["Who runs the shop", "Contact email", "Delivery", "Payment", "Returns and exchanges", "How long a reserved piece is held", "How long order chats are kept"]) {
+    await expect(details.getByLabel(label, { exact: true })).toBeVisible();
+  }
+  await expect(details).toContainText("Still to fill in: Who runs the shop, Contact email");
 });

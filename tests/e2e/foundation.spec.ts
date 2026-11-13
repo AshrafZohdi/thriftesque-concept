@@ -59,6 +59,8 @@ test("robots.txt keeps team pages out and points to a sitemap of what's for sale
 });
 
 test("no serious or critical accessibility issues", async ({ page }) => {
+  // axe checks contrast on every text node, including the ticker's animated copies; that alone can take 20 s in Firefox.
+  test.slow();
   for (const path of ["/", "/p/TQ-0705"]) {
     await page.goto(path);
     const { violations } = await new AxeBuilder({ page }).analyze();
@@ -79,6 +81,7 @@ test("the scrolling strips never run out, even on a 4K screen", async ({ page })
 });
 
 test("terms and privacy are linked from every page and pass axe", async ({ page }) => {
+  test.slow(); // two axe scans; slow in Firefox because of the ticker (see the test above)
   await page.goto("/");
   await page.getByRole("contentinfo").getByRole("link", { name: "Privacy" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();

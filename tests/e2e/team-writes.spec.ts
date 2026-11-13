@@ -55,6 +55,26 @@ test("settings: a bad number is refused, a new drop name reaches every page", as
   await expect(page.getByRole("note")).toHaveAttribute("aria-label", /^Drop 99 is live/);
 });
 
+test("a shop detail filled in on the dashboard replaces 'To be confirmed' on the terms", async ({ page }) => {
+  const returns = page.locator("h2:has-text('Returns and exchanges') + p");
+  await page.goto("/terms");
+  await expect(returns).toContainText("To be confirmed");
+
+  await signIn(page);
+  await page.getByLabel("Returns and exchanges", { exact: true }).fill("All sales are final. Check the measurements before you order.");
+  await page.getByLabel("Contact email", { exact: true }).fill("not an email");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Contact email: that doesn't look like an email address." })).toBeVisible();
+  await page.getByLabel("Contact email", { exact: true }).fill("hello@thriftesque.test");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Saved." })).toBeVisible();
+
+  await page.goto("/terms");
+  await expect(returns).toHaveText("All sales are final. Check the measurements before you order.");
+  await page.goto("/privacy");
+  await expect(page.getByRole("link", { name: "hello@thriftesque.test" })).toHaveAttribute("href", "mailto:hello@thriftesque.test");
+});
+
 test.describe("product editor", () => {
   test("an empty save explains what's missing", async ({ page }) => {
     await signIn(page);

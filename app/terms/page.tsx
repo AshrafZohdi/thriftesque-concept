@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactLine, Fact, LegalPage } from "@/components/LegalPage";
-import { FACTS } from "@/lib/shop-facts";
+import { getShop } from "@/lib/shop";
+import { shopFacts } from "@/lib/shop-facts";
 
 // How ordering works, in plain words. Shop facts the client hasn't confirmed yet are marked on the page (D-046).
 export const revalidate = false;
@@ -12,12 +13,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const { settings } = await getShop();
+  const facts = shopFacts(settings.details);
   return (
     <LegalPage title="Terms">
       <p>
         These terms cover buying from Thriftesque through this website and WhatsApp. The shop is run by{" "}
-        <Fact fact={FACTS.operator} missing="" />. By sending us an order you agree to them.
+        <Fact fact={facts.operator} />. By sending us an order you agree to them.
       </p>
 
       <h2 className="display">The pieces</h2>
@@ -39,21 +42,21 @@ export default function TermsPage() {
         </li>
         <li>
           While payment is pending we may mark a piece as reserved. We hold it for{" "}
-          <Fact fact={FACTS.reservedHold} missing="" />.
+          <Fact fact={facts.reservedHold} />.
         </li>
       </ul>
 
       <h2 className="display">Delivery and pickup</h2>
       <p>
-        <Fact fact={FACTS.delivery} missing="" /> The fee for your area is shown in your bag before you send the order.
+        <Fact fact={facts.delivery} /> The fee for your area is shown in your bag before you send the order.
         Pickup is free; we share the location when we confirm.
       </p>
 
       <h2 className="display">Payment</h2>
-      <p><Fact fact={FACTS.payment} missing="" /></p>
+      <p><Fact fact={facts.payment} /></p>
 
       <h2 className="display">Returns and exchanges</h2>
-      <p><Fact fact={FACTS.returns} missing="" /></p>
+      <p><Fact fact={facts.returns} /></p>
 
       <h2 className="display">Using this website</h2>
       <p>
@@ -64,7 +67,7 @@ export default function TermsPage() {
 
       <h2 className="display">Law and questions</h2>
       <p>
-        These terms are governed by the laws of the State of Qatar. Questions about an order or these terms: <ContactLine />
+        These terms are governed by the laws of the State of Qatar. Questions about an order or these terms: <ContactLine whatsappNumber={settings.whatsappNumber} email={facts.contactEmail} />
       </p>
     </LegalPage>
   );

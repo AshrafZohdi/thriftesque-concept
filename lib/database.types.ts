@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"settings": {
                   Row: {
-                    "delivery_fees": NonNullable<Json>,"drop_name": string,"id": number,"whatsapp_number": string
+                    "contact_email": string,"delivery_fees": NonNullable<Json>,"delivery_text": string,"drop_name": string,"id": number,"operator_name": string,"order_retention_text": string,"payment_text": string,"reserved_hold_text": string,"returns_text": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "delivery_fees"?: NonNullable<Json>,"drop_name"?: string,"id"?: number,"whatsapp_number"?: string
+                    "contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Update: {
-                    "delivery_fees"?: NonNullable<Json>,"drop_name"?: string,"id"?: number,"whatsapp_number"?: string
+                    "contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     

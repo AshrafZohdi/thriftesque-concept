@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 import { PHOTO } from "../lib/photo-spec.ts";
+import { EMPTY_DETAILS, detailsToRow } from "../lib/shop-facts.ts";
 import { SAMPLE_LOOKS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
 import { DEV_STRANGER, DEV_TEAM } from "./dev-accounts.ts";
 
@@ -90,7 +91,8 @@ async function main() {
     console.log(`removed ${extra.data.length} product(s) not in the seed: ${extra.data.map((r) => r.code).join(", ")}`);
   }
 
-  const settings = await db.from("settings").update(SAMPLE_SETTINGS).eq("id", 1);
+  // Shop details reset to empty, so the dashboard and legal pages start from "To be confirmed" (tests fill them in).
+  const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS) }).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
 
   // Local data resets exactly, including AI drafts made while testing.

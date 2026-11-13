@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { deliveryFee, lowestFee, orderBlocker, orderMessage, orderTotals, outfitMessage, type OrderForm } from "./order";
 import { activeSlots, availableModes, initialOutfit, load, outfitPieces, pools, sanitize, shuffle, step } from "./outfit";
+import { EMPTY_DETAILS } from "./shop-facts";
 import type { ShopProduct, ShopSettings } from "./shop-model";
 
 const settings: ShopSettings = {
   whatsappNumber: "97412345678", dropName: "Drop 07",
-  deliveryFees: [{ area: "Al Sadd", fee: 15 }, { area: "Al Khor", fee: 25 }],
+  deliveryFees: [{ area: "Al Sadd", fee: 15 }, { area: "Al Khor", fee: 25 }], details: EMPTY_DETAILS,
 };
 const items = [
   { code: "TQ-0709", name: "Sage V-neck sweater", size: "M", price: 120 },

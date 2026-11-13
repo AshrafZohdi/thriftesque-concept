@@ -7,6 +7,7 @@ import { looksPrompt, LOOKS_SCHEMA, validLooks, type LookPiece } from "@/lib/ai"
 import { geminiJson } from "@/lib/gemini";
 import { productSchema, toProductRow, type ProductInput } from "@/lib/product-schema";
 import { PHOTO } from "@/lib/photo-spec";
+import { detailsToRow } from "@/lib/shop-facts";
 import { requireTeam } from "@/lib/supabase/server";
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -53,10 +54,11 @@ export async function saveSettings(input: SettingsInput): Promise<Result> {
       whatsapp_number: v.value.whatsappNumber,
       drop_name: v.value.dropName,
       delivery_fees: v.value.deliveryFees.map((f) => ({ area: f.area, fee_qar: f.fee })),
+      ...detailsToRow(v.value.details),
     })
     .eq("id", 1);
   if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
-  // Settings show on every page (strip, footer, bag), so refresh them all.
+  // Settings show on every page (strip, footer, bag, terms, privacy), so refresh them all.
   revalidatePath("/", "layout");
   return { ok: true };
 }

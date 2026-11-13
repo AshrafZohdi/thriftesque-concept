@@ -168,11 +168,21 @@ npm run backup                                         # schema, data and photos
 Copy the folder somewhere safe and private (it holds team sign-in records). To restore into a fresh project: push the
 migrations, then load `data.sql` with `psql` and copy the photos back with `npx supabase storage cp -r`.
 
-## Content that has to be confirmed before launch (D-046)
+## Shop details on the terms and privacy pages (D-046, D-048)
 
-`lib/shop-facts.ts` holds the shop facts shown on the home page, the terms and the privacy page. When the client confirms one,
-set its text and `confirmed: true`, and update `LEGAL_UPDATED` if the legal pages changed. `node scripts/check-facts.ts` lists
-what's still open; `npm run deploy` runs it whenever preview mode is off.
+The team fills them in on the dashboard (Shop settings > Terms and privacy details). Empty ones show "To be confirmed".
+`npm run deploy` checks them against the live database whenever preview mode is off and stops until all seven are filled in.
+To check by hand: `NEXT_PUBLIC_SUPABASE_URL=... NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=... node scripts/check-facts.ts`.
+Change `LEGAL_UPDATED` in `lib/shop-facts.ts` when the fixed wording of `app/terms` or `app/privacy` changes.
+
+## Database changes (migrations)
+
+Push the migration before deploying code that needs it, and keep migrations additive so the live site works in between:
+
+```
+npx supabase db push        # linked to production; lists the new migrations and asks to confirm
+npm run deploy -- production
+```
 
 ## Share card
 

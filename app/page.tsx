@@ -59,7 +59,7 @@ export default async function ShopPage() {
           <Section id="shop" kicker={settings.dropName || "This week"} title="The drop" intro="Tap a piece for measurements and condition.">
             <Catalog />
           </Section>
-          <HowToOrder />
+          <HowToOrder details={settings.details} />
         </main>
         <Footer waHref={waLink(settings.whatsappNumber, "Hi Thriftesque!")} />
       </div>

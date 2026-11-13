@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ContactLine, Fact, LegalPage } from "@/components/LegalPage";
-import { FACTS } from "@/lib/shop-facts";
+import { getShop } from "@/lib/shop";
+import { shopFacts } from "@/lib/shop-facts";
 
 // Describes what the site actually does (D-046). If the code changes how data is handled, this page changes with it.
 export const revalidate = false;
@@ -11,12 +12,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy" },
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { settings } = await getShop();
+  const facts = shopFacts(settings.details);
   return (
     <LegalPage title="Privacy">
       <p>
         This page explains what happens to your information when you use this website and order from us. Who we are:{" "}
-        <Fact fact={FACTS.operator} missing="" />.
+        <Fact fact={facts.operator} />.
       </p>
 
       <h2 className="display">The short version</h2>
@@ -43,7 +46,7 @@ export default function PrivacyPage() {
       </p>
       <p>
         We use what you send us to confirm your order, arrange delivery or pickup and answer your questions. We keep it for{" "}
-        <Fact fact={FACTS.orderRetention} missing="" />.
+        <Fact fact={facts.orderRetention} />.
       </p>
 
       <h2 className="display">Cookies</h2>
@@ -75,8 +78,7 @@ export default function PrivacyPage() {
       <h2 className="display">Your rights</h2>
       <p>
         Under Qatar&apos;s personal data protection law (Law No. 13 of 2016) you can ask what information we hold about you,
-        ask us to correct it, or ask us to delete it. <ContactLine /> Email:{" "}
-        <Fact fact={FACTS.contactEmail} missing="" />
+        ask us to correct it, or ask us to delete it. <ContactLine whatsappNumber={settings.whatsappNumber} email={facts.contactEmail} />
       </p>
 
       <h2 className="display">Changes</h2>

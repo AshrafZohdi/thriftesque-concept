@@ -9,6 +9,7 @@ import { ChromeHeart } from "@/components/Chrome";
 import s from "@/components/shop/shop.module.css";
 import { STATUSES, codeNumber, type Status } from "@/lib/catalog";
 import { dashboardStats, searchProducts, type SettingsInput, type TeamProduct } from "@/lib/dashboard";
+import { DETAIL_COLUMNS, DETAIL_LABELS, detailsFromRow, missingDetails, type ShopDetails } from "@/lib/shop-facts";
 import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
@@ -30,7 +31,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
   if (team.data !== true) return { state: "not-team", email };
   const [products, settings] = await Promise.all([
     db.from("products").select("code,name,brand,era,category,size,price_qar,status,photos,cutout,created_at,sold_at"),
-    db.from("settings").select("whatsapp_number,drop_name,delivery_fees").eq("id", 1).single(),
+    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,${DETAIL_COLUMNS}`).eq("id", 1).single(),
   ]);
   if (products.error || settings.error) return { state: "error", message: (products.error ?? settings.error)!.message };
   const fees = Array.isArray(settings.data.delivery_fees) ? settings.data.delivery_fees : [];
@@ -42,6 +43,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
       whatsappNumber: settings.data.whatsapp_number,
       dropName: settings.data.drop_name,
       deliveryFees: fees.map((f) => ({ area: String((f as { area?: string })?.area ?? ""), fee: Number((f as { fee_qar?: number })?.fee_qar ?? 0) })),
+      details: detailsFromRow(settings.data),
     },
   };
 }
@@ -81,12 +83,25 @@ function Row({ p, onStatus, onDelete, onEdit }: {
   );
 }
 
+// The editable shop details, in order: field, example text (a placeholder, never saved), and textarea rows (0 = one line).
+const DETAIL_FIELDS: [keyof ShopDetails, string, number][] = [
+  ["operatorName", "For example: Thriftesque (Jane Doe), Doha, Qatar", 0],
+  ["contactEmail", "For example: name@example.com", 0],
+  ["deliveryText", "For example: Across Qatar. Doha orders arrive within 24 hours. The fee is added to your order.", 3],
+  ["paymentText", "For example: Cash on delivery or bank transfer. We share details when we confirm.", 3],
+  ["returnsText", "For example: All sales are final. Or: exchanges within 3 days if the piece is unworn.", 3],
+  ["reservedHoldText", "For example: 24 hours", 0],
+  ["orderRetentionText", "For example: 6 months after delivery", 0],
+];
+
 function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: (v: SettingsInput) => void }) {
   const [v, setV] = useState(initial);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const waId = useId();
   const dropId = useId();
+  const detailsId = useId();
+  const missing = missingDetails(v.details);
   const setFee = (i: number, patch: Partial<{ area: string; fee: number }>) =>
     setV({ ...v, deliveryFees: v.deliveryFees.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
 
@@ -101,7 +116,7 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
   }
 
   return (
-    <form className={d.settings} onSubmit={save} aria-labelledby="settingsTitle">
+    <form className={d.settings} onSubmit={save} aria-labelledby="settingsTitle" noValidate>
       <h2 className="display" id="settingsTitle">Shop settings</h2>
       <div className={d.field}>
         <label htmlFor={waId}>WhatsApp number for orders</label>
@@ -124,6 +139,27 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
           </div>
         ))}
         <button className={d.btnSm} type="button" onClick={() => setV({ ...v, deliveryFees: [...v.deliveryFees, { area: "", fee: 15 }] })}>+ Add area</button>
+      </fieldset>
+      <fieldset className={d.areas} style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={`${detailsId}-hint`}>
+        <legend className={d.fieldLegend}>Terms and privacy details</legend>
+        <p className={d.muted} id={`${detailsId}-hint`}>
+          Shown on the Terms and Privacy pages (and delivery and payment on the shop). Until a box is filled in, those pages say
+          &quot;To be confirmed&quot;, and the shop can&apos;t leave preview mode.{" "}
+          {missing.length ? `Still to fill in: ${missing.join(", ")}.` : "All filled in."}
+        </p>
+        {DETAIL_FIELDS.map(([key, hint, rows]) => (
+          <div className={d.field} key={key}>
+            <label htmlFor={`${detailsId}-${key}`}>{DETAIL_LABELS[key]}</label>
+            {rows ? (
+              <textarea id={`${detailsId}-${key}`} rows={rows} value={v.details[key]} placeholder={hint}
+                onChange={(e) => setV({ ...v, details: { ...v.details, [key]: e.target.value } })} />
+            ) : (
+              <input id={`${detailsId}-${key}`} value={v.details[key]} placeholder={hint}
+                type={key === "contactEmail" ? "email" : "text"} inputMode={key === "contactEmail" ? "email" : undefined}
+                onChange={(e) => setV({ ...v, details: { ...v.details, [key]: e.target.value } })} />
+            )}
+          </div>
+        ))}
       </fieldset>
       <div className={d.saveRow}>
         <button className={`${s.btn} ${s.primary}`} type="submit" disabled={busy}>{busy ? "Saving" : "Save settings"}</button>

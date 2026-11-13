@@ -2,7 +2,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChromeHeart } from "./Chrome";
-import { FACTS } from "@/lib/shop-facts";
+import { LOCATION, SIZING, shopFacts, type ShopDetails } from "@/lib/shop-facts";
+import { MadeWithNuvai } from "./MadeWithNuvai";
 import s from "./site.module.css";
 
 // Endless scrolling strip. Each half holds several copies so it's wider than any screen (one copy of the strip is about
@@ -45,10 +46,13 @@ export function Header({ right, nav = [["/#shop", "The drop"], ["/#how", "How to
   return (
     <header className={s.header}>
       <div className={s.headerIn}>
-        <Link className={s.logo} href="/">
-          <ChromeHeart />
-          Thriftesque
-        </Link>
+        <div className={s.brand}>
+          <Link className={s.logo} href="/">
+            <ChromeHeart />
+            Thriftesque
+          </Link>
+          <MadeWithNuvai paper="var(--color-surface)" ink="var(--color-ink)" />
+        </div>
         <nav className={`${s.nav} mono`} aria-label="Main">
           {nav.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
         </nav>
@@ -90,7 +94,8 @@ export function Section({ id, kicker, title, intro, children, className = "" }: 
   );
 }
 
-export function HowToOrder() {
+export function HowToOrder({ details }: { details: ShopDetails }) {
+  const facts = shopFacts(details);
   return (
     <Section id="how" kicker="How to order" title="One WhatsApp message">
       <ol className={s.steps}>
@@ -99,9 +104,9 @@ export function HowToOrder() {
         <li><h3>We confirm and deliver</h3><p>We reply to confirm your pieces, then arrange delivery or pickup.</p></li>
       </ol>
       <div className={s.info} id="info">
-        <div><h3 className="mono">Delivery</h3><p>{FACTS.delivery.text}</p></div>
-        <div><h3 className="mono">Payment</h3><p>{FACTS.payment.text}</p></div>
-        <div><h3 className="mono">Sizing</h3><p>{FACTS.sizing.text}</p></div>
+        <div><h3 className="mono">Delivery</h3><p>{facts.delivery.text}</p></div>
+        <div><h3 className="mono">Payment</h3><p>{facts.payment.text}</p></div>
+        <div><h3 className="mono">Sizing</h3><p>{SIZING}</p></div>
       </div>
     </Section>
   );
@@ -123,7 +128,10 @@ export function Footer({ waHref }: { waHref: string | null }) {
           {/* Plain link: the dashboard shouldn't be prefetched on every shopper's visit. */}
           <a href="/login">Team dashboard</a>
         </nav>
-        <small>{FACTS.location.text}</small>
+        <div className={s.footerBase}>
+          <small>{LOCATION}</small>
+          <MadeWithNuvai height={14} paper="var(--color-ink)" ink="var(--color-surface)" />
+        </div>
       </div>
     </footer>
   );

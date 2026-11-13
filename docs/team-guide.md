@@ -46,6 +46,10 @@ The shop updates within a few seconds of a change.
 At the bottom of the dashboard: the WhatsApp number orders go to (country code first, digits only, like 97455551234), the
 drop name shown at the top of the shop, and the delivery areas with their fees. Press **Save settings**.
 
+**Terms and privacy details** (same panel): who runs the shop, a contact email, delivery, payment, returns, how long you hold
+a reserved piece, and how long you keep order chats. They appear on the Terms and Privacy pages (delivery and payment also on
+the shop). Until a box is filled in, those pages say "To be confirmed", and the shop stays in preview mode.
+
 ## Looks
 
 **Suggest looks** asks the AI for outfits from live pieces that have cut-outs. Suggestions arrive as drafts; nothing shows in

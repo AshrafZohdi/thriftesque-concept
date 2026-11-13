@@ -416,3 +416,22 @@ Mumbai, Gemini for product photos only, WhatsApp). Privacy rights reference Qata
 - **Dependencies**: Dependabot opens weekly update pull requests against `dev`; nothing merges or deploys by itself.
 - **Not done**: `security.txt` needs a public contact email (C-14). Lighthouse and uptime monitoring wait on Ashraf's go-ahead
   (a dev dependency and an outside account).
+
+### D-048 The team edits the shop details for the terms and privacy pages. Decided by Ashraf, 2026-11-13
+Supersedes the code constants in D-046. Seven details are columns on the settings row (migration
+`20261113000000_shop_details.sql`, additive, length-checked, the email shape-checked) and fields under Shop settings in the
+dashboard: who runs the shop, contact email, delivery, payment, returns, how long a reserved piece is held, how long order
+chats are kept.
+- Filled in means confirmed. Empty ones show "To be confirmed" on the legal pages; delivery and payment keep the approved
+  mockup wording on the home page until the team writes their own.
+- Saving refreshes every page (the existing `revalidatePath("/", "layout")`).
+- `scripts/check-facts.ts` now reads the target database, so a deploy outside preview mode fails until all seven are filled in.
+- The settings form uses the app's own messages, not the browser's (`noValidate`, as in the product editor).
+- Rollout order: push the migration first, then deploy the code that reads it. A lawyer's review of the two pages stays a
+  launch checklist item; it isn't something the dashboard can hold.
+
+### D-049 "Made with Nuvai" credit. Decided by Ashraf, 2026-11-13
+A small "Made with" plus Nuvai's wordmark, linking to https://nuvai.qa, beside the Thriftesque wordmark in the header (under it
+on phones) and at the bottom of the footer. The logo is drawn the way nuvai.qa draws it: two CSS masks from Nuvai's own files
+(`public/brand/nuvai-wordmark-{paper,ink}.svg`, copied from the Nuvai landing page) painted with the site's tokens, so it reads
+on the white header and the black footer. Accessible name "Made with Nuvai", 24 px tap target. Resolves C-11.
