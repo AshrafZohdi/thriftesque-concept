@@ -32,6 +32,7 @@ eval "$exports"
 site="${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL missing from env.$target.vars}"
 # The target database must already have the shop details columns (push migrations before deploying code that reads them);
 # this fails if it doesn't. It also lists any details still empty, which are left off the terms and privacy pages (D-050).
+node scripts/check-schema.mjs
 node scripts/check-facts.ts
 
 step "clean build of $sha for $target"

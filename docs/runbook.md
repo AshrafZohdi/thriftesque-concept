@@ -179,9 +179,8 @@ Change `LEGAL_UPDATED` in `lib/shop-facts.ts` when the fixed wording of `app/ter
 ## Database changes (migrations)
 
 Push the migration before deploying code that needs it, and keep migrations additive so the live site works in between.
-To check a migration is live without a password, read the public API description: for example, after
-`20261113010000_incomplete_drafts.sql`, `era` is no longer in the `required` list of `products` at
-`https://<project>.supabase.co/rest/v1/` (with the publishable key as `apikey`).
+`npm run deploy` refuses to go ahead while the database is behind (`scripts/check-schema.mjs`, D-052). Every new migration
+must end by updating `public.schema_version()` to return its own timestamp prefix.
 
 ```
 npx supabase db push        # linked to production; lists the new migrations and asks to confirm

@@ -455,3 +455,9 @@ if the limit runs out the rest are saved without suggestions) and optionally cut
   missing choices ("Choose a category.").
 - Not done: several photos per piece in one go (add extra photos per draft in the editor), and spreadsheet import (the team
   works from phones; can be added if they ask).
+
+### D-052 The deploy checks the database is up to date. Decided, 2026-11-13
+Twice in one day a deploy needed a migration pushed first, and the only safeguard was remembering. `public.schema_version()`
+returns the newest migration applied (each migration updates it), and `scripts/check-schema.mjs` compares it with the newest
+file in `supabase/migrations` before every deploy. If the database is behind, the deploy stops before building. (Reading the
+public API description doesn't work for this: it shows anonymous visitors no column details.)
