@@ -42,6 +42,8 @@ export type ShopProductRow = Pick<
 // Hidden rows never reach the shop (RLS filters them), but a mapping bug must not show one either.
 export function toShopProduct(row: ShopProductRow, publicUrl: (path: string) => string): ShopProduct | null {
   if (row.status === "hidden") return null;
+  // The database won't let an incomplete product out of hidden (D-051); this guards the mapping all the same.
+  if (!row.era || !row.category || !row.size || row.price_qar === null || !row.condition) return null;
   const m = row.measurements && typeof row.measurements === "object" && !Array.isArray(row.measurements) ? row.measurements : {};
   return {
     code: row.code,

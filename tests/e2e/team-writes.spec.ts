@@ -223,3 +223,43 @@ test.describe("AI (real Gemini)", () => {
     }
   });
 });
+
+// After the editor tests, which expect the next product code to be TQ-0722.
+test("bulk add turns photos into hidden drafts that can't go live until they're finished", async ({ page }) => {
+  test.slow();
+  await signIn(page);
+  await page.getByRole("button", { name: "Bulk add" }).click();
+  const bulk = page.getByRole("dialog", { name: "Bulk add" });
+  await bulk.getByLabel("Suggest names and descriptions from the photos (AI)").uncheck(); // no Gemini calls in the gate
+  await bulk.locator('input[type=file][accept="image/*"]').setInputFiles(["design/img/striped-tee.jpg", "design/img/mint-sweater.jpg"]);
+  await bulk.getByRole("button", { name: "Add 2 drafts" }).click();
+  await expect(bulk.getByRole("status")).toContainText("2 drafts added", { timeout: 60_000 });
+  await bulk.getByRole("button", { name: "Done" }).click();
+
+  // The list switches to Hidden, where both drafts say what they still need.
+  const drafts = page.getByRole("region", { name: "Products" }).locator("div", { hasText: "Untitled draft" }).filter({ hasText: "Needs price, size, category, era, condition" });
+  await expect(drafts.first()).toBeVisible();
+  const first = await page.getByRole("region", { name: "Products" }).getByRole("combobox", { name: "Status of Untitled draft" }).first();
+
+  // Making a draft live too early is refused in plain words.
+  await first.selectOption("live");
+  await expect(page.getByRole("status").filter({ hasText: /needs price, size, category, era, condition before it can show in the shop/ })).toBeVisible();
+
+  // Finishing it in the editor lets it go live.
+  await page.getByRole("button", { name: "Edit Untitled draft" }).first().click();
+  const editor = page.getByRole("dialog", { name: /^Edit TQ-/ });
+  await expect(editor.getByLabel("Category")).toHaveValue("");
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(editor).toContainText("Choose a category.");
+  await editor.getByLabel("Product name").fill("Bulk striped tee");
+  await editor.getByLabel("Category").selectOption("Tops");
+  await editor.getByLabel("Era").selectOption("90s");
+  await editor.getByLabel("Condition").selectOption("Good");
+  await editor.getByLabel("Size").fill("M");
+  await editor.getByLabel("Price (QAR)").fill("55");
+  await editor.getByLabel("Visibility").selectOption("live");
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /TQ-\d+ saved/ })).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator("#shop article", { hasText: "Bulk striped tee" })).toContainText("55");
+});

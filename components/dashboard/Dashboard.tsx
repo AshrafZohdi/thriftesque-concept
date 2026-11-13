@@ -8,11 +8,12 @@ import { deleteProduct, saveSettings, setStatus } from "@/app/dashboard/actions"
 import { ChromeHeart } from "@/components/Chrome";
 import s from "@/components/shop/shop.module.css";
 import { STATUSES, codeNumber, type Status } from "@/lib/catalog";
-import { dashboardStats, searchProducts, type SettingsInput, type TeamProduct } from "@/lib/dashboard";
+import { dashboardStats, missingForShop, searchProducts, type SettingsInput, type TeamProduct } from "@/lib/dashboard";
 import { DETAIL_COLUMNS, DETAIL_LABELS, detailsFromRow, missingDetails, type ShopDetails } from "@/lib/shop-facts";
 import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
+import { BulkUpload } from "./BulkUpload";
 import { LooksPanel } from "./LooksPanel";
 import { ProductEditor, emptyProduct, loadForEdit, type EditTarget } from "./ProductEditor";
 
@@ -30,7 +31,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
   const team = await db.rpc("is_team");
   if (team.data !== true) return { state: "not-team", email };
   const [products, settings] = await Promise.all([
-    db.from("products").select("code,name,brand,era,category,size,price_qar,status,photos,cutout,created_at,sold_at"),
+    db.from("products").select("code,name,brand,era,category,size,price_qar,condition,status,photos,cutout,created_at,sold_at"),
     db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,${DETAIL_COLUMNS}`).eq("id", 1).single(),
   ]);
   if (products.error || settings.error) return { state: "error", message: (products.error ?? settings.error)!.message };
@@ -54,14 +55,19 @@ function Row({ p, onStatus, onDelete, onEdit }: {
   const [confirm, setConfirm] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
+  const missing = missingForShop(p);
   return (
     <div className={d.row}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={p.photos[0] ? photoUrl(p.photos[0]) : ""} alt="" width={56} height={70} />
-      <div className={d.nm}><b>{p.name}</b><span>{p.code} · {p.brand} · {p.era}</span></div>
-      <span className={`${d.muted} ${d.hideSm}`}>{p.category}</span>
-      <span className={d.hideSm}>{p.size}</span>
-      <span className={d.price}>{p.price_qar} QAR</span>
+      <div className={d.nm}>
+        <b>{p.name}</b>
+        <span>{[p.code, p.brand, p.era].filter(Boolean).join(" · ")}</span>
+        {missing.length > 0 && <span className={d.needs}>Needs {missing.join(", ")}</span>}
+      </div>
+      <span className={`${d.muted} ${d.hideSm}`}>{p.category ?? "No category"}</span>
+      <span className={d.hideSm}>{p.size ?? "No size"}</span>
+      <span className={d.price}>{p.price_qar === null ? "No price" : `${p.price_qar} QAR`}</span>
       <select className={d.status} data-s={p.status} value={p.status} aria-label={`Status of ${p.name}`}
         onChange={(e) => onStatus(p.code, e.target.value as Status)}>
         {STATUSES.map((st) => <option key={st} value={st}>{LABEL[st]}</option>)}
@@ -176,6 +182,7 @@ export function Dashboard() {
   const [tab, setTab] = useState<Status | "all">("all");
   const [note, setNote] = useState("");
   const [edit, setEdit] = useState<{ target: EditTarget; trigger: HTMLElement | null } | null>(null);
+  const [bulk, setBulk] = useState<{ n: number; trigger: HTMLElement | null } | null>(null);
   const nonce = useRef(0);
   const noteTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -284,7 +291,10 @@ export function Dashboard() {
             <h1 className="display">Products</h1>
             <p>Add pieces, change a status, search the stock and keep the shop settings up to date.</p>
           </div>
-          <button className={`${s.btn} ${s.primary}`} type="button" onClick={(e) => openEditor(null, e.currentTarget)}>+ Add product</button>
+          <div className={d.titleActions}>
+            <button className={`${s.btn} ${s.secondary}`} type="button" onClick={(e) => setBulk({ n: ++nonce.current, trigger: e.currentTarget })}>Bulk add</button>
+            <button className={`${s.btn} ${s.primary}`} type="button" onClick={(e) => openEditor(null, e.currentTarget)}>+ Add product</button>
+          </div>
         </div>
         <section className={d.stats} aria-label="Stats">
           <div className={d.stat}><span>Live in shop</span><b>{stats.live}</b></div>
@@ -313,6 +323,8 @@ export function Dashboard() {
       </main>
       </div>
       <ProductEditor target={edit?.target ?? null} trigger={edit?.trigger ?? null} onClose={() => setEdit(null)} onSaved={onSaved} />
+      <BulkUpload open={bulk?.n ?? null} trigger={bulk?.trigger ?? null} onClose={() => setBulk(null)}
+        onDone={(added) => { if (added) { setTab("hidden"); refresh(); } }} />
       <p className={d.toast} role="status" aria-live="polite">{note}</p>
     </>
   );

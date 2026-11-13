@@ -18,7 +18,7 @@ import d from "./dashboard.module.css";
 
 const STATUS_LABEL = { live: "Live in shop", reserved: "Reserved", sold: "Sold", hidden: "Hidden (draft)" } as const;
 
-async function upload(folder: "p" | "c", blob: Blob, ext: string): Promise<string> {
+export async function upload(folder: "p" | "c", blob: Blob, ext: string): Promise<string> {
   const path = `${folder}/${crypto.randomUUID()}.${ext}`;
   const { error } = await browserDb().storage.from(PHOTO.bucket).upload(path, blob, { contentType: blob.type, upsert: false, cacheControl: PHOTO.cacheSeconds });
   if (error) throw new Error(`Upload failed: ${error.message}`);
@@ -214,13 +214,15 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
           </div>
           <div className={d.field}>
             <label htmlFor={ids.era}>Era</label>
-            <select {...register("era")} id={ids.era}>{ERAS.map((x) => <option key={x}>{x}</option>)}</select>
+            <select {...register("era")} {...field("era", ids.era)}><option value="" disabled>Choose</option>{ERAS.map((x) => <option key={x}>{x}</option>)}</select>
+            <Err id={`${ids.era}-err`} errors={errors} name="era" />
           </div>
         </div>
         <div className={d.grid3}>
           <div className={d.field}>
             <label htmlFor={ids.cat}>Category</label>
-            <select {...register("category")} id={ids.cat}>{CATEGORIES.map((x) => <option key={x}>{x}</option>)}</select>
+            <select {...register("category")} {...field("category", ids.cat)}><option value="" disabled>Choose</option>{CATEGORIES.map((x) => <option key={x}>{x}</option>)}</select>
+            <Err id={`${ids.cat}-err`} errors={errors} name="category" />
           </div>
           <div className={d.field}>
             <label htmlFor={ids.size}>Size</label>
@@ -235,7 +237,7 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
         </div>
         <fieldset className={d.measures}>
           <legend className={d.fieldLegend}>Measurements, laid flat (cm)</legend>
-          {MEASURE[category].map((k) => {
+          {(MEASURE[category] ?? []).map((k) => {
             const id = `${ids.cat}-m-${k}`;
             return (
               <div className={d.field} key={`${category}-${k}`}>
@@ -248,7 +250,8 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
         <div className={d.grid2}>
           <div className={d.field}>
             <label htmlFor={ids.cond}>Condition</label>
-            <select {...register("condition")} id={ids.cond}>{CONDITIONS.map((x) => <option key={x}>{x}</option>)}</select>
+            <select {...register("condition")} {...field("condition", ids.cond)}><option value="" disabled>Choose</option>{CONDITIONS.map((x) => <option key={x}>{x}</option>)}</select>
+            <Err id={`${ids.cond}-err`} errors={errors} name="condition" />
           </div>
           <div className={d.field}>
             <label htmlFor={ids.status}>Visibility</label>
@@ -293,9 +296,10 @@ export async function loadForEdit(code: string): Promise<ProductInput> {
   if (error) throw new Error(error.message);
   const m = data.measurements && typeof data.measurements === "object" && !Array.isArray(data.measurements) ? data.measurements : {};
   return {
-    name: data.name, brand: data.brand === "Unbranded" ? "" : data.brand, era: data.era as ProductInput["era"],
-    category: data.category as ProductInput["category"], size: data.size, price: data.price_qar,
-    condition: data.condition as ProductInput["condition"], colour: data.colour ?? "",
+    // Drafts from a bulk upload can be missing these; the form then asks for them (D-051).
+    name: data.name, brand: data.brand === "Unbranded" ? "" : data.brand, era: (data.era ?? "") as ProductInput["era"],
+    category: (data.category ?? "") as ProductInput["category"], size: data.size ?? "", price: data.price_qar ?? ("" as unknown as number),
+    condition: (data.condition ?? "") as ProductInput["condition"], colour: data.colour ?? "",
     measurements: Object.fromEntries(Object.entries(m).map(([k, v]) => [k, Number(v)])), status: data.status,
     photos: data.photos, cutout: data.cutout ?? "", description: data.description ?? "", stylingTip: data.styling_tip ?? "",
   };

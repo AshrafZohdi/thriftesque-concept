@@ -2,10 +2,10 @@
 // Dashboard writes. Each checks the session and team membership first (requireTeam), validates input, writes with the
 // signed-in user's session (so RLS applies too), then refreshes the cached shop pages it affects (D-021).
 import { revalidatePath } from "next/cache";
-import { isCode, isStatus, validateSettings, type SettingsInput } from "@/lib/dashboard";
+import { isCode, isStatus, missingForShop, validateSettings, type SettingsInput } from "@/lib/dashboard";
 import { looksPrompt, LOOKS_SCHEMA, validLooks, type LookPiece } from "@/lib/ai";
 import { geminiJson } from "@/lib/gemini";
-import { productSchema, toProductRow, type ProductInput } from "@/lib/product-schema";
+import { draftSchema, productSchema, toProductRow, type DraftInput, type ProductInput } from "@/lib/product-schema";
 import { PHOTO } from "@/lib/photo-spec";
 import { detailsToRow } from "@/lib/shop-facts";
 import { requireTeam } from "@/lib/supabase/server";
@@ -22,8 +22,13 @@ export async function setStatus(code: string, status: string): Promise<Result> {
   if (!isCode(code) || !isStatus(status)) return { ok: false, error: "That change isn't valid." };
   const t = await requireTeam();
   if (!t.ok) return t;
+  if (status !== "hidden") {
+    const cur = await t.db.from("products").select("era,category,size,price_qar,condition").eq("code", code).maybeSingle();
+    const missing = cur.data ? missingForShop(cur.data) : [];
+    if (missing.length) return { ok: false, error: `${code} needs ${missing.join(", ")} before it can show in the shop. Open it with Edit.` };
+  }
   const { data, error } = await t.db.from("products").update({ status }).eq("code", code).select("code");
-  if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
+  if (error) return { ok: false, error: error.code === "23514" ? `${code} needs its price, size and details before it can show in the shop.` : `Couldn't save: ${error.message}` };
   if (!data.length) return { ok: false, error: `${code} wasn't found. Refresh the page.` };
   refreshProduct(code);
   return { ok: true };
@@ -135,4 +140,31 @@ export async function deleteLook(id: string): Promise<Result> {
   if (error) return { ok: false, error: `Couldn't delete: ${error.message}` };
   revalidatePath("/");
   return { ok: true };
+}
+
+// One hidden draft per photo from a bulk upload (D-051). Missing details stay empty for the team to fill in; the database
+// keeps it hidden until they do. Hidden pieces aren't in the shop, so no pages need refreshing.
+export async function createDraft(input: DraftInput): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
+  const parsed = draftSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "That photo couldn't be saved." };
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const v = parsed.data;
+  const { data, error } = await t.db
+    .from("products")
+    .insert({
+      name: v.name || "Untitled draft",
+      status: "hidden",
+      photos: [v.photo],
+      cutout: v.cutout ?? null,
+      category: v.category ?? null,
+      era: v.era ?? null,
+      colour: v.colour || null,
+      description: v.description || null,
+      styling_tip: v.stylingTip || null,
+    })
+    .select("code")
+    .single();
+  if (error) return { ok: false, error: `Couldn't save the draft: ${error.message}` };
+  return { ok: true, code: data.code };
 }

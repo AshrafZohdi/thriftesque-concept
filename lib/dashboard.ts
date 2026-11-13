@@ -2,17 +2,25 @@
 import { STATUSES, type Status } from "./catalog";
 import { EMPTY_DETAILS, validateDetails, type ShopDetails } from "./shop-facts";
 
+// Hidden drafts from a bulk upload can be missing these until the team fills them in (D-051).
 export type TeamProduct = {
-  code: string; name: string; brand: string; era: string; category: string; size: string; price_qar: number;
-  status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
+  code: string; name: string; brand: string; era: string | null; category: string | null; size: string | null; price_qar: number | null;
+  condition?: string | null; status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
 };
+
+const NEEDED_FOR_SHOP = [["price_qar", "price"], ["size", "size"], ["category", "category"], ["era", "era"], ["condition", "condition"]] as const;
+
+// What a product still needs before it can be live, reserved or sold. Empty means ready. The database enforces the same rule.
+export function missingForShop(p: Pick<TeamProduct, "price_qar" | "size" | "category" | "era"> & { condition?: string | null }): string[] {
+  return NEEDED_FOR_SHOP.filter(([k]) => p[k] === null || p[k] === undefined || p[k] === "").map(([, label]) => label);
+}
 
 const DAY = 86_400_000;
 
 export function dashboardStats(list: TeamProduct[]) {
   const by = (s: Status) => list.filter((p) => p.status === s);
   const sold = by("sold");
-  const sum = (a: TeamProduct[]) => a.reduce((t, p) => t + p.price_qar, 0);
+  const sum = (a: TeamProduct[]) => a.reduce((t, p) => t + (p.price_qar ?? 0), 0);
   const days = sold
     .filter((p) => p.sold_at)
     .map((p) => (Date.parse(p.sold_at!) - Date.parse(p.created_at)) / DAY)

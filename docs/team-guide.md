@@ -28,6 +28,16 @@ Forgot the password? Ask Nuvai to reset it.
 6. **Visibility**: "Live in shop" to publish now, or "Hidden (draft)" to finish later.
 7. **Add to shop**. Each piece gets its code (TQ-0001, TQ-0002, ...) automatically.
 
+## Add many pieces at once
+
+1. **Bulk add**, then **Choose photos**: up to 30, one piece per photo (the cover shot of each).
+2. Leave "Suggest names and descriptions" on to let the AI fill in each draft's name and description. Tick "Make cut-outs too"
+   if you want the outfit cut-outs made now (slower).
+3. **Add drafts**. Keep the screen open until it says it's done.
+4. Each photo is now a hidden draft marked "Needs price, size, ...". Open each with **Edit**, add the missing details, extra
+   photos and measurements, set Visibility to "Live in shop" and save. A draft can't go live until it has a price, size,
+   category, era and condition.
+
 ## When someone orders
 
 In the product list, change the piece's status:

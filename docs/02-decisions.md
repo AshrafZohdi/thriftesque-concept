@@ -442,3 +442,16 @@ left off the terms and privacy pages (its sentence or section isn't shown); deli
 approved wording until the team writes their own. `scripts/check-facts.ts` only lists empty details, but still fails if it
 can't read them, which is what stops code from going out before its migration. The client's team reviews the two pages
 themselves instead of a lawyer.
+
+### D-051 Bulk add: one hidden draft per photo. Decided, 2026-11-13
+Asked for by Ashraf. "Bulk add" on the dashboard takes up to 30 photos, one piece per photo. Each is resized and uploaded like in
+the editor, optionally described by the AI ("Fill from photo" per photo, 4 s apart to stay inside the free per-minute limit;
+if the limit runs out the rest are saved without suggestions) and optionally cut out, then saved as a hidden draft by the
+`createDraft` action. Photos run one at a time so phones don't run out of memory; a failed photo deletes its uploads.
+- Migration `20261113010000_incomplete_drafts.sql`: era, category, size, price and condition may be empty only while hidden.
+  The constraint `products_complete_unless_hidden` refuses anything else, so a half-finished draft can't reach the shop even
+  by mistake. Additive for existing data (every current product is complete).
+- The product list marks drafts "Needs price, size, ..."; making one live early gets a plain message; the editor asks for the
+  missing choices ("Choose a category.").
+- Not done: several photos per piece in one go (add extra photos per draft in the editor), and spreadsheet import (the team
+  works from phones; can be added if they ask).

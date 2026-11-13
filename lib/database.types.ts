@@ -21,14 +21,14 @@ export type Database = {
                   ]
                 },"products": {
                   Row: {
-                    "brand": string,"category": string,"code": string,"colour": string | null,"condition": string,"created_at": string,"cutout": string | null,"description": string | null,"era": string,"id": string,"measurements": NonNullable<Json>,"name": string,"photos": (string)[],"price_qar": number,"size": string,"sold_at": string | null,"status": Database["public"]['Enums']["product_status"],"styling_tip": string | null
+                    "brand": string,"category": string | null,"code": string,"colour": string | null,"condition": string | null,"created_at": string,"cutout": string | null,"description": string | null,"era": string | null,"id": string,"measurements": NonNullable<Json>,"name": string,"photos": (string)[],"price_qar": number | null,"size": string | null,"sold_at": string | null,"status": Database["public"]['Enums']["product_status"],"styling_tip": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "brand"?: string,"category": string,"code"?: string,"colour"?: string | null,"condition": string,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era": string,"id"?: string,"measurements"?: NonNullable<Json>,"name": string,"photos"?: (string)[],"price_qar": number,"size": string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
+                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name": string,"photos"?: (string)[],"price_qar"?: number | null,"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
                   }
                   Update: {
-                    "brand"?: string,"category"?: string,"code"?: string,"colour"?: string | null,"condition"?: string,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string,"id"?: string,"measurements"?: NonNullable<Json>,"name"?: string,"photos"?: (string)[],"price_qar"?: number,"size"?: string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
+                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name"?: string,"photos"?: (string)[],"price_qar"?: number | null,"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
                   }
                   Relationships: [
                     

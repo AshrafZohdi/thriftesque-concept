@@ -33,6 +33,20 @@ export const productSchema = z
     }
   });
 
+// A draft from a bulk upload (D-051): one photo, an optional cut-out, and whatever the AI suggested. Always hidden; the team
+// adds price, size, condition and measurements in the editor before it can go live.
+export const draftSchema = z.object({
+  photo: storagePath,
+  cutout: storagePath.optional(),
+  name: text(120, "Name").optional(),
+  category: z.enum(CATEGORIES).optional(),
+  era: z.enum(ERAS).optional(),
+  colour: text(40, "Colour").optional(),
+  description: text(1000, "Description").optional(),
+  stylingTip: text(300, "Styling tip").optional(),
+});
+export type DraftInput = z.input<typeof draftSchema>;
+
 export type ProductInput = z.input<typeof productSchema>;
 export type ProductValues = z.output<typeof productSchema>;
 

@@ -562,3 +562,84 @@
     align-items: center;
   }
 }
+/* A draft from a bulk upload that still needs details before it can go live (D-051). */
+.needs {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 6px;
+  background: var(--color-mockflag);
+  border: 1px solid var(--color-ink);
+  color: var(--color-ink);
+  font: 700 11px/1.5 var(--font-mono);
+  text-transform: uppercase;
+}
+/* Bulk add (D-051) */
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 40px;
+  padding-block: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--color-ink);
+}
+.bulkList {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bulkList li {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-ink);
+  background: var(--color-surface);
+}
+.bulkList li[data-state="done"] {
+  background: var(--color-sky2);
+}
+.bulkList li[data-state="failed"] {
+  background: var(--color-mockflag);
+}
+.bulkName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 700 12px/1.4 var(--font-mono);
+}
+.bulkNote {
+  font-size: 14px;
+  color: var(--color-soft);
+}
+.titleActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bulkPick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  margin-block: 12px 4px;
+  border: 1px dashed var(--color-ink);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 13px/1 var(--font-mono);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.bulkPick span {
+  font-size: 20px;
+}
