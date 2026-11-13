@@ -356,3 +356,24 @@ and a script is easier to hand over than a pipeline plus its secrets.
   which `pipefail` treated as fatal.
 - **Rejected:** Cloudflare Workers Builds (Git-connected CI). It builds with whatever env Cloudflare holds and can't run our
   gate (local Supabase, Playwright), and it would deploy on every push.
+
+### D-043 Where the accounts live. Decided by Ashraf, 2026-11-13
+- A Gmail was created for the client. The domain (thriftesque.com), Cloudflare and the production Supabase project
+  (`xuzndssktrgqfonedctw`) are on it, with Ashraf as a member. The client owns the data and the domain if maintenance ends.
+- The Gemini key stays on Ashraf's own Google AI Studio account, since Nuvai maintains the site and the key is free. At a
+  handover it's one Worker secret to replace (runbook). Only product photos and product facts are ever sent.
+- Supersedes the line in `CLAUDE.md` that put every account under the client's email (updated).
+
+### D-044 The domain goes live in preview, with the sample pieces. Decided by Ashraf, 2026-11-13
+thriftesque.com shows the app with the 21 sample products until the real content (WhatsApp number, fees, team, products)
+arrives. To keep that honest:
+- `NEXT_PUBLIC_SHOP_PREVIEW=1` in the production vars shows a strip on every page ("Preview: these are sample pieces, not for
+  sale yet. The shop opens soon."), sets `noindex, nofollow`, and makes robots.txt disallow everything, so sample products
+  don't end up in search results after launch.
+- The WhatsApp number stays empty, so there are no order buttons pointing at a fake number (`waLink` returns nothing).
+- `npm run demo -- load production <team email>` puts the samples in, signed in as a team member (RLS applies, no secret key,
+  no test accounts). It refuses if real products exist and only fills settings nobody has set. `npm run demo -- remove ...`
+  takes the samples, their photos and the sample looks out again.
+- At launch: remove the samples, add the real settings and products, delete `NEXT_PUBLIC_SHOP_PREVIEW` and deploy.
+- Found while building it: a new Tailwind `@utility` class was silently not generated, so the strip moved to a CSS Module like
+  the other components (D-031). Checked by screenshot, not just by markup.

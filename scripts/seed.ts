@@ -3,23 +3,9 @@
 import { execSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
-import sharp from "sharp";
 import { PHOTO } from "../lib/photo-spec.ts";
+import { SAMPLE_LOOKS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
 import { DEV_STRANGER, DEV_TEAM } from "./dev-accounts.ts";
-
-type SeedProduct = {
-  code: string;
-  name: string;
-  brand: string;
-  era: string;
-  category: string;
-  size: string;
-  price_qar: number;
-  condition: string;
-  measurements_cm: Record<string, number>;
-  status: string;
-  photo: string;
-};
 
 // The secret key comes straight from the local stack, never from an env file: OpenNext bakes every variable in the
 // project's env files into the Worker bundle, and the secret key must never be there (D-038).
@@ -43,37 +29,6 @@ if (!["127.0.0.1", "localhost"].includes(host)) {
 
 const db = createClient(url, secret, { auth: { persistSession: false } });
 
-async function toWebp(path: string): Promise<{ data: Buffer; quality: number }> {
-  const input = await readFile(path);
-  for (const q of PHOTO.qualities) {
-    const data = await sharp(input)
-      .rotate()
-      .resize(PHOTO.width, PHOTO.height, { fit: "cover", position: "centre" })
-      .webp({ quality: Math.round(q * 100) })
-      .toBuffer();
-    if (data.length <= PHOTO.maxBytes) return { data, quality: q };
-  }
-  throw new Error(`${path} is still over ${PHOTO.maxBytes} bytes at the lowest quality`);
-}
-
-// Hand-picked sample looks for local development (D-028). Marked source "team" so the shop never labels them as AI picks.
-const SAMPLE_LOOKS = [
-  { title: "Denim day", note: "A patchwork knit over a denim midi skirt, with black Chelsea boots.", product_codes: ["TQ-0706", "TQ-0718", "TQ-0721"] },
-  { title: "Stripes and dark denim", note: "A navy ringer tee with rigid straight jeans and white cut-out heels.", product_codes: ["TQ-0710", "TQ-0716", "TQ-0720"] },
-  { title: "Leather and light wash", note: "The green leather biker over light wash jeans, with Chelsea boots.", product_codes: ["TQ-0702", "TQ-0717", "TQ-0721"] },
-  { title: "Florals for dinner", note: "The blue floral sheath dress with white cut-out heels.", product_codes: ["TQ-0713", "TQ-0720"] },
-];
-
-// Sample delivery settings from the mockup. Placeholders until the client confirms (content inventory C-1, C-2, C-9).
-const SAMPLE_SETTINGS = {
-  whatsapp_number: "97400000000",
-  drop_name: "Drop 07",
-  delivery_fees: [
-    ...["Al Sadd", "West Bay", "The Pearl", "Lusail", "Msheireb", "Al Waab", "Al Rayyan"].map((area) => ({ area, fee_qar: 15 })),
-    ...["Al Wakra", "Al Khor", "Other"].map((area) => ({ area, fee_qar: 25 })),
-  ],
-};
-
 async function ensureUser(email: string, password: string): Promise<string> {
   const list = await db.auth.admin.listUsers({ perPage: 200 });
   if (list.error) throw new Error(`Users: ${list.error.message}`);
@@ -89,7 +44,7 @@ async function ensureUser(email: string, password: string): Promise<string> {
 }
 
 async function main() {
-  const seed: SeedProduct[] = JSON.parse(await readFile("design/seed-products.json", "utf8"));
+  const seed = await loadSeed();
   let bytes = 0;
 
   for (const p of seed) {
@@ -101,7 +56,7 @@ async function main() {
 
     // Cut-outs were made once with macOS Vision and live in design/img/cutouts (D-027).
     const cutoutPath = `${p.code}/seed-cutout.webp`;
-    const cutoutFile = p.photo.replace("design/img/", "design/img/cutouts/").replace(/\.jpg$/, ".webp");
+    const cutoutFile = cutoutFileFor(p.photo);
     const cut = await db.storage.from(PHOTO.bucket).upload(cutoutPath, await readFile(cutoutFile), { contentType: "image/webp", upsert: true });
     if (cut.error) throw new Error(`Upload ${cutoutPath}: ${cut.error.message}`);
 

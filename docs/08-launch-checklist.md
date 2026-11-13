@@ -4,7 +4,8 @@
 
 ## Content
 - [ ] C-1 to C-12 in `content-inventory.md` answered. No "owner to confirm" text left on the site
-- [ ] Sample products removed or hidden. Real products live
+- [ ] Sample products removed (`npm run demo -- remove production <email>`). Real products live
+- [ ] Preview mode off: `NEXT_PUBLIC_SHOP_PREVIEW` removed from the production vars and deployed (strip gone, robots.txt allows the shop) (D-044)
 - [ ] Settings row holds the real WhatsApp number, areas, fees and drop name
 
 ## Accounts and config
@@ -15,6 +16,7 @@
 - [ ] Secrets set with the non-deploying command (`wrangler versions secret put`). Table in `runbook.md` complete
 - [ ] The deploy build passed `npm run check:build-secrets -- --deploy` (D-038)
 - [ ] Domain connected over HTTPS. `NEXT_PUBLIC_SITE_URL` set to it (the deploy check refuses localhost or http)
+- [ ] `www.thriftesque.com` redirects to `thriftesque.com`
 - [ ] Cloudflare rate-limiting rule on `/p/*` (free plan includes one rule), per D-041
 - [ ] Sitemap submitted in Google Search Console (optional, ask the client)
 

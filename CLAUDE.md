@@ -101,4 +101,4 @@ See `.env.example`.
 - Domain.
 - First batch of real product photos.
 
-Accounts (Supabase, Cloudflare, Google AI Studio, domain) are created under the client's email with Nuvai added as a member.
+Accounts (Supabase, Cloudflare, domain) are on the client's Gmail with Nuvai added as a member. The Gemini key comes from Nuvai's own Google AI Studio account, the key already used in development (D-043). Domain: thriftesque.com.

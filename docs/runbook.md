@@ -133,6 +133,17 @@ The Worker is named `thriftesque-production` (wrangler adds the env name). The s
 - "Failed to set to cache" means the KV free write limit ran out for the day (D-041); "Failed to revalidate stale page" means
   a queue is needed after all (D-040).
 
+## Preview mode and sample pieces (until launch, D-044)
+
+| Task | Command |
+| --- | --- |
+| Put the 21 sample pieces in | `npm run demo -- load production <your team email>` (asks for your password, hidden) |
+| Take them out again | `npm run demo -- remove production <your team email>` |
+| Refresh the cached pages afterwards | deploy, or press Save settings in the dashboard |
+| End preview mode | delete `NEXT_PUBLIC_SHOP_PREVIEW` from `env.production.vars`, commit, `npm run deploy -- production` |
+
+The loader signs in as a team member, so your account must be in `team_members` first (see "Adding a team member").
+
 ## Local team accounts
 
 `npm run seed` creates two accounts on the **local** database only (`scripts/dev-accounts.ts`): `team@thriftesque.test` (on the
