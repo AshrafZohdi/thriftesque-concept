@@ -129,3 +129,16 @@ test("the team can see which terms and privacy details are still missing", async
   }
   await expect(details).toContainText("Not filled in yet: Who runs the shop, Contact email");
 });
+
+test("nothing in the product editor sticks out past its right edge", async ({ page }) => {
+  await signIn(page, DEV_TEAM);
+  await page.getByRole("button", { name: /^Edit / }).first().click();
+  const editor = page.getByRole("dialog", { name: /^Edit TQ-/ });
+  await expect(editor).toBeVisible({ timeout: SIGNED_IN });
+  // Includes the hidden file pickers, which once took the fields' full width and poked 16 px out of the drawer.
+  const sticking = await editor.evaluate((d) => {
+    const right = d.getBoundingClientRect().right;
+    return [...d.querySelectorAll("*")].filter((el) => el.getBoundingClientRect().right > right + 0.5).map((el) => el.outerHTML.slice(0, 60));
+  });
+  expect(sticking).toEqual([]);
+});

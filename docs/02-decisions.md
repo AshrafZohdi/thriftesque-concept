@@ -487,3 +487,17 @@ signs in as a team member (password typed by Ashraf, hidden) and sets only cut-o
 - Result on 2026-11-14: 22 good (the mannequin's neck shows above collars, like a shop window), TQ-0026 left out (Vision kept
   a fragment), TQ-0018 skipped (no subject found). Those two are for the editor or the phone's "lift subject".
 - Vision runs only on a Mac; the dashboard's "Make cut-outs" (D-053) stays the team's own way to do it.
+
+### D-055 Builder proportions, and the editor's hidden file pickers. Decided, 2026-11-14
+Reported by Ashraf after the real stock went in.
+- **Builder:** pieces used to overlap (the bottom row was pulled up under the top) and each could fill its row's width, so
+  pants came out wider than tops. Now each piece stays in its own row with a gap, and widths are capped like on a person: top
+  80% of the row, bottom 56% (taller row), dress 72%, shoes 42%. An e2e test checks no overlap and bottom no wider than top
+  (fails on the old CSS).
+- **Editor "cropped on the right":** not reproducible at 360, 390, 820, 1024 or 1700 px in Chromium or WebKit, but the one
+  real defect found was the two hidden file inputs: the fields' `width: 100%` rule (a CSS Module, which outranks Tailwind's
+  utility layer) beat their 1 px sr-only size, leaving a full-width invisible input 16 px past the drawer's edge. File inputs
+  are now excluded from that rule; an e2e test checks nothing in the editor extends past its right edge (fails on the old CSS).
+- **Cut-outs:** tried removing background patches inside a cut-out by colour (the zebra blanket between the angel wings
+  pants' legs). It removed the blue stripes but not the black ones, nor the sticker and caption printed over the gap, so it
+  wasn't kept. Photos with patterned backgrounds, stickers or captions need a clean photo for the cut-out.

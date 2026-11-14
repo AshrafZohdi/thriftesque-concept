@@ -198,3 +198,13 @@ test("the open bag and an open look pass axe", async ({ page }) => {
   await expect(page.getByRole("dialog")).toHaveCount(1);
   expect(await serious()).toEqual([]);
 });
+
+test("builder pieces don't overlap, and the bottom is no wider than the top", async ({ page }) => {
+  await page.goto("/");
+  const imgs = page.locator("#outfit [class*=pick] img");
+  await expect(imgs.first()).toBeVisible();
+  await page.locator("#outfit").scrollIntoViewIfNeeded();
+  const boxes = await imgs.evaluateAll((list) => list.map((i) => { const r = i.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, width: r.width }; }));
+  for (let i = 1; i < boxes.length; i++) expect(boxes[i].top).toBeGreaterThanOrEqual(boxes[i - 1].bottom - 0.5);
+  expect(boxes[1].width).toBeLessThanOrEqual(boxes[0].width);
+});

@@ -55,23 +55,33 @@
   width: 100%;
   max-width: 460px;
 }
+/* Each piece stays in its own row (no overlap) and is sized like it would sit on a person (D-055): the top widest, bottoms
+   narrower but taller, shoes small. Rows set the height; the widths below cap each piece inside its row. */
 .top {
-  height: 150px;
-  z-index: 3;
+  height: 160px;
 }
 .bottom {
-  height: 182px;
-  margin-top: -18px;
-  z-index: 2;
+  height: 196px;
+  margin-top: 8px;
 }
 .dress {
-  height: 318px;
-  z-index: 2;
+  height: 330px;
 }
 .shoes {
-  height: 70px;
-  margin-top: 6px;
-  z-index: 1;
+  height: 72px;
+  margin-top: 8px;
+}
+.top .pick img {
+  max-width: 80%;
+}
+.bottom .pick img {
+  max-width: 56%;
+}
+.dress .pick img {
+  max-width: 72%;
+}
+.shoes .pick img {
+  max-width: 42%;
 }
 .item {
   position: relative;
@@ -240,10 +250,10 @@
     clip: rect(0 0 0 0);
   }
   .top {
-    height: 140px;
+    height: 148px;
   }
   .bottom {
-    height: 170px;
+    height: 182px;
   }
 }
 @media (min-width: 53.75rem) {
@@ -275,16 +285,17 @@
     justify-self: start;
   }
   .top {
-    height: 240px;
+    height: 250px;
   }
   .bottom {
-    height: 290px;
-    margin-top: -28px;
+    height: 304px;
+    margin-top: 10px;
   }
   .dress {
-    height: 470px;
+    height: 480px;
   }
   .shoes {
     height: 104px;
+    margin-top: 10px;
   }
 }
