@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { ChromeHeart } from "@/components/Chrome";
 import { outfitMessage } from "@/lib/order";
-import { slotOf } from "@/lib/outfit";
+import { boardLayout } from "@/lib/board";
 import type { ShopLook, ShopProduct } from "@/lib/shop-model";
 import { waLink } from "@/lib/wa";
 import { Overlay } from "./Overlay";
@@ -12,20 +12,15 @@ import { useShop } from "./ShopProvider";
 import l from "./looks.module.css";
 import s from "./shop.module.css";
 
-// Where each piece sits on a 4:5 board, by slot: x, y, width, height (%), rotation (deg). Drawn from slots, not by AI.
-const BOARD = {
-  top: [4, 3, 56, 42, -5], bottom: [44, 27, 52, 61, 4], shoes: [6, 62, 38, 30, -7],
-  dress: [6, 4, 60, 82, -3], shoesWithDress: [58, 60, 38, 32, 7],
-} as const;
-
 function Board({ pieces, big }: { pieces: ShopProduct[]; big?: boolean }) {
-  const hasDress = pieces.some((p) => slotOf(p.category) === "dress");
+  const spots = boardLayout(pieces);
   return (
     <div className={`${l.board} ${big ? l.big : ""}`} aria-hidden="true">
       <ChromeHeart className={l.heart} />
       {pieces.map((p) => {
-        const k = slotOf(p.category)!;
-        const [x, y, w, h, r] = BOARD[k === "shoes" && hasDress ? "shoesWithDress" : k];
+        const spot = spots.get(p.code);
+        if (!spot) return null;
+        const [x, y, w, h, r] = spot;
         return (
           <span key={p.code}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

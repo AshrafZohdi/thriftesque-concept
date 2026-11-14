@@ -501,3 +501,11 @@ Reported by Ashraf after the real stock went in.
 - **Cut-outs:** tried removing background patches inside a cut-out by colour (the zebra blanket between the angel wings
   pants' legs). It removed the blue stripes but not the black ones, nor the sticker and caption printed over the gap, so it
   wasn't kept. Photos with patterned backgrounds, stickers or captions need a clean photo for the cut-out.
+
+### D-056 Look boards lay out layered tops side by side. Decided, 2026-11-14
+Reported by Ashraf: on "Looks from this drop", the two top-half pieces of a layered look (D-053) sat on each other, because
+the board had one spot per slot. `lib/board.ts` now picks a layout from what's in the look: a layered top half puts the base
+top on the left and the knit or jacket (the layer) on the right, with bottoms and shoes below; a dress can take a layer
+beside it; a single top keeps the original collage. A unit test fails if two top-half pieces overlap. Checked on a phone
+with a tee, leather jacket and jeans, and a tee with a knit. Deployed with types, lint and unit tests but without the
+browser e2e suite, at Ashraf's request (to save resources).
