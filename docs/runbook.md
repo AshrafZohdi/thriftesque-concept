@@ -187,6 +187,16 @@ npx supabase db push        # linked to production; lists the new migrations and
 npm run deploy -- production
 ```
 
+## Cut-outs made on a Mac (D-054)
+
+```
+npm run cutouts -- make production                        # downloads covers, makes cut-outs, writes review.jpg
+npm run cutouts -- save production admin@thriftesque.com  # asks for the password, saves only empty cut-outs
+```
+
+Check `backups/cutouts-<date>/review.jpg` before saving and delete any bad `.webp`. Then deploy (or save settings on the
+dashboard) so the cached pages pick them up.
+
 ## Share card
 
 After a design change, run `node scripts/make-og-image.mjs` to remake `public/og.jpg` (needs the internet for the fonts while it

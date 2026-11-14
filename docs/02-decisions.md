@@ -478,3 +478,12 @@ Asked for by Ashraf after the team uploaded the first real pieces. On production
 - **"Make cut-outs"** on the dashboard: for pieces in the shop without a cut-out, runs the editor's in-browser model on each
   cover photo, one at a time, saving each as it goes (`saveCutout`). Best on a laptop. Stop keeps what's done; failures are
   counted and left for the editor.
+
+### D-054 Cut-outs for the first real stock made with macOS Vision. Decided, 2026-11-14
+Asked for by Ashraf: make the 25 missing cut-outs rather than leave it to the team. `scripts/vision-cutout.swift` uses
+Apple's built-in subject lifting (the engine behind "lift subject"), and `npm run cutouts -- make production` runs it on each
+cover photo into `backups/cutouts-<date>/` (git-ignored) with a contact sheet to check by eye; `-- save production <email>`
+signs in as a team member (password typed by Ashraf, hidden) and sets only cut-outs that are still empty.
+- Result on 2026-11-14: 22 good (the mannequin's neck shows above collars, like a shop window), TQ-0026 left out (Vision kept
+  a fragment), TQ-0018 skipped (no subject found). Those two are for the editor or the phone's "lift subject".
+- Vision runs only on a Mac; the dashboard's "Make cut-outs" (D-053) stays the team's own way to do it.
