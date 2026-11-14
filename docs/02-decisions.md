@@ -509,3 +509,10 @@ top on the left and the knit or jacket (the layer) on the right, with bottoms an
 beside it; a single top keeps the original collage. A unit test fails if two top-half pieces overlap. Checked on a phone
 with a tee, leather jacket and jeans, and a tee with a knit. Deployed with types, lint and unit tests but without the
 browser e2e suite, at Ashraf's request (to save resources).
+
+### D-057 Out of preview: the shop is open. Decided by Ashraf, 2026-11-14
+`NEXT_PUBLIC_SHOP_PREVIEW` removed from the production vars: no "Preview" strip, pages no longer `noindex`, and robots.txt lets
+search engines in (team pages and the API stay disallowed), pointing at the sitemap. Checked first: no sample pieces left
+(none of TQ-07xx visible), WhatsApp number set, delivery, payment, returns, reserved hold and chat retention filled in. Still
+empty, so left off the pages: drop name, who runs the shop (the page uses "Thriftesque, a secondhand clothing shop in Doha,
+Qatar"), contact email. Deployed with types, lint and unit tests, without the browser suite (Ashraf's call on resources).

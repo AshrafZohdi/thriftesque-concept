@@ -35,9 +35,8 @@
         "NEXT_PUBLIC_SUPABASE_URL": "https://pexllnnfemgdutonpdqw.supabase.co",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_DeXQiuEGG7XjQfWz7SWIrw_RK51gztf",
         "GEMINI_MODEL": "gemini-3.8-flash",
-        "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite",
-        // Sample pieces and a "Preview" strip until the real content is in (D-044). Delete this line at launch.
-        "NEXT_PUBLIC_SHOP_PREVIEW": "1"
+        "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite"
+        // Preview mode ended 2026-11-14 (D-044, D-057). To turn it back on: "NEXT_PUBLIC_SHOP_PREVIEW": "1", then deploy.
       },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque-production" }],
       "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "048438e3cf854beb908a693a4a886e5f" }],

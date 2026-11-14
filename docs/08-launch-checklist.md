@@ -4,8 +4,8 @@
 
 ## Content
 - [ ] C-1 to C-12 in `content-inventory.md` answered. No "owner to confirm" text left on the site
-- [ ] Sample products removed (`npm run demo -- remove production <email>`). Real products live
-- [ ] Preview mode off: `NEXT_PUBLIC_SHOP_PREVIEW` removed from the production vars and deployed (strip gone, robots.txt allows the shop) (D-044)
+- [x] Sample products removed. Real products live (25 on 2026-11-14)
+- [x] Preview mode off: `NEXT_PUBLIC_SHOP_PREVIEW` removed from the production vars and deployed (strip gone, robots.txt allows the shop) (D-044, D-057, 2026-11-14)
 - [ ] Settings row holds the real WhatsApp number, areas, fees and drop name
 
 ## Accounts and config
