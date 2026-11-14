@@ -72,8 +72,15 @@ describe("outfit pools and modes", () => {
   });
   it("offers a mode only when its slots have pieces", () => {
     expect(availableModes(pl)).toEqual(["separates", "dress"]);
-    expect(availableModes({ ...pl, bottom: [] })).toEqual(["dress"]);
+    expect(availableModes({ ...pl, top: [], bottom: [] })).toEqual(["dress"]);
     expect(initialOutfit({ top: [], dress: [], bottom: [], shoes: [] })).toBeNull();
+  });
+  it("works with only tops in stock: one Top slot to flip through (D-053)", () => {
+    const tops = { top: ["T1", "T2"], dress: [], bottom: [], shoes: [] };
+    expect(availableModes(tops)).toEqual(["separates"]);
+    expect(activeSlots("separates", tops).map((s) => s.key)).toEqual(["top"]);
+    expect(initialOutfit(tops)).toEqual({ mode: "separates", pick: { top: "T1" }, lock: {} });
+    expect(activeSlots("separates", { ...tops, bottom: ["B1"] }).map((s) => s.key)).toEqual(["top", "bottom"]);
   });
   it("leaves out an empty slot", () => {
     expect(activeSlots("separates", { ...pl, shoes: [] }).map((s) => s.key)).toEqual(["top", "bottom"]);

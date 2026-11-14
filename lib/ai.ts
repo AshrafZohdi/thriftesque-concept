@@ -1,7 +1,6 @@
 // AI helpers that don't touch the network: prompts, response schemas, and cleaning what Gemini returns (D-012, D-028).
 // Only product photos and product facts are ever sent, never customer data.
 import { CATEGORIES, ERAS, type Category, type Era } from "./catalog";
-import { slotOf } from "./outfit";
 
 const clip = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/\s*\u2014\s*/g, ", ").replace(/\s+/g, " ").trim().slice(0, max) : "");
 
@@ -48,15 +47,40 @@ export function cleanAutofill(raw: unknown): AutofillFields | null {
 
 export type LookPiece = { code: string; name: string; category: Category; colour: string | null; era: string; size: string };
 
+// What counts as a look (D-053), built from whatever is in stock: 2 to 4 pieces. The top half is one Tops or Knitwear piece and
+// can be layered (a knit or jacket over it). While bottoms are in stock, every look but a dress has one; with none in stock,
+// a layered top half is a complete look, so a shop with only tops still gets looks. Shoes are optional. A dress takes an
+// optional layer and shoes, nothing else. Bags aren't styled yet. 2 to 4 matches the looks table's check, so one bad
+// suggestion can't make the whole insert fail.
+export function lookShapeOk(cats: Category[], inStock: ReadonlySet<Category>): boolean {
+  if (cats.length < 2 || cats.length > 4) return false;
+  const n = (c: Category) => cats.filter((x) => x === c).length;
+  const [tops, knit, outer, dress, bottom, shoes] = (["Tops", "Knitwear", "Outerwear", "Dresses", "Bottoms", "Shoes"] as const).map(n);
+  if (n("Bags") || tops > 1 || knit > 1 || outer > 1 || dress > 1 || bottom > 1 || shoes > 1) return false;
+  if (dress) return tops === 0 && bottom === 0 && knit + outer <= 1;
+  const upper = tops + knit + outer;
+  if (upper < 1 || upper > 2) return false;
+  return inStock.has("Bottoms") ? bottom === 1 : upper === 2;
+}
+
 export function looksPrompt(pieces: LookPiece[]): string {
   const list = pieces.map((p) => `${p.code} | ${p.category} | ${p.name}${p.colour ? ` | ${p.colour}` : ""} | ${p.era} | size ${p.size}`).join("\n");
+  const cats = new Set(pieces.map((p) => p.category));
+  const inStock = [...cats].join(", ");
+  const bottomsLine = cats.has("Bottoms")
+    ? "Every outfit has one Bottoms piece (the same bottoms can appear in more than one outfit)."
+    : "There are no bottoms in stock, so each outfit is a layered top half (a top with a knit or jacket over it).";
   return `You put outfits together for a secondhand clothing shop in Doha. Every piece is one of one.
 Here is what's in stock (code | category | name | colour | era | size):
 ${list}
 
-Suggest up to 6 outfits using only these codes. Each outfit is either:
-- one piece from Tops, Knitwear or Outerwear, plus one from Bottoms, plus optionally one pair of Shoes, or
-- one from Dresses, plus one pair of Shoes.
+Categories in stock right now: ${inStock}. Only use these codes, and only build outfits these categories allow.
+Suggest up to 6 outfits of 2 to 4 pieces each:
+- The top half is one Tops or Knitwear piece, and can have one layer over it: a Knitwear or Outerwear piece (for example a
+  tee under a cardigan, or a shirt under a jacket). Never two pieces from Tops.
+- ${bottomsLine}
+- Add one pair of Shoes when they're in stock and go with it.
+- Or a Dresses piece with optional Shoes and an optional Knitwear or Outerwear layer.
 Pick pieces whose colours and styles go together. Don't repeat the same set twice.
 For each outfit return a title of 2 to 5 plain words (like "Denim day") and a note of one plain sentence naming the pieces.
 No hype words. No em dashes.`;
@@ -79,11 +103,11 @@ export const LOOKS_SCHEMA = {
 
 export type LookSuggestion = { title: string; note: string; codes: string[] };
 
-// Keeps a suggested look only if every code is a piece we sent, the slot rules hold, and it isn't a repeat (D-028).
-// The rules match the looks table's check (2 to 4 pieces), so one bad suggestion can't make the whole insert fail.
+// Keeps a suggested look only if every code is a piece we sent, its shape is allowed (lookShapeOk) and it isn't a repeat.
 export function validLooks(raw: unknown, pieces: LookPiece[], existing: string[][]): { looks: LookSuggestion[]; rejected: number } {
   const list = Array.isArray((raw as { looks?: unknown })?.looks) ? (raw as { looks: unknown[] }).looks : [];
   const byCode = new Map(pieces.map((p) => [p.code, p]));
+  const inStock = new Set(pieces.map((p) => p.category));
   const seen = new Set(existing.map((c) => [...c].sort().join(",")));
   const looks: LookSuggestion[] = [];
   for (const item of list.slice(0, 10)) {
@@ -91,11 +115,7 @@ export function validLooks(raw: unknown, pieces: LookPiece[], existing: string[]
     const codes = Array.isArray(r.codes) ? [...new Set(r.codes.filter((c): c is string => typeof c === "string"))] : [];
     const title = clip(r.title, 60);
     const note = clip(r.note, 200);
-    const slots = codes.map((c) => (byCode.has(c) ? slotOf(byCode.get(c)!.category) : undefined));
-    const count = (k: string) => slots.filter((s) => s === k).length;
-    // 2 to 4 pieces, like the database check and the shop (a dress needs shoes to count as a look).
-    const shapeOk = codes.length >= 2 && codes.length <= 4 && !slots.includes(undefined) && count("shoes") <= 1 &&
-      ((count("dress") === 1 && count("top") === 0 && count("bottom") === 0) || (count("dress") === 0 && count("top") === 1 && count("bottom") === 1));
+    const shapeOk = codes.every((c) => byCode.has(c)) && lookShapeOk(codes.map((c) => byCode.get(c)!.category), inStock);
     const key = [...codes].sort().join(",");
     if (!title || !shapeOk || seen.has(key)) continue;
     seen.add(key);

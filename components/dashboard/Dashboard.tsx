@@ -14,6 +14,7 @@ import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
 import d from "./dashboard.module.css";
 import { BulkUpload } from "./BulkUpload";
+import { CutoutBatch } from "./CutoutBatch";
 import { LooksPanel } from "./LooksPanel";
 import { ProductEditor, emptyProduct, loadForEdit, type EditTarget } from "./ProductEditor";
 
@@ -318,6 +319,7 @@ export function Dashboard() {
             <p className={d.empty}>No products match. Try another search or tab.</p>
           )}
         </section>
+        <CutoutBatch products={products} onSaved={() => refresh()} />
         <LooksPanel say={say} products={products} />
         <SettingsPanel initial={load.settings} onSaved={() => refresh()} />
       </main>

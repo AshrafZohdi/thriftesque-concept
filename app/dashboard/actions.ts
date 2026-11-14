@@ -168,3 +168,18 @@ export async function createDraft(input: DraftInput): Promise<{ ok: true; code: 
   if (error) return { ok: false, error: `Couldn't save the draft: ${error.message}` };
   return { ok: true, code: data.code };
 }
+
+const STORAGE_PATH = /^[A-Za-z0-9-]+\/[A-Za-z0-9-]+\.(webp|jpg|png)$/;
+
+// Saves a cut-out made in the team's browser for a piece that had none (D-053, "Make cut-outs"). The piece then appears in the
+// outfit builder and can be used in looks.
+export async function saveCutout(code: string, path: string): Promise<Result> {
+  if (!isCode(code) || !STORAGE_PATH.test(path)) return { ok: false, error: "That cut-out isn't valid." };
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const { data, error } = await t.db.from("products").update({ cutout: path }).eq("code", code).select("code");
+  if (error) return { ok: false, error: `Couldn't save the cut-out: ${error.message}` };
+  if (!data.length) return { ok: false, error: `${code} wasn't found.` };
+  refreshProduct(code);
+  return { ok: true };
+}

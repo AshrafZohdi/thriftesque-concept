@@ -465,3 +465,16 @@ Twice in one day a deploy needed a migration pushed first, and the only safeguar
 returns the newest migration applied (each migration updates it), and `scripts/check-schema.mjs` compares it with the newest
 file in `supabase/migrations` before every deploy. If the database is behind, the deploy stops before building. (Reading the
 public API description doesn't work for this: it shows anonymous visitors no column details.)
+
+### D-053 The builder and AI looks use whatever is in stock; cut-outs for pieces that have none. Decided, 2026-11-14
+Asked for by Ashraf after the team uploaded the first real pieces. On production: 25 live pieces (16 Tops, 5 Outerwear,
+2 Knitwear, 2 Bottoms), **none with a cut-out**, so the builder and AI looks had nothing to use either way.
+- **Builder:** shows whichever slots have pieces. Only tops gives a single Top slot to flip through; bottoms and shoes appear
+  as soon as there are some (before, it needed a top and a bottom or it hid itself).
+- **AI looks** (`lookShapeOk` in `lib/ai.ts`): 2 to 4 pieces; the top half is a Tops or Knitwear piece, optionally layered with
+  a Knitwear or Outerwear piece (never two Tops). While bottoms are in stock, every non-dress look has one (the same bottoms
+  can appear in several looks); with none in stock, a layered top half is a complete look. Shoes optional. A dress takes an
+  optional layer and shoes. The prompt lists the categories in stock and says which of these applies.
+- **"Make cut-outs"** on the dashboard: for pieces in the shop without a cut-out, runs the editor's in-browser model on each
+  cover photo, one at a time, saving each as it goes (`saveCutout`). Best on a laptop. Stop keeps what's done; failures are
+  counted and left for the editor.

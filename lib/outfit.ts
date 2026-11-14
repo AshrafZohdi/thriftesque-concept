@@ -28,9 +28,11 @@ export function pools(products: ShopProduct[]): Pools {
   return out;
 }
 
+// The builder works with whatever is in stock (D-053): only tops gives a single Top slot to flip through; add bottoms or
+// shoes and their slots appear.
 export function availableModes(pl: Pools): OutfitMode[] {
   const modes: OutfitMode[] = [];
-  if (pl.top.length && pl.bottom.length) modes.push("separates");
+  if (pl.top.length || pl.bottom.length) modes.push("separates");
   if (pl.dress.length) modes.push("dress");
   return modes;
 }

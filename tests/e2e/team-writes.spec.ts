@@ -270,6 +270,13 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   // The unfinished one still can't go live.
   await page.getByRole("region", { name: "Products" }).getByRole("combobox", { name: "Status of Untitled draft" }).selectOption("live");
   await expect(page.getByRole("status").filter({ hasText: /needs price, size, category, era, condition before it can show in the shop/ })).toBeVisible();
+  // It went live without a cut-out, so the dashboard offers to make one; afterwards it stops offering (D-053).
+  const cutouts = page.getByRole("region", { name: "Cut-outs" });
+  await expect(cutouts).toContainText("1 piece in the shop has no cut-out yet");
+  await cutouts.getByRole("button", { name: "Make 1 cut-out" }).click();
+  await expect(cutouts.getByRole("status")).toContainText("1 cut-out made", { timeout: 120_000 }); // first run downloads the model
+  await expect(cutouts.getByRole("button", { name: /^Make \d+ cut-out/ })).toHaveCount(0);
+
   await page.goto("/");
   await expect(page.locator("#shop article", { hasText: "Bulk striped tee" })).toContainText("55");
 });

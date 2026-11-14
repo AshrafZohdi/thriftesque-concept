@@ -61,9 +61,17 @@ drop name shown at the top of the shop, and the delivery areas with their fees. 
 a reserved piece, and how long you keep order chats. They appear on the Terms and Privacy pages (delivery and payment also on
 the shop). Anything you leave empty is simply left off those pages.
 
+## Cut-outs
+
+The outfit builder and looks only use pieces that have a cut-out (the piece with its background removed). If some pieces
+don't have one, the dashboard shows a **Cut-outs** section: press **Make cut-outs** on a laptop and keep the page open. Then
+check a few in the shop's outfit builder; if one looks wrong, open that piece and use "Upload your own cut-out" with your
+phone's "lift subject".
+
 ## Looks
 
-**Suggest looks** asks the AI for outfits from live pieces that have cut-outs. Suggestions arrive as drafts; nothing shows in
+**Suggest looks** asks the AI for outfits from live pieces that have cut-outs, using whatever is in stock: tops with bottoms
+when there are bottoms, layered tops (a top with a knit or jacket over it) when there aren't. Suggestions arrive as drafts; nothing shows in
 the shop until you press **Publish**. A published look hides itself if one of its pieces is sold or hidden.
 
 ## Good to know
