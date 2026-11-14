@@ -531,7 +531,9 @@ fixed:
   still helps search and AI answers).
 - **/llms.txt** for AI assistants: summary, FAQ answers, the live pieces with links; refreshed on every dashboard save.
 - **Cloudflare Web Analytics**, cookieless, no banner needed: one switch (`NEXT_PUBLIC_WEB_ANALYTICS`) allows its script in
-  the CSP and describes it on the privacy page. Enabled for the zone in the Cloudflare dashboard (automatic setup; it reports
-  to this domain's `/cdn-cgi/rum`). It doesn't record `utm_` parameters (by design, per Cloudflare's docs), so it shows
+  the CSP and describes it on the privacy page. Found already enabled for the zone (automatic setup, created by Cloudflare
+  when the domain was added on 2026-11-13): Cloudflare had been injecting its beacon, but our CSP blocked it, so nothing ran
+  and nothing was collected before this change. Checked after the deploy: the beacon loads and reports to this domain's
+  `/cdn-cgi/rum`, with no CSP errors. It doesn't record `utm_` parameters (by design, per Cloudflare's docs), so it shows
   visits, pages, referring sites, countries and devices, not which ad was clicked.
 - Not done (owner actions): Google Business Profile, Google Search Console, an Arabic version.
