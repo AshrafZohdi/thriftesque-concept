@@ -136,3 +136,19 @@ export function Footer({ waHref }: { waHref: string | null }) {
     </footer>
   );
 }
+
+// Questions and answers from lib/faq.ts. Native <details>, so it works without JavaScript and with the keyboard.
+export function Faq({ items }: { items: { q: string; a: string }[] }) {
+  return (
+    <Section id="faq" kicker="FAQ" title="Good to know">
+      <div className={s.faq}>
+        {items.map((f) => (
+          <details key={f.q}>
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </Section>
+  );
+}

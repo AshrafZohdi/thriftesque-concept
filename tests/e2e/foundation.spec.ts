@@ -100,7 +100,7 @@ test("terms and privacy are linked from every page and pass axe", async ({ page 
 test("search engines get structured data, a share card and a manifest", async ({ page, request }) => {
   await page.goto("/");
   const home = await page.locator('script[type="application/ld+json"]').allTextContents();
-  expect(home.map((t) => JSON.parse(t)).flat().map((d) => d["@type"])).toEqual(["OnlineStore", "WebSite"]);
+  expect(home.map((t) => JSON.parse(t)).flat().map((d) => d["@type"])).toEqual(["OnlineStore", "WebSite", "FAQPage"]);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og\.jpg$/);
   expect((await request.get("/og.jpg")).headers()["content-type"]).toContain("image/jpeg");
 
@@ -111,4 +111,25 @@ test("search engines get structured data, a share card and a manifest", async ({
   const manifest = await (await request.get("/manifest.webmanifest")).json();
   expect(manifest).toMatchObject({ name: "Thriftesque", start_url: "/" });
   for (const icon of manifest.icons) expect((await request.get(icon.src)).status()).toBe(200);
+});
+
+test("the FAQ, its structured data, llms.txt and product snippets (D-058)", async ({ page, request }) => {
+  await page.goto("/");
+  const faq = page.getByRole("region", { name: "Good to know" });
+  await faq.getByText("How do I order?").click();
+  await expect(faq).toContainText("Your bag becomes a ready-made message");
+  const data = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((t) => JSON.parse(t)).flat();
+  expect(data.find((d) => d["@type"] === "FAQPage").mainEntity.length).toBeGreaterThanOrEqual(4);
+  await expect(page).toHaveTitle("Thriftesque | Vintage and secondhand clothes in Doha, Qatar");
+
+  const llms = await request.get("/llms.txt");
+  expect(llms.status()).toBe(200);
+  const text = await llms.text();
+  expect(text).toMatch(/^# Thriftesque\n\n> Hand-picked vintage and secondhand clothing in Doha, Qatar\./);
+  expect(text).toMatch(/- \[.+\]\(http.+\/p\/TQ-\d+\): /);
+
+  await page.goto("/p/TQ-0705");
+  const desc = await page.locator('meta[name="description"]').getAttribute("content");
+  expect(desc!.length).toBeLessThanOrEqual(160);
+  expect(desc).toContain("One of one, order on WhatsApp.");
 });

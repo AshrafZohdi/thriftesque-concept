@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ShopProduct } from "./shop-model";
-import { jsonLdText, productJsonLd, shopJsonLd } from "./structured-data";
+import { jsonLdText, productJsonLd, productSnippet, shopJsonLd } from "./structured-data";
 
 const piece: ShopProduct = {
   code: "TQ-0705", name: "Butter yellow pinafore", brand: "Unbranded", era: "90s", category: "Dresses", size: "M", price: 140,
@@ -36,5 +36,19 @@ describe("shopJsonLd and jsonLdText", () => {
     const text = jsonLdText({ name: "</script><script>alert(1)</script>" });
     expect(text).not.toContain("</script>");
     expect(JSON.parse(text).name).toBe("</script><script>alert(1)</script>");
+  });
+});
+
+describe("productSnippet (D-058)", () => {
+  it("leads with the description and fits a search result", () => {
+    const long = { ...piece, description: "Navy knit with a big yellow star across the front. Soft wool blend, ribbed cuffs and hem, barely worn. Fits relaxed through the body." };
+    const s = productSnippet(long);
+    expect(s.startsWith("Navy knit with a big yellow star across the front.")).toBe(true);
+    expect(s).toContain("Size M, 140 QAR, very good condition. One of one, order on WhatsApp.");
+    expect(s.length).toBeLessThanOrEqual(160);
+  });
+  it("says sold or reserved first, and falls back without a description", () => {
+    expect(productSnippet({ ...piece, status: "sold" })).toMatch(/^Cotton twill\. Sold\. Size M/);
+    expect(productSnippet({ ...piece, description: null })).toBe("Size M · Very good · 90s. One of one, order on WhatsApp.");
   });
 });

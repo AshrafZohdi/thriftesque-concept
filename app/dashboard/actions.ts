@@ -16,6 +16,7 @@ function refreshProduct(code: string) {
   revalidatePath("/");
   revalidatePath(`/p/${code}`);
   revalidatePath("/sitemap.xml");
+  revalidatePath("/llms.txt");
 }
 
 export async function setStatus(code: string, status: string): Promise<Result> {
@@ -63,8 +64,9 @@ export async function saveSettings(input: SettingsInput): Promise<Result> {
     })
     .eq("id", 1);
   if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
-  // Settings show on every page (strip, footer, bag, terms, privacy), so refresh them all.
+  // Settings show on every page (strip, footer, bag, terms, privacy, FAQ), so refresh them all, and the AI summary.
   revalidatePath("/", "layout");
+  revalidatePath("/llms.txt");
   return { ok: true };
 }
 

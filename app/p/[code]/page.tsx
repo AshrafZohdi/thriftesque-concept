@@ -11,7 +11,7 @@ import { isCode } from "@/lib/dashboard";
 import { JsonLd } from "@/components/JsonLd";
 import { getShop } from "@/lib/shop";
 import { siteUrl } from "@/lib/site";
-import { productJsonLd } from "@/lib/structured-data";
+import { productJsonLd, productSnippet } from "@/lib/structured-data";
 import { waLink } from "@/lib/wa";
 
 // Rendered on first visit, then cached until the dashboard changes the shop (D-021).
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps<"/p/[code]">): Prom
   const p = data.product;
   const state = p.status === "sold" ? " (sold)" : p.status === "reserved" ? " (reserved)" : "";
   const title = `${p.name}, ${p.price} QAR${state} | Thriftesque`;
-  const description = `Size ${p.size} · ${p.condition} · ${p.era}. One of one, order on WhatsApp.`;
+  const description = productSnippet(p);
   return {
     title,
     description,

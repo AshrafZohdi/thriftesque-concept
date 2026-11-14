@@ -3,7 +3,7 @@ import { preconnect } from "react-dom";
 import { Anton, Instrument_Sans, Space_Mono } from "next/font/google";
 import { ChromeDefs } from "@/components/Chrome";
 import { PreviewStrip } from "@/components/PreviewStrip";
-import { isPreview, siteUrl } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_TITLE, isPreview, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted at build time, so no request goes to Google (D-018). Families from option F (D-029).
@@ -13,9 +13,8 @@ const spaceMono = Space_Mono({ variable: "--font-spacemono", subsets: ["latin"],
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Thriftesque | Pre-loved pieces, one of each",
-  description:
-    "Hand-picked secondhand clothing in Qatar. Every piece is one of one. Browse the drop and order on WhatsApp.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   // Sample pieces shouldn't end up in search results (D-044).
   ...(isPreview ? { robots: { index: false, follow: false } } : {}),
 };

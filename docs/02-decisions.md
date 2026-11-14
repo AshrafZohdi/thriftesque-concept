@@ -516,3 +516,22 @@ search engines in (team pages and the API stay disallowed), pointing at the site
 (none of TQ-07xx visible), WhatsApp number set, delivery, payment, returns, reserved hold and chat retention filled in. Still
 empty, so left off the pages: drop name, who runs the shop (the page uses "Thriftesque, a secondhand clothing shop in Doha,
 Qatar"), contact email. Deployed with types, lint and unit tests, without the browser suite (Ashraf's call on resources).
+
+### D-058 Search and AI visibility, and privacy-friendly analytics for ads. Decided by Ashraf, 2026-11-14
+Audit first (live): Google, Bing, Apple and the AI crawlers (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot,
+PerplexityBot) all get 200; sitemap with the 25 pieces; structured data on every piece; 20 of 25 with descriptions. Gaps
+fixed:
+- **Title and description** carry search words: "Thriftesque | Vintage and secondhand clothes in Doha, Qatar" (`SITE_TITLE`,
+  `SITE_DESCRIPTION` in `lib/site.ts`, one source for the page, share cards, manifest and structured data). The hero line
+  under the headline now says "in Doha".
+- **Product snippets** (`productSnippet`) lead with the piece's own description, then size, price, condition and "order on
+  WhatsApp", within 160 characters; "Sold" or "Reserved" first when it applies.
+- **FAQ** on the home page (`lib/faq.ts`), answered only from how the shop works and the details the team filled in; empty
+  ones are left out. Also `FAQPage` structured data (Google shows FAQ rich results only for some sites now, but the content
+  still helps search and AI answers).
+- **/llms.txt** for AI assistants: summary, FAQ answers, the live pieces with links; refreshed on every dashboard save.
+- **Cloudflare Web Analytics**, cookieless, no banner needed: one switch (`NEXT_PUBLIC_WEB_ANALYTICS`) allows its script in
+  the CSP and describes it on the privacy page. Enabled for the zone in the Cloudflare dashboard (automatic setup; it reports
+  to this domain's `/cdn-cgi/rum`). It doesn't record `utm_` parameters (by design, per Cloudflare's docs), so it shows
+  visits, pages, referring sites, countries and devices, not which ad was clicked.
+- Not done (owner actions): Google Business Profile, Google Search Console, an Arabic version.

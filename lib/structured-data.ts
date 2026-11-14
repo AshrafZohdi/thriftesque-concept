@@ -1,6 +1,7 @@
 // schema.org JSON-LD for search engines: the shop on the home page, and each piece with its price, availability and condition
 // on its product page. Built only from real product data; nothing here is invented (no ratings, no reviews, no stock counts).
 import type { ShopProduct } from "./shop-model";
+import { SITE_DESCRIPTION } from "./site";
 
 const TIKTOK = "https://www.tiktok.com/@thriftesque";
 
@@ -16,7 +17,7 @@ export function shopJsonLd(siteUrl: string) {
       name: "Thriftesque",
       url: `${siteUrl}/`,
       logo: `${siteUrl}/icon-512.png`,
-      description: "Hand-picked secondhand clothing in Qatar. Every piece is one of one, ordered on WhatsApp.",
+      description: SITE_DESCRIPTION,
       areaServed: { "@type": "Country", name: "Qatar" },
       currenciesAccepted: "QAR",
       sameAs: [TIKTOK],
@@ -67,4 +68,21 @@ export function productJsonLd(p: ShopProduct, siteUrl: string) {
 // Safe inside a <script> tag: a "</script>" or "<!--" in a product name can't end the tag early.
 export function jsonLdText(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+// The product page's search snippet (D-058): the piece's own description first, cut at a sentence or word so it reads
+// whole, then size, price and how to order. About 160 characters, which is what search results show.
+export function productSnippet(p: Pick<ShopProduct, "description" | "size" | "price" | "condition" | "era" | "status">): string {
+  const state = p.status === "sold" ? "Sold. " : p.status === "reserved" ? "Reserved. " : "";
+  const facts = `${state}Size ${p.size}, ${p.price} QAR, ${p.condition.toLowerCase()} condition. One of one, order on WhatsApp.`;
+  const desc = (p.description ?? "").replace(/\s+/g, " ").trim();
+  if (!desc) return `${state}Size ${p.size} · ${p.condition} · ${p.era}. One of one, order on WhatsApp.`;
+  const room = 160 - facts.length - 1;
+  let lead = desc;
+  if (lead.length > room) {
+    const cut = lead.slice(0, room);
+    const sentence = cut.lastIndexOf(". ");
+    lead = sentence > room * 0.5 ? cut.slice(0, sentence + 1) : `${cut.slice(0, cut.lastIndexOf(" "))}…`;
+  }
+  return `${/[.!?…]$/.test(lead) ? lead : `${lead}.`} ${facts}`;
 }

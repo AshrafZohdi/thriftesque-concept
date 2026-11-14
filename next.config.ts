@@ -5,10 +5,14 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
   : "";
 
+// Cloudflare Web Analytics (D-058): Cloudflare adds its beacon script at the edge and it reports to /cdn-cgi/rum on this
+// domain, so only the script's origin needs allowing. The same switch adds it to the privacy page (lib/site.ts).
+const analytics = process.env.NEXT_PUBLIC_WEB_ANALYTICS === "1" ? " https://static.cloudflareinsights.com" : "";
+
 // Static pages can't carry per-request nonces, so inline scripts are allowed (Next's hydration payload is inline).
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
+  "script-src 'self' 'unsafe-inline'" + analytics + (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabase}`.trim(),
   "font-src 'self'",

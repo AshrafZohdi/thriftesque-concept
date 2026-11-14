@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ContactLine, Fact, LegalPage } from "@/components/LegalPage";
 import { getShop } from "@/lib/shop";
 import { shopFacts } from "@/lib/shop-facts";
+import { webAnalytics } from "@/lib/site";
 
 // Describes what the site actually does (D-046). If the code changes how data is handled, this page changes with it.
 export const revalidate = false;
@@ -27,7 +28,11 @@ export default async function PrivacyPage() {
         <li>You don&apos;t need an account to shop, and we don&apos;t ask for one.</li>
         <li>Your bag is saved in your own browser, not on our servers.</li>
         <li>Nothing is sent to us until you press send in WhatsApp.</li>
-        <li>No analytics, no advertising and no tracking cookies.</li>
+        <li>
+          {webAnalytics
+            ? "No advertising and no tracking cookies. We count visits with analytics that uses no cookies and doesn't identify you."
+            : "No analytics, no advertising and no tracking cookies."}
+        </li>
       </ul>
 
       <h2 className="display">Your bag</h2>
@@ -58,7 +63,13 @@ export default async function PrivacyPage() {
       <h2 className="display">Who helps us run the site</h2>
       <ul>
         <li>
-          <strong>Cloudflare</strong> hosts the site and protects it from attacks. Like any web server it sees your IP address
+          <strong>Cloudflare</strong> hosts the site and protects it from attacks.{" "}
+          {webAnalytics && (
+            <>
+              Its Web Analytics counts visits: which pages are viewed, the site you came from, your country and device type,
+              and how fast pages load. It uses no cookies, keeps no profile of you and doesn&apos;t follow you to other sites.{" "}
+            </>
+          )} Like any web server it sees your IP address
           and the pages you request, and keeps short-lived logs (a few days) to run the service and fix problems.
         </li>
         <li>

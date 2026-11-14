@@ -16,7 +16,7 @@ export function Hero({ piece, liveCount, dropName, firstSection }: { piece: Shop
       <div className={s.heroCopy}>
         <span className={`${s.chipOut} mono`}>{dropName ? `${dropName} · ` : ""}{liveCount} pieces live</span>
         <h1 className="display">Pre-loved pieces, one of each.</h1>
-        <p>Hand-picked secondhand clothing, checked and measured. When a piece is gone, it&apos;s gone for good.</p>
+        <p>Hand-picked secondhand clothing in Doha, checked and measured. When a piece is gone, it&apos;s gone for good.</p>
         <div className={s.cta}>
           {firstSection === "looks" && <a className={`${s.btn} ${s.primary}`} href="#looks">See the looks</a>}
           <a className={`${s.btn} ${firstSection === "looks" ? s.secondary : s.primary}`} href="#shop">Shop the drop</a>

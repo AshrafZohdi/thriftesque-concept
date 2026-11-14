@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
+import { SITE_DESCRIPTION } from "@/lib/site";
 
 // Lets phones save the shop to the home screen with the right name, icon and colours.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Thriftesque",
     short_name: "Thriftesque",
-    description: "Hand-picked secondhand clothing in Qatar. Every piece is one of one.",
+    description: SITE_DESCRIPTION,
     start_url: "/",
     display: "browser",
     background_color: "#f4f7fb", // token-ok: --color-bg
