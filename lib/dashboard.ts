@@ -1,12 +1,13 @@
 // Pure dashboard logic: stats, search and status tabs, and settings validation. Unit tested.
 import { STATUSES, type Status } from "./catalog";
-import { validateAbout } from "./about";
+import { validateAbout, validateAboutPhotos } from "./about";
+import type { AboutPhoto } from "./shop-model";
 import { EMPTY_DETAILS, validateDetails, type ShopDetails } from "./shop-facts";
 
 // Hidden drafts from a bulk upload can be missing these until the team fills them in (D-051).
 export type TeamProduct = {
   code: string; name: string; brand: string; era: string | null; category: string | null; size: string | null; price_qar: number | null;
-  condition?: string | null; status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
+  was_price_qar?: number | null; section_ids?: string[]; condition?: string | null; status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
 };
 
 const NEEDED_FOR_SHOP = [["price_qar", "price"], ["size", "size"], ["category", "category"], ["era", "era"], ["condition", "condition"]] as const;
@@ -45,7 +46,9 @@ export function searchProducts(list: TeamProduct[], query: string, tab: Status |
 export const isStatus = (v: unknown): v is Status => typeof v === "string" && (STATUSES as readonly string[]).includes(v);
 export const isCode = (v: unknown): v is string => typeof v === "string" && /^TQ-\d{4,}$/.test(v);
 
-export type SettingsInput = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string };
+export type SettingsInput = {
+  whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string; aboutPhotos: AboutPhoto[];
+};
 
 // Returns cleaned settings, or the first problem in plain words.
 export function validateSettings(input: SettingsInput): { ok: true; value: SettingsInput } | { ok: false; error: string } {
@@ -67,5 +70,28 @@ export function validateSettings(input: SettingsInput): { ok: true; value: Setti
   if (!details.ok) return details;
   const about = validateAbout(input.about);
   if (!about.ok) return about;
-  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees, details: details.value, about: about.value } };
+  const aboutPhotos = validateAboutPhotos(input.aboutPhotos);
+  if (!aboutPhotos.ok) return aboutPhotos;
+  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees, details: details.value, about: about.value, aboutPhotos: aboutPhotos.value } };
+}
+
+// Team-made sections (D-060), in shop order. A new one has no id yet.
+export type SectionInput = { id?: string; name: string };
+export const SECTIONS_MAX = 20;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function validateSections(input: SectionInput[]): { ok: true; value: SectionInput[] } | { ok: false; error: string } {
+  const list = Array.isArray(input) ? input : [];
+  if (list.length > SECTIONS_MAX) return { ok: false, error: `${SECTIONS_MAX} sections at most.` };
+  const seen = new Set<string>();
+  const value: SectionInput[] = [];
+  for (const s of list) {
+    const name = String(s?.name ?? "").replace(/\s+/g, " ").trim();
+    if (!name || name.length > 30) return { ok: false, error: "Every section needs a name (30 characters at most)." };
+    if (seen.has(name.toLowerCase())) return { ok: false, error: `"${name}" is listed twice.` };
+    seen.add(name.toLowerCase());
+    if (s.id !== undefined && !UUID.test(s.id)) return { ok: false, error: "That section isn't valid. Refresh the page." };
+    value.push(s.id ? { id: s.id, name } : { name });
+  }
+  return { ok: true, value };
 }

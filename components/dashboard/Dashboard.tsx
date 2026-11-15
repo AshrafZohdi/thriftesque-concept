@@ -9,7 +9,10 @@ import { deleteProduct, saveSettings, setStatus } from "@/app/dashboard/actions"
 import { ChromeHeart } from "@/components/Chrome";
 import s from "@/components/shop/shop.module.css";
 import { STATUSES, codeNumber, type Status } from "@/lib/catalog";
-import { ABOUT_DEFAULT, ABOUT_MAX } from "@/lib/about";
+import { ABOUT_DEFAULT, ABOUT_MAX, ABOUT_PHOTOS_MAX, aboutPhotosFrom } from "@/lib/about";
+import { toProductPhoto } from "@/lib/image";
+import { PHOTO } from "@/lib/photo-spec";
+import type { ShopSection } from "@/lib/shop-model";
 import { dashboardStats, missingForShop, searchProducts, type SettingsInput, type TeamProduct } from "@/lib/dashboard";
 import { DETAIL_COLUMNS, DETAIL_LABELS, detailsFromRow, missingDetails, type ShopDetails } from "@/lib/shop-facts";
 import { browserDb } from "@/lib/supabase/browser";
@@ -18,10 +21,11 @@ import d from "./dashboard.module.css";
 import { BulkUpload } from "./BulkUpload";
 import { CutoutBatch } from "./CutoutBatch";
 import { LooksPanel } from "./LooksPanel";
-import { ProductEditor, emptyProduct, loadForEdit, type EditTarget } from "./ProductEditor";
+import { ProductEditor, emptyProduct, loadForEdit, upload, type EditTarget } from "./ProductEditor";
+import { SectionsPanel } from "./SectionsPanel";
 
 type Load = { state: "checking" } | { state: "not-team"; email: string } | { state: "error"; message: string } | {
-  state: "ready"; email: string; products: TeamProduct[]; settings: SettingsInput;
+  state: "ready"; email: string; products: TeamProduct[]; settings: SettingsInput; sections: ShopSection[];
 };
 
 const LABEL: Record<Status, string> = { live: "Live", reserved: "Reserved", sold: "Sold", hidden: "Hidden" };
@@ -33,11 +37,12 @@ async function loadAll(): Promise<Load | "signed-out"> {
   const email = data.user.email ?? "";
   const team = await db.rpc("is_team");
   if (team.data !== true) return { state: "not-team", email };
-  const [products, settings] = await Promise.all([
-    db.from("products").select("code,name,brand,era,category,size,price_qar,condition,status,photos,cutout,created_at,sold_at"),
-    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,about_text,${DETAIL_COLUMNS}`).eq("id", 1).single(),
+  const [products, settings, sections] = await Promise.all([
+    db.from("products").select("code,name,brand,era,category,size,price_qar,was_price_qar,section_ids,condition,status,photos,cutout,created_at,sold_at"),
+    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,about_text,about_photos,${DETAIL_COLUMNS}`).eq("id", 1).single(),
+    db.from("sections").select("id,name").order("position").order("created_at"),
   ]);
-  if (products.error || settings.error) return { state: "error", message: (products.error ?? settings.error)!.message };
+  if (products.error || settings.error || sections.error) return { state: "error", message: (products.error ?? settings.error ?? sections.error)!.message };
   const fees = Array.isArray(settings.data.delivery_fees) ? settings.data.delivery_fees : [];
   return {
     state: "ready",
@@ -49,7 +54,9 @@ async function loadAll(): Promise<Load | "signed-out"> {
       deliveryFees: fees.map((f) => ({ area: String((f as { area?: string })?.area ?? ""), fee: Number((f as { fee_qar?: number })?.fee_qar ?? 0) })),
       details: detailsFromRow(settings.data),
       about: settings.data.about_text,
+      aboutPhotos: aboutPhotosFrom(settings.data.about_photos),
     },
+    sections: sections.data,
   };
 }
 
@@ -71,7 +78,10 @@ function Row({ p, onStatus, onDelete, onEdit }: {
       </div>
       <span className={`${d.muted} ${d.hideSm}`}>{p.category ?? "No category"}</span>
       <span className={d.hideSm}>{p.size ?? "No size"}</span>
-      <span className={d.price}>{p.price_qar === null ? "No price" : `${p.price_qar} QAR`}</span>
+      <span className={d.price}>
+        {p.price_qar === null ? "No price" : `${p.price_qar} QAR`}
+        {p.was_price_qar ? <small className={d.muted}> was {p.was_price_qar}</small> : null}
+      </span>
       <select className={d.status} data-s={p.status} value={p.status} aria-label={`Status of ${p.name}`}
         onChange={(e) => onStatus(p.code, e.target.value as Status)}>
         {STATUSES.map((st) => <option key={st} value={st}>{LABEL[st]}</option>)}
@@ -104,8 +114,13 @@ const DETAIL_FIELDS: [keyof ShopDetails, string, number][] = [
   ["orderRetentionText", "For example: 6 months after delivery", 0],
 ];
 
+// An About photo in the settings: saved ones have a path; new ones wait as a resized blob until Save settings uploads them.
+type AboutItem = { key: string; path?: string; blob?: Blob; ext?: string; preview: string; alt: string };
+
 function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: (v: SettingsInput) => void }) {
   const [v, setV] = useState(initial);
+  const [photos, setPhotos] = useState<AboutItem[]>(() => initial.aboutPhotos.map((p) => ({ key: p.path, path: p.path, preview: photoUrl(p.path), alt: p.alt })));
+  const photoInput = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const waId = useId();
@@ -116,14 +131,54 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
   const setFee = (i: number, patch: Partial<{ area: string; fee: number }>) =>
     setV({ ...v, deliveryFees: v.deliveryFees.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
 
+  async function addPhotos(files: FileList | null) {
+    if (!files?.length) return;
+    const room = ABOUT_PHOTOS_MAX - photos.length;
+    const added: AboutItem[] = [];
+    setBusy(true);
+    for (const f of [...files].slice(0, room)) {
+      setMsg(`Resizing photo ${added.length + 1}…`);
+      try {
+        const { blob, ext } = await toProductPhoto(f);
+        added.push({ key: crypto.randomUUID(), blob, ext, preview: URL.createObjectURL(blob), alt: "" });
+      } catch (err) {
+        setMsg(err instanceof Error ? err.message : "That photo couldn't be read.");
+      }
+    }
+    setBusy(false);
+    setPhotos([...photos, ...added]);
+    setMsg(files.length > room ? `${ABOUT_PHOTOS_MAX} photos at most, so only the first ${room} were added. Press Save settings to publish them.` : added.length ? "Press Save settings to publish the new photos." : "");
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setMsg("");
-    const r = await saveSettings(v);
+    // New photos are uploaded only now, so a photo picked and then removed never reaches storage.
+    const fresh: string[] = [];
+    let saved: { path: string; alt: string }[];
+    try {
+      saved = [];
+      for (const p of photos) {
+        if (p.path) saved.push({ path: p.path, alt: p.alt });
+        else {
+          setMsg("Uploading photos…");
+          const path = await upload("a", p.blob!, p.ext!);
+          fresh.push(path);
+          saved.push({ path, alt: p.alt });
+        }
+      }
+    } catch (err) {
+      if (fresh.length) await browserDb().storage.from(PHOTO.bucket).remove(fresh);
+      setBusy(false);
+      return setMsg(err instanceof Error ? err.message : "A photo didn't upload.");
+    }
+    const next = { ...v, aboutPhotos: saved };
+    const r = await saveSettings(next);
+    if (!r.ok && fresh.length) await browserDb().storage.from(PHOTO.bucket).remove(fresh);
     setBusy(false);
     setMsg(r.ok ? "Saved. The shop shows the new settings now." : r.error);
-    if (r.ok) onSaved(v);
+    if (r.ok) onSaved(next);
   }
 
   return (
@@ -160,6 +215,31 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
           Left empty, the page shows the short text above. {v.about.length} of {ABOUT_MAX} characters.
         </p>
       </div>
+      <fieldset className={d.areas} style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={`${aboutId}-photos-hint`}>
+        <legend className={d.fieldLegend}>About page photos ({photos.length} of {ABOUT_PHOTOS_MAX})</legend>
+        <div className={d.aboutPhotos}>
+          {photos.map((p, i) => (
+            <figure className={d.aboutPhoto} key={p.key}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.preview} alt={`About photo ${i + 1}`} width={720} height={900} />
+              <input aria-label={`Describe about photo ${i + 1} (optional)`} value={p.alt} maxLength={120} placeholder="Describe it"
+                onChange={(e) => setPhotos(photos.map((x) => (x.key === p.key ? { ...x, alt: e.target.value } : x)))} />
+              <button className={d.btnSm} type="button" aria-label={`Remove about photo ${i + 1}`} onClick={() => setPhotos(photos.filter((x) => x.key !== p.key))}>Remove</button>
+            </figure>
+          ))}
+          {photos.length < ABOUT_PHOTOS_MAX && (
+            <button type="button" className={d.addPhoto} onClick={() => photoInput.current?.click()} disabled={busy}>
+              <span aria-hidden="true">+</span>Add photos
+            </button>
+          )}
+        </div>
+        <input ref={photoInput} className="sr-only-text" type="file" accept="image/*" multiple tabIndex={-1} aria-hidden="true"
+          onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+        <p className={d.muted} id={`${aboutId}-photos-hint`}>
+          Model shots or the team, shown under the About text. Cropped to 4:5 (portrait) and made small. The description is read
+          out to blind visitors and helps Google; for example: &quot;Model in the brown cropped jacket&quot;.
+        </p>
+      </fieldset>
       <fieldset className={d.areas} style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={`${detailsId}-hint`}>
         <legend className={d.fieldLegend}>Terms and privacy details</legend>
         <p className={d.muted} id={`${detailsId}-hint`}>
@@ -334,10 +414,11 @@ export function Dashboard() {
         </section>
         <CutoutBatch products={products} onSaved={() => refresh()} />
         <LooksPanel say={say} products={products} />
+        <SectionsPanel initial={load.sections} products={products} onSaved={() => refresh()} />
         <SettingsPanel initial={load.settings} onSaved={() => refresh()} />
       </main>
       </div>
-      <ProductEditor target={edit?.target ?? null} trigger={edit?.trigger ?? null} onClose={() => setEdit(null)} onSaved={onSaved} />
+      <ProductEditor target={edit?.target ?? null} sections={load.sections} trigger={edit?.trigger ?? null} onClose={() => setEdit(null)} onSaved={onSaved} />
       <BulkUpload open={bulk?.n ?? null} trigger={bulk?.trigger ?? null} onClose={() => setBulk(null)}
         onDone={(added) => { if (added) { setTab("hidden"); refresh(); } }} onEdit={openEditor} products={products} />
       <p className={d.toast} role="status" aria-live="polite">{note}</p>

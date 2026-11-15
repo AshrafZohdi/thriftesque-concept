@@ -35,3 +35,22 @@ describe("productSchema", () => {
     expect(bad({ status: "deleted" })).toBe(false);
   });
 });
+
+describe("sale price and sections (D-060)", () => {
+  const parse = (over: object) => productSchema.safeParse({ ...good, ...over });
+  it("an empty was price means not on sale", () => {
+    expect(toProductRow(parse({ wasPrice: "" }).data!).was_price_qar).toBeNull();
+    expect(toProductRow(parse({ wasPrice: null }).data!).was_price_qar).toBeNull();
+  });
+  it("takes a was price above the price, and explains one that isn't", () => {
+    expect(toProductRow(parse({ wasPrice: "180" }).data!).was_price_qar).toBe(180);
+    const r = parse({ wasPrice: "120" });
+    expect(r.success ? [] : r.error.issues.map((i) => i.message)).toEqual(["The was price has to be higher than the price, or leave it empty."]);
+    expect(parse({ wasPrice: "99.5" }).success).toBe(false);
+  });
+  it("keeps section ids, and refuses anything that isn't one", () => {
+    const id = "6f1c2b8e-3d4a-4b5c-9d6e-7f8091a2b3c4";
+    expect(toProductRow(parse({ sectionIds: [id] }).data!).section_ids).toEqual([id]);
+    expect(parse({ sectionIds: ["Men's"] }).success).toBe(false);
+  });
+});

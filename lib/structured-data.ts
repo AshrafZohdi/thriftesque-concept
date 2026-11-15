@@ -72,9 +72,10 @@ export function jsonLdText(data: unknown): string {
 
 // The product page's search snippet (D-058): the piece's own description first, cut at a sentence or word so it reads
 // whole, then size, price and how to order. About 160 characters, which is what search results show.
-export function productSnippet(p: Pick<ShopProduct, "description" | "size" | "price" | "condition" | "era" | "status">): string {
+export function productSnippet(p: Pick<ShopProduct, "description" | "size" | "price" | "condition" | "era" | "status"> & Partial<Pick<ShopProduct, "wasPrice">>): string {
   const state = p.status === "sold" ? "Sold. " : p.status === "reserved" ? "Reserved. " : "";
-  const facts = `${state}Size ${p.size}, ${p.price} QAR, ${p.condition.toLowerCase()} condition. One of one, order on WhatsApp.`;
+  const was = p.wasPrice && p.status !== "sold" ? ` (was ${p.wasPrice})` : "";
+  const facts = `${state}Size ${p.size}, ${p.price} QAR${was}, ${p.condition.toLowerCase()} condition. One of one, order on WhatsApp.`;
   const desc = (p.description ?? "").replace(/\s+/g, " ").trim();
   if (!desc) return `${state}Size ${p.size} · ${p.condition} · ${p.era}. One of one, order on WhatsApp.`;
   const room = 160 - facts.length - 1;

@@ -48,3 +48,24 @@
   color: var(--color-surface);
   text-decoration: none;
 }
+/* About photos (D-060): two across on phones, three on wider screens, wider than the text column. */
+.photos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-block: 24px 8px;
+}
+.photos img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid var(--color-ink);
+}
+@media (min-width: 53.75rem) {
+  .photos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(100vw - 64px, 960px);
+  }
+}

@@ -6,7 +6,7 @@ import type { ShopProduct, ShopSettings } from "./shop-model";
 
 const settings: ShopSettings = {
   whatsappNumber: "97412345678", dropName: "Drop 07",
-  deliveryFees: [{ area: "Al Sadd", fee: 15 }, { area: "Al Khor", fee: 25 }], details: EMPTY_DETAILS, about: "",
+  deliveryFees: [{ area: "Al Sadd", fee: 15 }, { area: "Al Khor", fee: 25 }], details: EMPTY_DETAILS, about: "", aboutPhotos: [],
 };
 const items = [
   { code: "TQ-0709", name: "Sage V-neck sweater", size: "M", price: 120 },

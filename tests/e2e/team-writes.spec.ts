@@ -95,6 +95,60 @@ test("the About page shows the default until the team writes their own (D-059)",
   await expect(main.getByRole("link", { name: "Browse the shop" })).toHaveAttribute("href", "/");
 });
 
+test("the team makes a section, puts a piece in it on sale, and the shop shows both (D-060)", async ({ page }) => {
+  await signIn(page);
+  const panel = page.getByRole("form", { name: "Sections" });
+  await panel.getByRole("button", { name: "+ Add section" }).click();
+  await panel.getByLabel("Section 3 name").fill("Jackets");
+  await panel.getByRole("button", { name: "Remove Men's" }).click();
+  await panel.getByRole("button", { name: "Save sections" }).click();
+  await expect(panel.getByRole("status")).toHaveText(/^Saved/);
+
+  await page.getByRole("button", { name: "Edit Green leather biker jacket" }).click();
+  const editor = page.getByRole("dialog", { name: "Edit TQ-0702" });
+  await editor.getByLabel("Jackets").check();
+  const was = editor.getByLabel("Price before the sale (QAR)");
+  await was.fill("300");
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(editor).toContainText("The was price has to be higher than the price, or leave it empty.");
+  await was.fill("400");
+  await editor.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "TQ-0702 saved" })).toBeVisible();
+
+  await page.goto("/");
+  const sections = page.getByRole("toolbar", { name: "Sections" });
+  await expect(sections.getByRole("button")).toHaveText([/^Sale\s*2$/, /^Basics\s*3$/, /^Jackets\s*1$/]);
+  await sections.getByRole("button", { name: /^Jackets/ }).click();
+  await expect(page.locator("#shop article")).toHaveCount(1);
+  await expect(page.locator("#shop article")).toContainText("20% off");
+});
+
+test("About photos: added, described, shown and removed from storage when taken off (D-060)", async ({ page }) => {
+  await signIn(page);
+  const group = page.getByRole("group", { name: /^About page photos/ });
+  await group.locator('input[type="file"]').setInputFiles(["design/img/chelsea-boots.jpg", "design/img/college-sweatshirt.jpg"]);
+  await group.getByLabel("Describe about photo 1 (optional)").fill("Model in the college sweatshirt");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Saved." })).toBeVisible();
+
+  await page.goto("/about");
+  const imgs = page.getByRole("main").locator("img");
+  await expect(imgs).toHaveCount(2);
+  await expect(imgs.first()).toHaveAttribute("alt", "Model in the college sweatshirt");
+  await expect(imgs.nth(1)).toHaveAttribute("alt", "Thriftesque, photo 2");
+  const firstSrc = (await imgs.first().getAttribute("src"))!;
+  expect((await page.request.get(firstSrc)).status()).toBe(200);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", firstSrc);
+
+  await signIn(page);
+  await page.getByRole("button", { name: "Remove about photo 1" }).click();
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Saved." })).toBeVisible();
+  await page.goto("/about");
+  await expect(imgs).toHaveCount(1);
+  expect((await page.request.get(firstSrc)).status()).not.toBe(200);
+});
+
 test.describe("product editor", () => {
   test("an empty save explains what's missing", async ({ page }) => {
     await signIn(page);

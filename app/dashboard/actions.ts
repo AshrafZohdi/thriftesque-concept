@@ -2,7 +2,8 @@
 // Dashboard writes. Each checks the session and team membership first (requireTeam), validates input, writes with the
 // signed-in user's session (so RLS applies too), then refreshes the cached shop pages it affects (D-021).
 import { revalidatePath } from "next/cache";
-import { isCode, isStatus, missingForShop, validateSettings, type SettingsInput } from "@/lib/dashboard";
+import { isCode, isStatus, missingForShop, validateSections, validateSettings, type SectionInput, type SettingsInput } from "@/lib/dashboard";
+import { aboutPhotosFrom } from "@/lib/about";
 import { looksPrompt, LOOKS_SCHEMA, validLooks, type LookPiece } from "@/lib/ai";
 import { geminiJson } from "@/lib/gemini";
 import { draftSchema, productSchema, toProductRow, type DraftInput, type ProductInput } from "@/lib/product-schema";
@@ -54,6 +55,7 @@ export async function saveSettings(input: SettingsInput): Promise<Result> {
   if (!v.ok) return v;
   const t = await requireTeam();
   if (!t.ok) return t;
+  const before = await t.db.from("settings").select("about_photos").eq("id", 1).single();
   const { error } = await t.db
     .from("settings")
     .update({
@@ -62,13 +64,46 @@ export async function saveSettings(input: SettingsInput): Promise<Result> {
       delivery_fees: v.value.deliveryFees.map((f) => ({ area: f.area, fee_qar: f.fee })),
       ...detailsToRow(v.value.details),
       about_text: v.value.about,
+      about_photos: v.value.aboutPhotos,
     })
     .eq("id", 1);
   if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
+  // About photos taken off the page are deleted, so storage doesn't fill up (1 GB on the free plan).
+  const kept = new Set(v.value.aboutPhotos.map((p) => p.path));
+  const dropped = aboutPhotosFrom(before.data?.about_photos).map((p) => p.path).filter((p) => !kept.has(p));
+  if (dropped.length) await t.db.storage.from(PHOTO.bucket).remove(dropped);
   // Settings show on every page (strip, footer, bag, terms, privacy, about, FAQ), so refresh them all, and the AI summary.
   revalidatePath("/", "layout");
   revalidatePath("/llms.txt");
   return { ok: true };
+}
+
+// Saves the whole list of sections in the order given (D-060). Ones left out are removed; the database then takes them off
+// their pieces, and the pieces stay.
+export async function saveSections(input: SectionInput[]): Promise<{ ok: true; sections: { id: string; name: string }[] } | { ok: false; error: string }> {
+  const v = validateSections(input);
+  if (!v.ok) return v;
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const cur = await t.db.from("sections").select("id");
+  if (cur.error) return { ok: false, error: `Couldn't save: ${cur.error.message}` };
+  const keep = new Set(v.value.flatMap((s) => (s.id ? [s.id] : [])));
+  const gone = cur.data.map((r) => r.id).filter((id) => !keep.has(id));
+  if (gone.length) {
+    const del = await t.db.from("sections").delete().in("id", gone);
+    if (del.error) return { ok: false, error: `Couldn't remove a section: ${del.error.message}` };
+  }
+  for (const [position, s] of v.value.entries()) {
+    const { error } = s.id
+      ? await t.db.from("sections").update({ name: s.name, position }).eq("id", s.id)
+      : await t.db.from("sections").insert({ name: s.name, position });
+    if (error) return { ok: false, error: error.code === "23505" ? `"${s.name}" already exists.` : `Couldn't save "${s.name}": ${error.message}` };
+  }
+  revalidatePath("/");
+  // The saved list with the new sections' ids, so the panel carries on from it.
+  const saved = await t.db.from("sections").select("id,name").order("position").order("created_at");
+  if (saved.error) return { ok: false, error: `Saved, but couldn't reload the list: ${saved.error.message}` };
+  return { ok: true, sections: saved.data };
 }
 
 // Creates (code null) or updates a product. New products get the next TQ code from the database (D-006).

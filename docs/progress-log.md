@@ -2,6 +2,23 @@
 
 Newest first.
 
+## 2026-11-16: Sale prices, sections, About photos (D-060)
+
+**Built, not deployed yet.** Needs migration `20261116010000` pushed first (`npx supabase db push`).
+
+**Found and fixed while testing**
+- "% off" said 19% for 320 down from 400 (floating point); now whole-number maths, with a unit test that fails on the old
+  formula.
+- The Sections panel lost its "Saved" message because the dashboard reload remounted it; it now keeps its own list.
+- The new price field's label contained "Price (QAR)", which made the existing editor test ambiguous; renamed to "Price
+  before the sale (QAR)".
+
+**Verified**
+- Typecheck, lint, tokens, 130 unit, 73 database tests. E2E on the Worker preview: the read-only suite in Chromium, Firefox,
+  WebKit, a 360 px phone and iPhone (230 passed; one existing Firefox test timed out under load and passed 3 of 3 when
+  re-run alone), then all 13 team-write tests.
+- Screenshots at 360 px (shop chips and cards, product page, Sections panel, editor, About photos) and 1280 px (About).
+
 ## 2026-11-16: About page, cut-outs to redo
 
 **Built, not deployed yet**: an About page the team edits on the dashboard (D-059). The production database needs the

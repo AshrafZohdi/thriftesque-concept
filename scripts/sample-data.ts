@@ -53,3 +53,11 @@ export const SAMPLE_SETTINGS = {
     ...["Al Wakra", "Al Khor", "Other"].map((area) => ({ area, fee_qar: 25 })),
   ],
 };
+
+// Local test data for sale prices and sections (D-060): one piece on sale, one section with pieces and one without (the shop
+// must leave an empty section out).
+export const SAMPLE_SALE: Record<string, number> = { "TQ-0710": 90 };
+export const SAMPLE_SECTIONS = [
+  { name: "Basics", codes: ["TQ-0709", "TQ-0710", "TQ-0717"] },
+  { name: "Men's", codes: [] as string[] },
+];

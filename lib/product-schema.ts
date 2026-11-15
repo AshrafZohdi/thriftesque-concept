@@ -16,6 +16,10 @@ export const productSchema = z
     category: z.enum(CATEGORIES, { message: "Choose a category." }),
     size: text(20, "Size").min(1, "Add a size."),
     price: z.coerce.number({ message: "Add a price." }).int("Price: whole QAR only.").min(1, "Add a price.").max(999_999, "That price is too high."),
+    // Sale (D-060): the price before the reduction. Empty means not on sale.
+    wasPrice: z.union([z.literal(""), z.null(), z.coerce.number({ message: "Was price: a whole number of QAR." }).int("Was price: whole QAR only.").min(1).max(999_999)]),
+    // Team-made sections the piece belongs to (D-060).
+    sectionIds: z.array(z.uuid()).max(10, "10 sections at most."),
     condition: z.enum(CONDITIONS, { message: "Choose a condition." }),
     colour: text(40, "Colour"),
     // Flat measurements in cm. Empty means not measured.
@@ -27,6 +31,8 @@ export const productSchema = z
     stylingTip: text(300, "Styling tip"),
   })
   .superRefine((v, ctx) => {
+    if (typeof v.wasPrice === "number" && v.wasPrice <= v.price)
+      ctx.addIssue({ code: "custom", path: ["wasPrice"], message: "The was price has to be higher than the price, or leave it empty." });
     const allowed = MEASURE[v.category as Category];
     for (const k of Object.keys(v.measurements)) {
       if (!allowed.includes(k)) ctx.addIssue({ code: "custom", path: ["measurements", k], message: `${k} isn't measured for ${v.category}.` });
@@ -60,6 +66,8 @@ export function toProductRow(v: ProductValues) {
     category: v.category,
     size: v.size,
     price_qar: v.price,
+    was_price_qar: typeof v.wasPrice === "number" ? v.wasPrice : null,
+    section_ids: v.sectionIds,
     condition: v.condition,
     colour: v.colour || null,
     measurements,
@@ -72,6 +80,6 @@ export function toProductRow(v: ProductValues) {
 }
 
 export const emptyProduct = (): ProductInput => ({
-  name: "", brand: "", era: "90s", category: "Tops", size: "", price: "" as unknown as number, condition: "Very good",
+  name: "", brand: "", era: "90s", category: "Tops", size: "", price: "" as unknown as number, wasPrice: "", sectionIds: [], condition: "Very good",
   colour: "", measurements: {}, status: "hidden", photos: [], cutout: "", description: "", stylingTip: "",
 });

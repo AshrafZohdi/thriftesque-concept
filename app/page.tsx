@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage() {
-  const { products, looks, settings } = await getShop();
+  const { products, looks, settings, sections } = await getShop();
   const live = products.filter((p) => p.status === "live");
   const faq = shopFaq(settings.details);
   const hasBuilder = initialOutfit(pools(products)) !== null;
@@ -58,7 +58,7 @@ export default async function ShopPage() {
             </Section>
           )}
           <Section id="shop" kicker={settings.dropName || "This week"} title="The drop" intro="Tap a piece for measurements and condition.">
-            <Catalog />
+            <Catalog sections={sections} />
           </Section>
           <HowToOrder details={settings.details} />
           <Faq items={faq} />

@@ -11,6 +11,7 @@ import s from "@/components/shop/shop.module.css";
 import { CATEGORIES, CONDITIONS, ERAS, MEASURE, STATUSES, type Category } from "@/lib/catalog";
 import { toCutout, toProductPhoto } from "@/lib/image";
 import { PHOTO } from "@/lib/photo-spec";
+import type { ShopSection } from "@/lib/shop-model";
 import { emptyProduct, productSchema, type ProductInput, type ProductValues } from "@/lib/product-schema";
 import { browserDb } from "@/lib/supabase/browser";
 import { photoUrl } from "@/lib/supabase/public";
@@ -18,7 +19,7 @@ import d from "./dashboard.module.css";
 
 const STATUS_LABEL = { live: "Live in shop", reserved: "Reserved", sold: "Sold", hidden: "Hidden (draft)" } as const;
 
-export async function upload(folder: "p" | "c", blob: Blob, ext: string): Promise<string> {
+export async function upload(folder: "p" | "c" | "a", blob: Blob, ext: string): Promise<string> {
   const path = `${folder}/${crypto.randomUUID()}.${ext}`;
   const { error } = await browserDb().storage.from(PHOTO.bucket).upload(path, blob, { contentType: blob.type, upsert: false, cacheControl: PHOTO.cacheSeconds });
   if (error) throw new Error(`Upload failed: ${error.message}`);
@@ -30,11 +31,11 @@ function Err({ id, errors, name }: { id: string; errors: FieldErrors<ProductInpu
   return e?.message ? <p className={d.fieldErr} id={id}>{String(e.message)}</p> : null;
 }
 
-function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
-  code: string | null; initial: ProductInput; onClose: () => void; onSaved: (code: string, created: boolean) => void;
+function Editor({ code, initial, sections, onClose, onSaved, closeRef, cancelRef }: {
+  code: string | null; initial: ProductInput; sections: ShopSection[]; onClose: () => void; onSaved: (code: string, created: boolean) => void;
   closeRef: RefObject<HTMLButtonElement | null>; cancelRef: RefObject<(() => void) | null>;
 }) {
-  const ids = { name: useId(), brand: useId(), era: useId(), cat: useId(), size: useId(), price: useId(), cond: useId(), status: useId(), colour: useId(), desc: useId(), tip: useId() };
+  const ids = { name: useId(), brand: useId(), era: useId(), cat: useId(), size: useId(), price: useId(), was: useId(), cond: useId(), status: useId(), colour: useId(), desc: useId(), tip: useId() };
   const { register, handleSubmit, control, setValue, formState } = useForm<ProductInput, unknown, ProductValues>({
     resolver: zodResolver(productSchema),
     defaultValues: initial,
@@ -43,6 +44,7 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
   const photos = useWatch({ control, name: "photos" }) ?? [];
   const cutout = useWatch({ control, name: "cutout" });
   const category = useWatch({ control, name: "category" }) as Category;
+  const sectionIds = useWatch({ control, name: "sectionIds" }) ?? [];
   const [busy, setBusy] = useState("");
   const [problem, setProblem] = useState("");
   const fresh = useRef<string[]>([]); // uploaded during this edit, removed again if the edit is cancelled
@@ -235,6 +237,12 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
             <Err id={`${ids.price}-err`} errors={errors} name="price" />
           </div>
         </div>
+        <div className={d.field}>
+          <label htmlFor={ids.was}>Price before the sale (QAR)</label>
+          <input {...register("wasPrice")} {...field("wasPrice", ids.was)} type="number" inputMode="numeric" min={1} step={1} placeholder="Empty: not on sale" />
+          <Err id={`${ids.was}-err`} errors={errors} name="wasPrice" />
+          <p className={d.muted}>To put the piece on sale, type the old price here and the new one in Price. The shop crosses out the old price and shows the % off. Empty it to end the sale.</p>
+        </div>
         <fieldset className={d.measures}>
           <legend className={d.fieldLegend}>Measurements, laid flat (cm)</legend>
           {(MEASURE[category] ?? []).map((k) => {
@@ -258,6 +266,16 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
             <select {...register("status")} id={ids.status}>{STATUSES.map((x) => <option key={x} value={x}>{STATUS_LABEL[x]}</option>)}</select>
           </div>
         </div>
+        <fieldset className={d.sectionsPick}>
+          <legend className={d.fieldLegend}>Sections</legend>
+          {sections.length ? sections.map((sec) => (
+            <label key={sec.id} className={d.check}>
+              <input type="checkbox" checked={sectionIds.includes(sec.id)}
+                onChange={(e) => setValue("sectionIds", e.target.checked ? [...sectionIds, sec.id] : sectionIds.filter((x) => x !== sec.id), { shouldDirty: true, shouldValidate: true })} />
+              {sec.name}
+            </label>
+          )) : <p className={d.muted}>No sections yet. Add them under Sections on the dashboard, then tick them here.</p>}
+        </fieldset>
         <div className={d.field}>
           <label htmlFor={ids.colour}>Colour (optional)</label>
           <input {...register("colour")} {...field("colour", ids.colour)} placeholder="Sage green" />
@@ -290,7 +308,7 @@ function Editor({ code, initial, onClose, onSaved, closeRef, cancelRef }: {
 export async function loadForEdit(code: string): Promise<ProductInput> {
   const { data, error } = await browserDb()
     .from("products")
-    .select("name,brand,era,category,size,price_qar,condition,colour,measurements,status,photos,cutout,description,styling_tip")
+    .select("name,brand,era,category,size,price_qar,was_price_qar,section_ids,condition,colour,measurements,status,photos,cutout,description,styling_tip")
     .eq("code", code)
     .single();
   if (error) throw new Error(error.message);
@@ -299,6 +317,7 @@ export async function loadForEdit(code: string): Promise<ProductInput> {
     // Drafts from a bulk upload can be missing these; the form then asks for them (D-051).
     name: data.name, brand: data.brand === "Unbranded" ? "" : data.brand, era: (data.era ?? "") as ProductInput["era"],
     category: (data.category ?? "") as ProductInput["category"], size: data.size ?? "", price: data.price_qar ?? ("" as unknown as number),
+    wasPrice: data.was_price_qar ?? "", sectionIds: data.section_ids,
     condition: (data.condition ?? "") as ProductInput["condition"], colour: data.colour ?? "",
     measurements: Object.fromEntries(Object.entries(m).map(([k, v]) => [k, Number(v)])), status: data.status,
     photos: data.photos, cutout: data.cutout ?? "", description: data.description ?? "", stylingTip: data.styling_tip ?? "",
@@ -307,8 +326,9 @@ export async function loadForEdit(code: string): Promise<ProductInput> {
 
 export type EditTarget = { code: string | null; values: ProductInput; nonce: number };
 
-export function ProductEditor({ target, trigger, onClose, onSaved }: {
+export function ProductEditor({ target, trigger, sections, onClose, onSaved }: {
   target: EditTarget | null;
+  sections: ShopSection[];
   trigger: HTMLElement | null;
   onClose: () => void;
   onSaved: (code: string, created: boolean) => void;
@@ -318,7 +338,7 @@ export function ProductEditor({ target, trigger, onClose, onSaved }: {
   return (
     <Overlay item={target} onClose={() => (cancelRef.current ?? onClose)()} trigger={trigger} kind="drawer" labelledBy="editorTitle">
       {/* Keyed per open, so form state never leaks from one product to the next. */}
-      {(t, closeRef) => <Editor key={t.nonce} code={t.code} initial={t.values} onClose={onClose} onSaved={onSaved} closeRef={closeRef} cancelRef={cancelRef} />}
+      {(t, closeRef) => <Editor key={t.nonce} code={t.code} initial={t.values} sections={sections} onClose={onClose} onSaved={onSaved} closeRef={closeRef} cancelRef={cancelRef} />}
     </Overlay>
   );
 }

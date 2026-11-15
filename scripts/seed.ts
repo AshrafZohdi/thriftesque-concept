@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 import { PHOTO } from "../lib/photo-spec.ts";
 import { EMPTY_DETAILS, detailsToRow } from "../lib/shop-facts.ts";
-import { SAMPLE_LOOKS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
+import { SAMPLE_LOOKS, SAMPLE_SALE, SAMPLE_SECTIONS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
 import { DEV_STRANGER, DEV_TEAM } from "./dev-accounts.ts";
 
 // The secret key comes straight from the local stack, never from an env file: OpenNext bakes every variable in the
@@ -69,6 +69,8 @@ async function main() {
       category: p.category,
       size: p.size,
       price_qar: p.price_qar,
+      was_price_qar: SAMPLE_SALE[p.code] ?? null,
+      section_ids: [] as string[],
       condition: p.condition,
       measurements: p.measurements_cm,
       status: p.status,
@@ -91,9 +93,24 @@ async function main() {
     console.log(`removed ${extra.data.length} product(s) not in the seed: ${extra.data.map((r) => r.code).join(", ")}`);
   }
 
-  // Shop details and the about text reset to empty, so the dashboard and pages start empty (tests fill them in).
-  const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS), about_text: "" }).eq("id", 1);
+  // Shop details, the about text and photos reset to empty, so the dashboard and pages start empty (tests fill them in).
+  // About photos a test uploaded are removed from storage too.
+  const about = await db.storage.from(PHOTO.bucket).list("a");
+  if (about.data?.length) await db.storage.from(PHOTO.bucket).remove(about.data.map((f) => `a/${f.name}`));
+  const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS), about_text: "", about_photos: [] }).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
+
+  // Sections reset exactly (D-060); removing them also clears them off the products.
+  const noSections = await db.from("sections").delete().not("id", "is", null);
+  if (noSections.error) throw new Error(`Sections: ${noSections.error.message}`);
+  for (const [position, sec] of SAMPLE_SECTIONS.entries()) {
+    const made = await db.from("sections").insert({ name: sec.name, position }).select("id").single();
+    if (made.error) throw new Error(`Section ${sec.name}: ${made.error.message}`);
+    if (sec.codes.length) {
+      const tagged = await db.from("products").update({ section_ids: [made.data.id] }).in("code", sec.codes);
+      if (tagged.error) throw new Error(`Section ${sec.name}: ${tagged.error.message}`);
+    }
+  }
 
   // Local data resets exactly, including AI drafts made while testing.
   const cleared = await db.from("looks").delete().not("id", "is", null);

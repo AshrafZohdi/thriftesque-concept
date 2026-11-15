@@ -1,7 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-// Runs against the seeded local database (npm run seed): 21 sample products, TQ-0705 and TQ-0711 sold.
+// Runs against the seeded local database (npm run seed): 21 sample products, TQ-0705 and TQ-0711 sold, TQ-0710 on sale (was 90),
+// and a Basics section with 3 pieces (plus an empty Men's section the shop leaves out).
 
 const cards = (page: Page) => page.locator("#shop article");
 const chip = (page: Page, name: string) => page.getByRole("toolbar", { name: "Categories" }).getByRole("button", { name: new RegExp(`^${name}\\s*\\d+$`) });
@@ -93,4 +94,26 @@ test("unknown or malformed product codes are 404", async ({ request }) => {
   for (const path of ["/p/TQ-9999", "/p/not-a-code"]) {
     expect((await request.get(path)).status(), path).toBe(404);
   }
+});
+
+test("a piece on sale shows the old price crossed out, and Sale and section chips filter the grid (D-060)", async ({ page }) => {
+  await page.goto("/");
+  const tee = cards(page).filter({ hasText: "Navy stripe ringer tee" });
+  await expect(tee.locator("s")).toHaveText("Was 90");
+  await expect(tee).toContainText("27% off");
+  const sections = page.getByRole("toolbar", { name: "Sections" });
+  await expect(sections.getByRole("button")).toHaveText([/^Sale\s*1$/, /^Basics\s*3$/]);
+  await sections.getByRole("button", { name: /^Sale/ }).click();
+  await expect(cards(page)).toHaveCount(1);
+  await sections.getByRole("button", { name: /^Basics/ }).click();
+  await expect(cards(page)).toHaveCount(3);
+  await chip(page, "Bottoms").click();
+  await expect(cards(page)).toHaveText([/Light wash straight jeans/]);
+  // Tapping the chosen section again shows every section.
+  await sections.getByRole("button", { name: /^Basics/ }).click();
+  await expect(sections.getByRole("button", { pressed: true })).toHaveCount(0);
+  await expect(cards(page)).toHaveCount(4);
+
+  await page.goto("/p/TQ-0710");
+  await expect(page.getByRole("main")).toContainText("Was 90 QAR, now 65 QAR27% off");
 });

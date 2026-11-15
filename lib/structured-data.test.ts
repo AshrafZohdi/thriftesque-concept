@@ -5,7 +5,7 @@ import { jsonLdText, productJsonLd, productSnippet, shopJsonLd } from "./structu
 const piece: ShopProduct = {
   code: "TQ-0705", name: "Butter yellow pinafore", brand: "Unbranded", era: "90s", category: "Dresses", size: "M", price: 140,
   condition: "Very good", colour: "Yellow", measurements: [], status: "live", photos: ["https://x.supabase.co/a.webp"],
-  cutout: null, description: "Cotton twill.", stylingTip: null,
+  cutout: null, description: "Cotton twill.", stylingTip: null, wasPrice: null, sections: [],
 };
 
 describe("productJsonLd", () => {
@@ -50,5 +50,12 @@ describe("productSnippet (D-058)", () => {
   it("says sold or reserved first, and falls back without a description", () => {
     expect(productSnippet({ ...piece, status: "sold" })).toMatch(/^Cotton twill\. Sold\. Size M/);
     expect(productSnippet({ ...piece, description: null })).toBe("Size M · Very good · 90s. One of one, order on WhatsApp.");
+  });
+});
+
+describe("productSnippet on sale (D-060)", () => {
+  it("mentions the old price while the piece can still be bought", () => {
+    expect(productSnippet({ ...piece, wasPrice: 200 })).toContain("140 QAR (was 200)");
+    expect(productSnippet({ ...piece, wasPrice: 200, status: "sold" })).not.toContain("was 200");
   });
 });

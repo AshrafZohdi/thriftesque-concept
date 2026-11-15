@@ -1,5 +1,6 @@
 // The About page's text (D-059): what the team wrote on the dashboard, or a short default made only from facts already on the
 // site. Plain text, never HTML; a blank line starts a new paragraph.
+import type { AboutPhoto } from "./shop-model";
 import { LOCATION } from "./shop-facts";
 
 export const ABOUT_MAX = 3000;
@@ -29,4 +30,33 @@ export function aboutSnippet(paragraphs: string[]): string {
   const cut = first.slice(0, 159);
   const sentence = cut.lastIndexOf(". ");
   return sentence > 80 ? cut.slice(0, sentence + 1) : `${cut.slice(0, cut.lastIndexOf(" "))}…`;
+}
+
+// Photos on the About page (D-060): the team's model shots, stored under a/ in the photo bucket, each with an optional
+// description for screen readers and search.
+export const ABOUT_PHOTOS_MAX = 8;
+export const ABOUT_ALT_MAX = 120;
+const ABOUT_PATH = /^a\/[A-Za-z0-9-]+\.(webp|jpg)$/;
+
+// Reads the stored list, dropping anything malformed rather than breaking the page.
+export function aboutPhotosFrom(raw: unknown): AboutPhoto[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((x) => ({ path: String(x?.path ?? ""), alt: String(x?.alt ?? "") }))
+    .filter((x) => ABOUT_PATH.test(x.path))
+    .slice(0, ABOUT_PHOTOS_MAX);
+}
+
+export function validateAboutPhotos(input: unknown): { ok: true; value: AboutPhoto[] } | { ok: false; error: string } {
+  const list = Array.isArray(input) ? input : [];
+  if (list.length > ABOUT_PHOTOS_MAX) return { ok: false, error: `About photos: ${ABOUT_PHOTOS_MAX} at most.` };
+  const value: AboutPhoto[] = [];
+  for (const [i, x] of list.entries()) {
+    const path = String(x?.path ?? "");
+    const alt = String(x?.alt ?? "").replace(/\s*—\s*/g, ", ").replace(/\s+/g, " ").trim();
+    if (!ABOUT_PATH.test(path)) return { ok: false, error: "An About photo didn't upload properly. Remove it and add it again." };
+    if (alt.length > ABOUT_ALT_MAX) return { ok: false, error: `About photo ${i + 1}: the description is ${ABOUT_ALT_MAX} characters at most.` };
+    value.push({ path, alt });
+  }
+  return { ok: true, value };
 }

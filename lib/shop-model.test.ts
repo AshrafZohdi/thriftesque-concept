@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { categoryChips, filterShop, sortForShop, toShopProduct, visibleLooks, type ShopProduct, type ShopProductRow } from "./shop-model";
+import { SALE, categoryChips, filterShop, percentOff, sectionChips, sortForShop, toShopProduct, visibleLooks, type ShopProduct, type ShopProductRow } from "./shop-model";
 import { askAboutPiece, waLink } from "./wa";
 
 const row = (over: Partial<ShopProductRow> = {}): ShopProductRow => ({
   code: "TQ-0701", name: "Jacket", brand: "Unbranded", era: "90s", category: "Outerwear", size: "M", price_qar: 100,
   condition: "Good", colour: null, measurements: { "Pit to pit": 52, Length: "60", Sleeve: null, Bad: "x" }, status: "live",
-  photos: ["TQ-0701/a.webp"], cutout: "TQ-0701/c.webp", description: null, styling_tip: null, ...over,
+  photos: ["TQ-0701/a.webp"], cutout: "TQ-0701/c.webp", description: null, styling_tip: null, was_price_qar: null, section_ids: [], ...over,
 });
 const url = (p: string) => `https://cdn.test/${p}`;
 const prod = (code: string, category: ShopProduct["category"], status: ShopProduct["status"], cutout = true): ShopProduct =>
@@ -25,6 +25,37 @@ describe("toShopProduct", () => {
     const p = toShopProduct(row({ cutout: null, measurements: [1, 2] }), url)!;
     expect(p.cutout).toBeNull();
     expect(p.measurements).toEqual([]);
+  });
+});
+
+describe("sale and sections (D-060)", () => {
+  const BASICS = "b1";
+  const MENS = "m1";
+  const list = [
+    { ...prod("TQ-0701", "Tops", "live"), wasPrice: 150, sections: [BASICS] },
+    { ...prod("TQ-0702", "Outerwear", "live"), sections: [BASICS, MENS] },
+    { ...prod("TQ-0703", "Outerwear", "sold"), sections: [MENS] },
+    prod("TQ-0704", "Tops", "live"),
+  ];
+  const sections = [{ id: MENS, name: "Men's" }, { id: BASICS, name: "Basics" }, { id: "empty", name: "Bags" }];
+
+  it("keeps a was price only when it's above the price", () => {
+    expect(toShopProduct(row({ was_price_qar: 150 }), url)!.wasPrice).toBe(150);
+    expect(toShopProduct(row({ was_price_qar: 100 }), url)!.wasPrice).toBeNull();
+    expect(percentOff({ price: 100, wasPrice: 150 })).toBe(33);
+    expect(percentOff({ price: 320, wasPrice: 400 })).toBe(20);
+    expect(percentOff({ price: 100, wasPrice: null })).toBe(0);
+  });
+  it("filters by section or sale, together with the category", () => {
+    expect(filterShop(list, { category: "All", hideSold: false, section: MENS }).map((p) => p.code)).toEqual(["TQ-0702", "TQ-0703"]);
+    expect(filterShop(list, { category: "Outerwear", hideSold: true, section: MENS }).map((p) => p.code)).toEqual(["TQ-0702"]);
+    expect(filterShop(list, { category: "All", hideSold: false, section: SALE }).map((p) => p.code)).toEqual(["TQ-0701"]);
+  });
+  it("shows Sale first, then the team's sections in their order, skipping empty ones", () => {
+    expect(sectionChips(list, sections)).toEqual([
+      { id: SALE, name: "Sale", live: 1 }, { id: MENS, name: "Men's", live: 1 }, { id: BASICS, name: "Basics", live: 2 },
+    ]);
+    expect(sectionChips(list.map((p) => ({ ...p, wasPrice: null })), [])).toEqual([]);
   });
 });
 

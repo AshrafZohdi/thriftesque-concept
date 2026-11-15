@@ -21,28 +21,42 @@ export type Database = {
                   ]
                 },"products": {
                   Row: {
-                    "brand": string,"category": string | null,"code": string,"colour": string | null,"condition": string | null,"created_at": string,"cutout": string | null,"description": string | null,"era": string | null,"id": string,"measurements": NonNullable<Json>,"name": string,"photos": (string)[],"price_qar": number | null,"size": string | null,"sold_at": string | null,"status": Database["public"]['Enums']["product_status"],"styling_tip": string | null
+                    "brand": string,"category": string | null,"code": string,"colour": string | null,"condition": string | null,"created_at": string,"cutout": string | null,"description": string | null,"era": string | null,"id": string,"measurements": NonNullable<Json>,"name": string,"photos": (string)[],"price_qar": number | null,"section_ids": (string)[],"size": string | null,"sold_at": string | null,"status": Database["public"]['Enums']["product_status"],"styling_tip": string | null,"was_price_qar": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name": string,"photos"?: (string)[],"price_qar"?: number | null,"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
+                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name": string,"photos"?: (string)[],"price_qar"?: number | null,"section_ids"?: (string)[],"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null,"was_price_qar"?: number | null
                   }
                   Update: {
-                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name"?: string,"photos"?: (string)[],"price_qar"?: number | null,"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null
+                    "brand"?: string,"category"?: string | null,"code"?: string,"colour"?: string | null,"condition"?: string | null,"created_at"?: string,"cutout"?: string | null,"description"?: string | null,"era"?: string | null,"id"?: string,"measurements"?: NonNullable<Json>,"name"?: string,"photos"?: (string)[],"price_qar"?: number | null,"section_ids"?: (string)[],"size"?: string | null,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["product_status"],"styling_tip"?: string | null,"was_price_qar"?: number | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"sections": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"position": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"position"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"position"?: number
                   }
                   Relationships: [
                     
                   ]
                 },"settings": {
                   Row: {
-                    "about_text": string,"contact_email": string,"delivery_fees": NonNullable<Json>,"delivery_text": string,"drop_name": string,"id": number,"operator_name": string,"order_retention_text": string,"payment_text": string,"reserved_hold_text": string,"returns_text": string,"whatsapp_number": string
+                    "about_photos": NonNullable<Json>,"about_text": string,"contact_email": string,"delivery_fees": NonNullable<Json>,"delivery_text": string,"drop_name": string,"id": number,"operator_name": string,"order_retention_text": string,"payment_text": string,"reserved_hold_text": string,"returns_text": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
+                    "about_photos"?: NonNullable<Json>,"about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Update: {
-                    "about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
+                    "about_photos"?: NonNullable<Json>,"about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     

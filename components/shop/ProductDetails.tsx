@@ -1,8 +1,22 @@
 // Product details shared by the sheet over the shop and the /p/[code] page. No hooks, so it renders on server or client.
 import type { ReactNode } from "react";
 import { CONDITION_NOTE } from "@/lib/catalog";
-import type { ShopProduct } from "@/lib/shop-model";
+import { percentOff, type ShopProduct } from "@/lib/shop-model";
 import s from "./shop.module.css";
+
+// The price, with the old one crossed out while a live or reserved piece is on sale (D-060). Screen readers hear "was, now".
+export function Price({ p, big = false }: { p: ShopProduct; big?: boolean }) {
+  const sale = p.wasPrice !== null && p.status !== "sold";
+  if (!sale) return big ? <>{p.price} QAR</> : <span className={s.price}>{p.price} QAR</span>;
+  return (
+    <span className={s.priceWrap}>
+      <s className={big ? s.bigWas : s.was}><span className="sr-only-text">Was </span>{p.wasPrice}{big && " QAR"}</s>
+      <span className="sr-only-text">, now </span>
+      {big ? <span>{p.price} QAR</span> : <span className={s.price}>{p.price} QAR</span>}
+      {big && <span className={`${s.off} mono`}>{percentOff(p)}% off</span>}
+    </span>
+  );
+}
 
 export function Gallery({ product, className = "" }: { product: ShopProduct; className?: string }) {
   const many = product.photos.length > 1;
@@ -28,7 +42,7 @@ export function ProductDetails({ product: p, titleId, heading = "h1", actions }:
     <div className={s.detail}>
       <p className={`${s.meta} mono`}>{p.brand} · {p.era} · {p.category} · {p.code}</p>
       <Title className={`${s.title} display`} id={titleId}>{p.name}</Title>
-      <p className={s.bigPrice}>{p.price} QAR</p>
+      <p className={s.bigPrice}><Price p={p} big /></p>
       {p.status !== "live" && (
         <p className={`${s.status} ${p.status === "reserved" ? s.reserved : ""} mono`}>
           {p.status === "sold" ? "Sold" : "Reserved. Payment pending"}

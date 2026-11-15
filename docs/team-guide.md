@@ -25,6 +25,9 @@ Forgot the password? Ask Nuvai to reset it.
 4. **Fill from photo** (optional): the AI suggests the name, category, era, colour, description and styling tip. Check every
    field; it can be wrong. Price, size, condition and measurements are always yours to fill in.
 5. Fill in size, price (QAR) and the flat measurements in cm. The measurement boxes change with the category.
+   **On sale?** Put the old price in "Price before the sale" and the new one in Price. The shop crosses out the old price and
+   shows the % off. Empty it to end the sale.
+   **Sections**: tick the sections the piece belongs to (see Sections below).
 6. **Visibility**: "Live in shop" to publish now, or "Hidden (draft)" to finish later.
 7. **Add to shop**. Each piece gets its code (TQ-0001, TQ-0002, ...) automatically.
 
@@ -62,7 +65,16 @@ a reserved piece, and how long you keep order chats. They appear on the Terms an
 the shop). Anything you leave empty is simply left off those pages.
 
 **About us** (same panel): the text of the About page. Leave a blank line between paragraphs. Until you write it, the page
-shows a short default about the shop.
+shows a short default about the shop. Under it, **About page photos**: up to 8 (model shots, the team). They're cropped to
+portrait (4:5), so keep the person in the middle. Add a short description to each if you can. Press **Save settings** to
+publish them.
+
+## Sections
+
+Groups like Basics, Jackets or Men's, shown as buttons above the shop. Add, rename, reorder or remove them in the **Sections**
+panel and press **Save sections**, then tick them on each piece in the editor. A piece can be in several. A section only shows
+in the shop once it has a piece. Removing a section doesn't delete its pieces. Pieces on sale appear under **Sale**
+automatically.
 
 ## Cut-outs
 

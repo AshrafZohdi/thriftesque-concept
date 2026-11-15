@@ -143,6 +143,7 @@
 
 /* filters */
 .filters {
+  flex-wrap: wrap;
   position: sticky;
   top: var(--hh);
   z-index: 20;
@@ -160,6 +161,10 @@
   overflow-x: auto;
   scrollbar-width: none;
   padding-block: 2px;
+}
+/* Sections get their own row above the categories (D-060). */
+.sectionChips {
+  flex-basis: 100%;
 }
 .chips::-webkit-scrollbar {
   display: none;
@@ -292,6 +297,36 @@
   border: 1px solid var(--color-ink);
   font: 700 13px/1.2 var(--font-mono);
   white-space: nowrap;
+}
+/* Sale (D-060): the old price crossed out before the price chip, and a lime flag on the photo. */
+.priceWrap {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px 6px;
+}
+.was {
+  font: 700 12px/1.2 var(--font-mono);
+  color: var(--color-soft);
+}
+.bigWas {
+  font-size: 20px;
+  color: var(--color-soft);
+}
+.off {
+  align-self: center;
+  padding: 3px 7px;
+  background: var(--color-lime);
+  border: 1px solid var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.saleFlag {
+  background: var(--color-lime);
+  color: var(--color-ink);
+  border: 1px solid var(--color-ink);
 }
 /* Sold is shown by the grey photo, the flag and a plain price chip. Text keeps full contrast (fading it failed AA). */
 .sold .price {

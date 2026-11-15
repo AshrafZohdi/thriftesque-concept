@@ -16,6 +16,8 @@ export type ShopProduct = {
   category: Category;
   size: string;
   price: number;
+  // The price before a reduction, or null when the piece isn't on sale (D-060).
+  wasPrice: number | null;
   condition: Condition;
   colour: string | null;
   measurements: [label: string, cm: number][];
@@ -24,19 +26,24 @@ export type ShopProduct = {
   cutout: string | null;
   description: string | null;
   stylingTip: string | null;
+  sections: string[];
 };
+
+export type ShopSection = { id: string; name: string };
+
+export type AboutPhoto = { path: string; alt: string };
 
 export type ShopLook = { id: string; title: string; note: string | null; codes: string[]; source: "ai" | "team" };
 
-export type ShopSettings = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string };
+export type ShopSettings = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string; aboutPhotos: AboutPhoto[] };
 
 export const SHOP_PRODUCT_COLUMNS =
-  "code,name,brand,era,category,size,price_qar,condition,colour,measurements,status,photos,cutout,description,styling_tip" as const;
+  "code,name,brand,era,category,size,price_qar,was_price_qar,condition,colour,measurements,status,photos,cutout,description,styling_tip,section_ids" as const;
 
 export type ShopProductRow = Pick<
   ProductRow,
-  | "code" | "name" | "brand" | "era" | "category" | "size" | "price_qar" | "condition" | "colour"
-  | "measurements" | "status" | "photos" | "cutout" | "description" | "styling_tip"
+  | "code" | "name" | "brand" | "era" | "category" | "size" | "price_qar" | "was_price_qar" | "condition" | "colour"
+  | "measurements" | "status" | "photos" | "cutout" | "description" | "styling_tip" | "section_ids"
 >;
 
 // Hidden rows never reach the shop (RLS filters them), but a mapping bug must not show one either.
@@ -53,6 +60,7 @@ export function toShopProduct(row: ShopProductRow, publicUrl: (path: string) => 
     category: row.category as Category,
     size: row.size,
     price: row.price_qar,
+    wasPrice: row.was_price_qar !== null && row.was_price_qar > row.price_qar ? row.was_price_qar : null,
     condition: row.condition as Condition,
     colour: row.colour,
     measurements: Object.entries(m)
@@ -63,6 +71,7 @@ export function toShopProduct(row: ShopProductRow, publicUrl: (path: string) => 
     cutout: row.cutout ? publicUrl(row.cutout) : null,
     description: row.description,
     stylingTip: row.styling_tip,
+    sections: row.section_ids,
   };
 }
 
@@ -73,9 +82,27 @@ export function sortForShop(list: ShopProduct[]): ShopProduct[] {
   return [...list].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || codeNumber(b.code) - codeNumber(a.code));
 }
 
-export function filterShop(list: ShopProduct[], f: { category: Category | "All"; hideSold: boolean }): ShopProduct[] {
-  return list.filter((p) => (f.category === "All" || p.category === f.category) && !(f.hideSold && p.status === "sold"));
+// The section filter: "" for everything, SALE for pieces on sale, or a team section's id (D-060).
+export const SALE = "sale";
+
+const inSection = (p: ShopProduct, section: string) => !section || (section === SALE ? p.wasPrice !== null : p.sections.includes(section));
+
+export function filterShop(list: ShopProduct[], f: { category: Category | "All"; hideSold: boolean; section?: string }): ShopProduct[] {
+  return list.filter((p) => (f.category === "All" || p.category === f.category) && !(f.hideSold && p.status === "sold") && inSection(p, f.section ?? ""));
 }
+
+// Section chips: Sale while a live piece is on sale, then the team's sections that have a piece in the shop, in their order.
+// The number on each chip is how many are live.
+export function sectionChips(list: ShopProduct[], sections: ShopSection[]): { id: string; name: string; live: number }[] {
+  const live = (id: string) => list.filter((p) => p.status === "live" && inSection(p, id)).length;
+  return [
+    ...(live(SALE) ? [{ id: SALE, name: "Sale", live: live(SALE) }] : []),
+    ...sections.filter((s) => list.some((p) => p.sections.includes(s.id))).map((s) => ({ id: s.id, name: s.name, live: live(s.id) })),
+  ];
+}
+
+// "30% off", rounded down so it never overstates the saving. Whole-number maths: 1 - 320 / 400 in floating point gave 19.
+export const percentOff = (p: Pick<ShopProduct, "price" | "wasPrice">) => (p.wasPrice ? Math.floor(((p.wasPrice - p.price) * 100) / p.wasPrice) : 0);
 
 // Categories that have any piece in the shop, with how many are live (the number on each chip).
 export function categoryChips(list: ShopProduct[]): { category: Category | "All"; live: number }[] {

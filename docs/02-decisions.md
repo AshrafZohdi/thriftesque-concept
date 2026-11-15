@@ -547,3 +547,18 @@ fixed:
   on the site (secondhand, Doha, one of one, drops, WhatsApp, TikTok). No invented history or names.
 - The meta description comes from the first paragraph (at most 160 characters), so search results show the team's own words.
 - Same frame as the terms and privacy pages, without the "Last updated" date.
+
+### D-060 Sale prices, team-made sections and About photos. Decided by Ashraf with the client, 2026-11-16
+Client asks: show an old and a discounted price; sections like Basics, Jackets, Bags, Men's; model photos on the About page.
+- **Sale**: an optional "Price before the sale" per piece (`was_price_qar`). The database refuses one that isn't above the
+  price. The shop crosses it out next to the price, the card gets a "% off" tag (rounded down, whole-number maths), and a
+  "Sale" chip appears while any live piece is on sale. Orders, totals and structured data use the current price only.
+- **Sections**: chosen over fixed categories because "Men's" cuts across categories (a men's jacket is both). A `sections`
+  table the team edits (name, order), and `products.section_ids` (a piece can be in several). Removing a section takes it
+  off its pieces via a trigger; the pieces stay. The shop shows section chips (Sale first) in a row above the categories,
+  only for sections with a piece in the shop; a section and a category filter together.
+- **About photos**: up to 8, `settings.about_photos` as `[{path, alt}]`, stored under `a/` in the photo bucket, cropped to
+  4:5 and compressed like product photos. Uploaded only when Save settings is pressed, and deleted from storage when taken
+  off, so nothing is left behind. The first one is the About page's share image. An optional description is the alt text.
+- Migration `20261116010000` must be pushed before deploying (D-052).
+
