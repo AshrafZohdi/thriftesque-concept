@@ -103,6 +103,15 @@ test("terms, privacy and about are linked from every page and pass axe", async (
   expect(fg).not.toBe(bg);
 });
 
+test("About is in the header on every screen size", async ({ page }) => {
+  await page.goto("/p/TQ-0705");
+  await page.getByRole("banner").getByRole("link", { name: "About", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "About us" })).toBeVisible();
+  // The header still fits: nothing in it runs past the screen's edge.
+  const overflow = await page.getByRole("banner").evaluate((h) => h.scrollWidth - h.clientWidth);
+  expect(overflow).toBe(0);
+});
+
 test("search engines get structured data, a share card and a manifest", async ({ page, request }) => {
   await page.goto("/");
   const home = await page.locator('script[type="application/ld+json"]').allTextContents();

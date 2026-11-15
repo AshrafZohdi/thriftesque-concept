@@ -55,7 +55,10 @@ export function Header({ right, nav = [["/#shop", "The drop"], ["/#how", "How to
         </div>
         <nav className={`${s.nav} mono`} aria-label="Main">
           {nav.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
+          <Link href="/about">About</Link>
         </nav>
+        {/* Phones have no room for the nav, so About gets its own cell there (the nav's link takes over on wider screens). */}
+        <Link className={s.aboutCell} href="/about">About</Link>
         {right ?? (
           <Link className={s.cell} href="/#shop">
             Shop
