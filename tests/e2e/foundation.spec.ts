@@ -80,13 +80,13 @@ test("the scrolling strips never run out, even on a 4K screen", async ({ page })
   for (const w of shown) expect(w).toBeGreaterThanOrEqual(3840);
 });
 
-test("terms and privacy are linked from every page and pass axe", async ({ page }) => {
-  test.slow(); // two axe scans; slow in Firefox because of the ticker (see the test above)
+test("terms, privacy and about are linked from every page and pass axe", async ({ page }) => {
+  test.slow(); // three axe scans; slow in Firefox because of the ticker (see the test above)
   await page.goto("/");
   await page.getByRole("contentinfo").getByRole("link", { name: "Privacy" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
   await expect(page.getByRole("main")).toContainText("Law No. 13 of 2016");
-  for (const path of ["/privacy", "/terms"]) {
+  for (const path of ["/privacy", "/terms", "/about"]) {
     await page.goto(path);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`${path}$`));
     const { violations } = await new AxeBuilder({ page }).analyze();
@@ -95,6 +95,12 @@ test("terms and privacy are linked from every page and pass axe", async ({ page 
   await page.goto("/p/TQ-0705");
   await page.getByRole("contentinfo").getByRole("link", { name: "Terms" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Terms" })).toBeVisible();
+  await page.getByRole("contentinfo").getByRole("link", { name: "About" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "About us" })).toBeVisible();
+  // The button's text was once ink on ink (the text-link colour won).
+  const cta = page.getByRole("main").getByRole("link", { name: "Browse the shop" });
+  const [fg, bg] = await cta.evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor]);
+  expect(fg).not.toBe(bg);
 });
 
 test("search engines get structured data, a share card and a manifest", async ({ page, request }) => {

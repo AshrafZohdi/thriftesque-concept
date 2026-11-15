@@ -15,6 +15,7 @@ expect 200 "home" "$base/"
 expect 200 "sign-in page" "$base/login"
 expect 200 "robots.txt" "$base/robots.txt"
 expect 200 "sitemap.xml" "$base/sitemap.xml"
+expect 200 "about" "$base/about"
 expect 200 "terms" "$base/terms"
 expect 200 "privacy" "$base/privacy"
 expect 200 "web manifest" "$base/manifest.webmanifest"
@@ -36,7 +37,7 @@ fi
 grep -q "Sitemap: " <<<"$(curl -s --max-time 20 "$base/robots.txt")" && ok "robots.txt points to the sitemap" || bad "robots.txt has no Sitemap line"
 home="$(curl -s --max-time 20 "$base/")"
 grep -q 'application/ld+json' <<<"$home" && ok "home has structured data" || bad "home has no structured data"
-grep -q 'href="/privacy"' <<<"$home" && grep -q 'href="/terms"' <<<"$home" && ok "footer links to terms and privacy" || bad "footer is missing terms or privacy"
+grep -q 'href="/privacy"' <<<"$home" && grep -q 'href="/terms"' <<<"$home" && grep -q 'href="/about"' <<<"$home" && ok "footer links to about, terms and privacy" || bad "footer is missing about, terms or privacy"
 
 headers="$(curl -s -D - -o /dev/null --max-time 20 "$base/" | tr -d '\r')"
 for h in content-security-policy strict-transport-security x-content-type-options referrer-policy permissions-policy x-frame-options cross-origin-opener-policy; do

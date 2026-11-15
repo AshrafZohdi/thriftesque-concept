@@ -1,5 +1,6 @@
 // Pure dashboard logic: stats, search and status tabs, and settings validation. Unit tested.
 import { STATUSES, type Status } from "./catalog";
+import { validateAbout } from "./about";
 import { EMPTY_DETAILS, validateDetails, type ShopDetails } from "./shop-facts";
 
 // Hidden drafts from a bulk upload can be missing these until the team fills them in (D-051).
@@ -44,7 +45,7 @@ export function searchProducts(list: TeamProduct[], query: string, tab: Status |
 export const isStatus = (v: unknown): v is Status => typeof v === "string" && (STATUSES as readonly string[]).includes(v);
 export const isCode = (v: unknown): v is string => typeof v === "string" && /^TQ-\d{4,}$/.test(v);
 
-export type SettingsInput = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails };
+export type SettingsInput = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string };
 
 // Returns cleaned settings, or the first problem in plain words.
 export function validateSettings(input: SettingsInput): { ok: true; value: SettingsInput } | { ok: false; error: string } {
@@ -64,5 +65,7 @@ export function validateSettings(input: SettingsInput): { ok: true; value: Setti
   }
   const details = validateDetails(input.details ?? EMPTY_DETAILS);
   if (!details.ok) return details;
-  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees, details: details.value } };
+  const about = validateAbout(input.about);
+  if (!about.ok) return about;
+  return { ok: true, value: { whatsappNumber, dropName, deliveryFees: fees, details: details.value, about: about.value } };
 }

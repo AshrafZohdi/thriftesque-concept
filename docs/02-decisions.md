@@ -537,3 +537,13 @@ fixed:
   `/cdn-cgi/rum`, with no CSP errors. It doesn't record `utm_` parameters (by design, per Cloudflare's docs), so it shows
   visits, pages, referring sites, countries and devices, not which ad was clicked.
 - Not done (owner actions): Google Business Profile, Google Search Console, an Arabic version.
+
+### D-059 An About page the team writes in the dashboard. Decided by Ashraf, 2026-11-16
+- `/about`, linked first in the footer, in the sitemap and in `/llms.txt`. Text from one new settings column, `about_text`
+  (plain text, at most 3000 characters, a blank line starts a paragraph; migration `20261116000000`). Edited under Shop
+  settings > About us; saving refreshes every page like the other settings.
+- Plain text, not HTML or Markdown: nothing the team types can break the page or inject markup, and it's all a shop story needs.
+- Until the team writes it, the page shows a short default (`ABOUT_DEFAULT` in `lib/about.ts`) built only from facts already
+  on the site (secondhand, Doha, one of one, drops, WhatsApp, TikTok). No invented history or names.
+- The meta description comes from the first paragraph (at most 160 characters), so search results show the team's own words.
+- Same frame as the terms and privacy pages, without the "Last updated" date.

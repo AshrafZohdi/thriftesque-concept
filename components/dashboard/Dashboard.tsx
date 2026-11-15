@@ -1,5 +1,6 @@
 "use client";
-// Team dashboard: stats, product table (search, status tabs, inline status, two-tap delete), looks and shop settings.
+// Team dashboard: stats, product table (search, status tabs, inline status, two-tap delete), looks and shop settings
+// (including the About page's text, D-059).
 // Reads with the signed-in session in the browser; writes go through server actions that check the team first.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +9,7 @@ import { deleteProduct, saveSettings, setStatus } from "@/app/dashboard/actions"
 import { ChromeHeart } from "@/components/Chrome";
 import s from "@/components/shop/shop.module.css";
 import { STATUSES, codeNumber, type Status } from "@/lib/catalog";
+import { ABOUT_DEFAULT, ABOUT_MAX } from "@/lib/about";
 import { dashboardStats, missingForShop, searchProducts, type SettingsInput, type TeamProduct } from "@/lib/dashboard";
 import { DETAIL_COLUMNS, DETAIL_LABELS, detailsFromRow, missingDetails, type ShopDetails } from "@/lib/shop-facts";
 import { browserDb } from "@/lib/supabase/browser";
@@ -33,7 +35,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
   if (team.data !== true) return { state: "not-team", email };
   const [products, settings] = await Promise.all([
     db.from("products").select("code,name,brand,era,category,size,price_qar,condition,status,photos,cutout,created_at,sold_at"),
-    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,${DETAIL_COLUMNS}`).eq("id", 1).single(),
+    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,about_text,${DETAIL_COLUMNS}`).eq("id", 1).single(),
   ]);
   if (products.error || settings.error) return { state: "error", message: (products.error ?? settings.error)!.message };
   const fees = Array.isArray(settings.data.delivery_fees) ? settings.data.delivery_fees : [];
@@ -46,6 +48,7 @@ async function loadAll(): Promise<Load | "signed-out"> {
       dropName: settings.data.drop_name,
       deliveryFees: fees.map((f) => ({ area: String((f as { area?: string })?.area ?? ""), fee: Number((f as { fee_qar?: number })?.fee_qar ?? 0) })),
       details: detailsFromRow(settings.data),
+      about: settings.data.about_text,
     },
   };
 }
@@ -108,6 +111,7 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
   const waId = useId();
   const dropId = useId();
   const detailsId = useId();
+  const aboutId = useId();
   const missing = missingDetails(v.details);
   const setFee = (i: number, patch: Partial<{ area: string; fee: number }>) =>
     setV({ ...v, deliveryFees: v.deliveryFees.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
@@ -147,6 +151,15 @@ function SettingsPanel({ initial, onSaved }: { initial: SettingsInput; onSaved: 
         ))}
         <button className={d.btnSm} type="button" onClick={() => setV({ ...v, deliveryFees: [...v.deliveryFees, { area: "", fee: 15 }] })}>+ Add area</button>
       </fieldset>
+      <div className={d.field}>
+        <label htmlFor={aboutId}>About us</label>
+        <textarea id={aboutId} rows={10} maxLength={ABOUT_MAX} value={v.about} aria-describedby={`${aboutId}-hint`}
+          placeholder={ABOUT_DEFAULT.join("\n\n")} onChange={(e) => setV({ ...v, about: e.target.value })} />
+        <p className={d.muted} id={`${aboutId}-hint`}>
+          The text of the <a href="/about" target="_blank" rel="noopener">About page</a>. Leave a blank line between paragraphs.
+          Left empty, the page shows the short text above. {v.about.length} of {ABOUT_MAX} characters.
+        </p>
+      </div>
       <fieldset className={d.areas} style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={`${detailsId}-hint`}>
         <legend className={d.fieldLegend}>Terms and privacy details</legend>
         <p className={d.muted} id={`${detailsId}-hint`}>

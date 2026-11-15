@@ -121,6 +121,7 @@ export function Footer({ waHref }: { waHref: string | null }) {
           Thriftesque
         </Link>
         <nav className={`${s.footerNav} mono`} aria-label="Links">
+          <Link href="/about">About</Link>
           <a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a>
           {waHref && <a href={waHref} target="_blank" rel="noopener">WhatsApp</a>}
           <Link href="/terms">Terms</Link>

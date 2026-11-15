@@ -39,13 +39,13 @@ describe("input checks", () => {
     expect(isCode("TQ-0722; drop table")).toBe(false);
   });
   it("cleans and accepts good settings", () => {
-    const r = validateSettings({ whatsappNumber: "+974 5555 1234", dropName: " Drop 08 ", deliveryFees: [{ area: " Lusail ", fee: 15 }], details: EMPTY_DETAILS });
-    expect(r).toEqual({ ok: true, value: { whatsappNumber: "97455551234", dropName: "Drop 08", deliveryFees: [{ area: "Lusail", fee: 15 }], details: EMPTY_DETAILS } });
+    const r = validateSettings({ whatsappNumber: "+974 5555 1234", dropName: " Drop 08 ", deliveryFees: [{ area: " Lusail ", fee: 15 }], details: EMPTY_DETAILS, about: " Our story " });
+    expect(r).toEqual({ ok: true, value: { whatsappNumber: "97455551234", dropName: "Drop 08", deliveryFees: [{ area: "Lusail", fee: 15 }], details: EMPTY_DETAILS, about: "Our story" } });
   });
   it("rejects bad settings with a plain message", () => {
-    expect(validateSettings({ whatsappNumber: "5555", dropName: "", deliveryFees: [], details: EMPTY_DETAILS })).toMatchObject({ ok: false, error: expect.stringMatching(/^WhatsApp number/) });
-    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "A", fee: 1 }, { area: "a", fee: 2 }], details: EMPTY_DETAILS })).toMatchObject({ ok: false, error: '"a" is listed twice.' });
-    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "A", fee: 1.5 }], details: EMPTY_DETAILS })).toMatchObject({ ok: false });
-    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "", fee: 1 }], details: EMPTY_DETAILS })).toMatchObject({ ok: false });
+    expect(validateSettings({ whatsappNumber: "5555", dropName: "", deliveryFees: [], details: EMPTY_DETAILS, about: "" })).toMatchObject({ ok: false, error: expect.stringMatching(/^WhatsApp number/) });
+    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "A", fee: 1 }, { area: "a", fee: 2 }], details: EMPTY_DETAILS, about: "" })).toMatchObject({ ok: false, error: '"a" is listed twice.' });
+    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "A", fee: 1.5 }], details: EMPTY_DETAILS, about: "" })).toMatchObject({ ok: false });
+    expect(validateSettings({ whatsappNumber: "", dropName: "", deliveryFees: [{ area: "", fee: 1 }], details: EMPTY_DETAILS, about: "" })).toMatchObject({ ok: false });
   });
 });

@@ -28,7 +28,7 @@ export type ShopProduct = {
 
 export type ShopLook = { id: string; title: string; note: string | null; codes: string[]; source: "ai" | "team" };
 
-export type ShopSettings = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails };
+export type ShopSettings = { whatsappNumber: string; dropName: string; deliveryFees: { area: string; fee: number }[]; details: ShopDetails; about: string };
 
 export const SHOP_PRODUCT_COLUMNS =
   "code,name,brand,era,category,size,price_qar,condition,colour,measurements,status,photos,cutout,description,styling_tip" as const;

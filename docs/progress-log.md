@@ -2,6 +2,23 @@
 
 Newest first.
 
+## 2026-11-16: About page, cut-outs to redo
+
+**Built, not deployed yet**: an About page the team edits on the dashboard (D-059). The production database needs the
+migration first (`npx supabase db push`); the deploy refuses until then (D-052).
+
+**Found and fixed**: the About page's "Browse the shop" button had ink text on an ink background (the text-link colour won);
+an e2e check now compares its text and background colours.
+
+**Verified**
+- Typecheck, lint, tokens, 121 unit, 62 database tests. E2E on the Worker preview: 222 in Chromium and iPhone (the full
+  read-only suite plus the team writes), then the About checks again in Chromium, WebKit and a 360 px phone after the fix.
+- Screenshots of the page at 360 px and the dashboard field at 390 px.
+
+**Cut-outs**: TQ-0023 and TQ-0026 have the bad automatic cut-outs again (made from the dashboard after D-054's removal).
+TQ-0001 and TQ-0011 have none. Their cover photos (720x900, the largest stored) are in `backups/cutouts-to-redo/`
+(git-ignored). TQ-0018 sold, so it was dropped from the folder.
+
 ## 2026-11-13: Phase 9 (part 2), standards, editable shop details, bulk add
 
 **Live** (version `841819bc`, commit `a301165`): terms and privacy pages, structured data, share card, manifest and icons,

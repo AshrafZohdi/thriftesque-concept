@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"settings": {
                   Row: {
-                    "contact_email": string,"delivery_fees": NonNullable<Json>,"delivery_text": string,"drop_name": string,"id": number,"operator_name": string,"order_retention_text": string,"payment_text": string,"reserved_hold_text": string,"returns_text": string,"whatsapp_number": string
+                    "about_text": string,"contact_email": string,"delivery_fees": NonNullable<Json>,"delivery_text": string,"drop_name": string,"id": number,"operator_name": string,"order_retention_text": string,"payment_text": string,"reserved_hold_text": string,"returns_text": string,"whatsapp_number": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
+                    "about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Update: {
-                    "contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
+                    "about_text"?: string,"contact_email"?: string,"delivery_fees"?: NonNullable<Json>,"delivery_text"?: string,"drop_name"?: string,"id"?: number,"operator_name"?: string,"order_retention_text"?: string,"payment_text"?: string,"reserved_hold_text"?: string,"returns_text"?: string,"whatsapp_number"?: string
                   }
                   Relationships: [
                     
@@ -72,6 +72,9 @@ export type Database = {
                            },
 "is_team":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"schema_version":
+{ Args: Record<PropertyKey, never>; Returns: string
                            },
 "sync_product_code_seq":
 { Args: Record<PropertyKey, never>; Returns: number

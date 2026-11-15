@@ -61,6 +61,9 @@ drop name shown at the top of the shop, and the delivery areas with their fees. 
 a reserved piece, and how long you keep order chats. They appear on the Terms and Privacy pages (delivery and payment also on
 the shop). Anything you leave empty is simply left off those pages.
 
+**About us** (same panel): the text of the About page. Leave a blank line between paragraphs. Until you write it, the page
+shows a short default about the shop.
+
 ## Cut-outs
 
 The outfit builder and looks only use pieces that have a cut-out (the piece with its background removed). If some pieces

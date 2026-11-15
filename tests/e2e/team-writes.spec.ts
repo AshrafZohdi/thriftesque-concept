@@ -76,6 +76,25 @@ test("a shop detail filled in on the dashboard appears on the terms; empty ones 
   await expect(page.getByRole("link", { name: "hello@thriftesque.test" })).toHaveAttribute("href", "mailto:hello@thriftesque.test");
 });
 
+test("the About page shows the default until the team writes their own (D-059)", async ({ page }) => {
+  await page.goto("/about");
+  const main = page.getByRole("main");
+  await expect(main).toContainText("Thriftesque is a secondhand clothing shop in Doha, Qatar.");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /^Thriftesque is a secondhand clothing shop/);
+
+  await signIn(page);
+  await page.getByLabel("About us", { exact: true }).fill("We started on TikTok in 2024 — two friends.\n\nEvery piece is washed\nand steamed.");
+  await page.getByRole("button", { name: "Save settings" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Saved." })).toBeVisible();
+
+  await page.goto("/about");
+  const paras = main.locator("p:not(.mono)").filter({ hasNotText: "Browse the shop" });
+  await expect(paras).toHaveText(["We started on TikTok in 2024, two friends.", "Every piece is washed\nand steamed."]);
+  await expect(main).not.toContainText("secondhand clothing shop in Doha");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "We started on TikTok in 2024, two friends.");
+  await expect(main.getByRole("link", { name: "Browse the shop" })).toHaveAttribute("href", "/");
+});
+
 test.describe("product editor", () => {
   test("an empty save explains what's missing", async ({ page }) => {
     await signIn(page);

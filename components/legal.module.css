@@ -35,3 +35,16 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+/* About: the team's single line breaks are kept inside a paragraph. */
+.lines {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.cta {
+  margin-top: 28px;
+}
+/* The button keeps its own colours, not the text links' ink and underline. */
+.body .cta a {
+  color: var(--color-surface);
+  text-decoration: none;
+}

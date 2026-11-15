@@ -61,10 +61,11 @@ export async function saveSettings(input: SettingsInput): Promise<Result> {
       drop_name: v.value.dropName,
       delivery_fees: v.value.deliveryFees.map((f) => ({ area: f.area, fee_qar: f.fee })),
       ...detailsToRow(v.value.details),
+      about_text: v.value.about,
     })
     .eq("id", 1);
   if (error) return { ok: false, error: `Couldn't save: ${error.message}` };
-  // Settings show on every page (strip, footer, bag, terms, privacy, FAQ), so refresh them all, and the AI summary.
+  // Settings show on every page (strip, footer, bag, terms, privacy, about, FAQ), so refresh them all, and the AI summary.
   revalidatePath("/", "layout");
   revalidatePath("/llms.txt");
   return { ok: true };

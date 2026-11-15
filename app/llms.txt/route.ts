@@ -30,6 +30,7 @@ export async function GET() {
     "## Links",
     "",
     `- [Shop](${siteUrl}/): every piece in the current drop`,
+    `- [About](${siteUrl}/about): who we are`,
     `- [Terms](${siteUrl}/terms) and [Privacy](${siteUrl}/privacy)`,
     `- [Sitemap](${siteUrl}/sitemap.xml)`,
     "- [TikTok @thriftesque](https://www.tiktok.com/@thriftesque)",

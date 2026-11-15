@@ -11,7 +11,7 @@ function fail(what: string, error: { message: string }): never {
   throw new Error(`Couldn't load ${what}: ${error.message}`);
 }
 
-function toSettings(row: ({ whatsapp_number: string; drop_name: string; delivery_fees: unknown } & Parameters<typeof detailsFromRow>[0]) | null): ShopSettings {
+function toSettings(row: ({ whatsapp_number: string; drop_name: string; delivery_fees: unknown; about_text: string } & Parameters<typeof detailsFromRow>[0]) | null): ShopSettings {
   const fees = Array.isArray(row?.delivery_fees) ? row.delivery_fees : [];
   return {
     whatsappNumber: row?.whatsapp_number ?? "",
@@ -20,6 +20,7 @@ function toSettings(row: ({ whatsapp_number: string; drop_name: string; delivery
       .map((f) => ({ area: String(f?.area ?? ""), fee: Number(f?.fee_qar) }))
       .filter((f) => f.area && Number.isFinite(f.fee) && f.fee >= 0),
     details: detailsFromRow(row),
+    about: row?.about_text ?? "",
   };
 }
 
@@ -29,7 +30,7 @@ export const getShop = cache(async function getShop(): Promise<{ products: ShopP
   const [products, looks, settings] = await Promise.all([
     db.from("products").select(SHOP_PRODUCT_COLUMNS).neq("status", "hidden"),
     db.from("looks").select("id,title,note,product_codes,source").eq("status", "published").order("created_at", { ascending: false }),
-    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,${DETAIL_COLUMNS}`).eq("id", 1).maybeSingle(),
+    db.from("settings").select(`whatsapp_number,drop_name,delivery_fees,about_text,${DETAIL_COLUMNS}`).eq("id", 1).maybeSingle(),
   ]);
   if (products.error) fail("products", products.error);
   if (looks.error) fail("looks", looks.error);

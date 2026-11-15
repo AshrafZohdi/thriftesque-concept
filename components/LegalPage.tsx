@@ -1,4 +1,4 @@
-// Frame and helpers for the terms and privacy pages. Text comes from the page; shop facts from lib/shop-facts.ts.
+// Frame and helpers for the text pages (terms, privacy, about). Text comes from the page; shop facts from lib/shop-facts.ts.
 import type { ReactNode } from "react";
 import { BagButton } from "@/components/shop/BagDrawer";
 import { ShopProvider } from "@/components/shop/ShopProvider";
@@ -8,7 +8,8 @@ import { getShop } from "@/lib/shop";
 import { waLink } from "@/lib/wa";
 import s from "./legal.module.css";
 
-export async function LegalPage({ title, children }: { title: string; children: ReactNode }) {
+// `updated` is the date under the title; the About page passes null (it's the team's own text, not a policy).
+export async function LegalPage({ title, updated = LEGAL_UPDATED, children }: { title: string; updated?: string | null; children: ReactNode }) {
   const shop = await getShop();
   return (
     <ShopProvider products={shop.products} settings={shop.settings} hasBuilder={false}>
@@ -18,7 +19,7 @@ export async function LegalPage({ title, children }: { title: string; children: 
         <main className={`wrap ${s.page}`}>
           <p className="mono">Thriftesque</p>
           <h1 className="display">{title}</h1>
-          <p className={`${s.updated} mono`}>Last updated {LEGAL_UPDATED}</p>
+          {updated && <p className={`${s.updated} mono`}>Last updated {updated}</p>}
           <div className={s.body}>{children}</div>
         </main>
         <Footer waHref={waLink(shop.settings.whatsappNumber, "Hi Thriftesque!")} />

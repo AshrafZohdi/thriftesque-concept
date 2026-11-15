@@ -91,8 +91,8 @@ async function main() {
     console.log(`removed ${extra.data.length} product(s) not in the seed: ${extra.data.map((r) => r.code).join(", ")}`);
   }
 
-  // Shop details reset to empty, so the dashboard and legal pages start empty (tests fill them in).
-  const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS) }).eq("id", 1);
+  // Shop details and the about text reset to empty, so the dashboard and pages start empty (tests fill them in).
+  const settings = await db.from("settings").update({ ...SAMPLE_SETTINGS, ...detailsToRow(EMPTY_DETAILS), about_text: "" }).eq("id", 1);
   if (settings.error) throw new Error(`Settings: ${settings.error.message}`);
 
   // Local data resets exactly, including AI drafts made while testing.
