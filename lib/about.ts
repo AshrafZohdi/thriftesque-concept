@@ -8,7 +8,7 @@ export const ABOUT_MAX = 3000;
 export const ABOUT_DEFAULT = [
   `Thriftesque is a secondhand clothing shop in ${LOCATION}. Every piece is hand-picked, checked and measured, and one of one: when it's sold, it's gone.`,
   "New pieces arrive in drops. Add what you like to your bag and send the order on WhatsApp. We reply to confirm, then arrange delivery or pickup.",
-  "Follow us on TikTok at @thriftesque.",
+  "Follow us on TikTok at @thriftesque and Instagram at @thriftesqueqa.",
 ];
 
 export function aboutParagraphs(text: string): string[] {

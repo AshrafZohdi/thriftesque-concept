@@ -15,7 +15,7 @@ export function shopFaq(details: ShopDetails): Faq[] {
     f.payment.confirmed && { q: "How do I pay?", a: f.payment.text },
     f.returns.confirmed && { q: "Can I return or exchange a piece?", a: f.returns.text },
     f.reservedHold.confirmed && { q: "Can you hold a piece for me?", a: `When you've ordered and payment is pending, we mark it reserved and hold it for ${f.reservedHold.text}.` },
-    { q: "Where is Thriftesque?", a: `${LOCATION}. We sell through this website and TikTok (@thriftesque).` },
+    { q: "Where is Thriftesque?", a: `${LOCATION}. We sell through this website. Follow us on TikTok (@thriftesque) and Instagram (@thriftesqueqa) for new drops.` },
   ];
   return list.filter((x): x is Faq => Boolean(x));
 }

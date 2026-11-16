@@ -1,9 +1,7 @@
 // schema.org JSON-LD for search engines: the shop on the home page, and each piece with its price, availability and condition
 // on its product page. Built only from real product data; nothing here is invented (no ratings, no reviews, no stock counts).
 import type { ShopProduct } from "./shop-model";
-import { SITE_DESCRIPTION } from "./site";
-
-const TIKTOK = "https://www.tiktok.com/@thriftesque";
+import { INSTAGRAM, SITE_DESCRIPTION, TIKTOK } from "./site";
 
 // Reserved pieces may come back if the buyer doesn't pay, so they're out of stock rather than sold out.
 const AVAILABILITY = { live: "InStock", reserved: "OutOfStock", sold: "SoldOut" } as const;
@@ -20,7 +18,7 @@ export function shopJsonLd(siteUrl: string) {
       description: SITE_DESCRIPTION,
       areaServed: { "@type": "Country", name: "Qatar" },
       currenciesAccepted: "QAR",
-      sameAs: [TIKTOK],
+      sameAs: [TIKTOK.url, INSTAGRAM.url],
     },
     { "@context": "https://schema.org", "@type": "WebSite", "@id": `${siteUrl}/#website`, name: "Thriftesque", url: `${siteUrl}/` },
   ];

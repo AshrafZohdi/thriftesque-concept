@@ -15,3 +15,7 @@ export const isPreview = process.env.NEXT_PUBLIC_SHOP_PREVIEW === "1";
 // Cloudflare Web Analytics is on (D-058): set NEXT_PUBLIC_WEB_ANALYTICS to "1" in the target's vars. Allows its script in
 // the CSP (next.config.ts) and describes it on the privacy page, so what runs and what's disclosed can't drift apart.
 export const webAnalytics = process.env.NEXT_PUBLIC_WEB_ANALYTICS === "1";
+
+// The shop's social accounts (Instagram handle confirmed by Ashraf, 2026-11-16).
+export const TIKTOK = { handle: "thriftesque", url: "https://www.tiktok.com/@thriftesque" };
+export const INSTAGRAM = { handle: "thriftesqueqa", url: "https://www.instagram.com/thriftesqueqa/" };

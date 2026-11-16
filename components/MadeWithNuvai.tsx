@@ -1,14 +1,17 @@
 // "Made with Nuvai" credit, linking to nuvai.qa. The logo is Nuvai's own traced wordmark drawn the way nuvai.qa draws it:
-// two masks (letter fills and outlines) painted with CSS colours, so it suits the white header and the black footer.
+// two masks (letter fills and outlines) painted with CSS colours, so it suits the white header and the black footer. With
+// `cycle`, the lettering slowly cycles through Nuvai's colours like on nuvai.qa (site.module.css).
 import s from "./site.module.css";
 
 const RATIO = 2278 / 836;
 
-export function MadeWithNuvai({ height = 12, paper, ink, className = "" }: { height?: number; paper: string; ink: string; className?: string }) {
+export function MadeWithNuvai({ height = 12, paper, ink, cycle, className = "" }: {
+  height?: number; paper: string; ink: string; cycle?: "onLight" | "onDark"; className?: string;
+}) {
   const layer = (kind: "paper" | "ink", color: string) => (
     <span
       aria-hidden="true"
-      className={s.nuvaiLayer}
+      className={`${s.nuvaiLayer} ${kind === "ink" && cycle ? (cycle === "onLight" ? s.nuvaiOnLight : s.nuvaiOnDark) : ""}`}
       style={{
         backgroundColor: color,
         WebkitMask: `url(/brand/nuvai-wordmark-${kind}.svg) center / contain no-repeat`,

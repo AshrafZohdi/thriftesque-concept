@@ -232,6 +232,61 @@
   position: relative;
   display: inline-block;
   flex: none;
+  /* The cycle's colours, named in a plain rule: Tailwind drops theme colours used only inside @keyframes. */
+  --nuvai-indigo: var(--color-nuvai-indigo);
+  --nuvai-mint: var(--color-nuvai-mint);
+  --nuvai-spark: var(--color-nuvai-spark);
+  --nuvai-indigo-on-dark: var(--color-nuvai-indigo-on-dark);
+  --nuvai-mint-on-dark: var(--color-nuvai-mint-on-dark);
+  --nuvai-spark-on-dark: var(--color-nuvai-spark-on-dark);
+}
+/* The wordmark's lettering cycles through Nuvai's colours like it does on nuvai.qa: 16 s, each colour held, back to the
+   start colour. Only for visitors who haven't asked for reduced motion; they see the start colour. */
+@keyframes nuvaiOnLight {
+  0%,
+  20%,
+  to {
+    background-color: var(--color-ink);
+  }
+  25%,
+  45% {
+    background-color: var(--nuvai-indigo);
+  }
+  50%,
+  70% {
+    background-color: var(--nuvai-mint);
+  }
+  75%,
+  95% {
+    background-color: var(--nuvai-spark);
+  }
+}
+@keyframes nuvaiOnDark {
+  0%,
+  20%,
+  to {
+    background-color: var(--color-surface);
+  }
+  25%,
+  45% {
+    background-color: var(--nuvai-indigo-on-dark);
+  }
+  50%,
+  70% {
+    background-color: var(--nuvai-mint-on-dark);
+  }
+  75%,
+  95% {
+    background-color: var(--nuvai-spark-on-dark);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nuvaiOnLight {
+    animation: nuvaiOnLight 16s ease-in-out infinite;
+  }
+  .nuvaiOnDark {
+    animation: nuvaiOnDark 16s ease-in-out infinite;
+  }
 }
 .nuvaiLayer {
   position: absolute;

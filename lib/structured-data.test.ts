@@ -29,8 +29,10 @@ describe("productJsonLd", () => {
 });
 
 describe("shopJsonLd and jsonLdText", () => {
-  it("names the shop and its TikTok", () => {
-    expect(shopJsonLd("https://thriftesque.com")[0]).toMatchObject({ "@type": "OnlineStore", sameAs: ["https://www.tiktok.com/@thriftesque"] });
+  it("names the shop, its TikTok and Instagram", () => {
+    expect(shopJsonLd("https://thriftesque.com")[0]).toMatchObject({
+      "@type": "OnlineStore", sameAs: ["https://www.tiktok.com/@thriftesque", "https://www.instagram.com/thriftesqueqa/"],
+    });
   });
   it("can't be broken out of with a script tag in a name", () => {
     const text = jsonLdText({ name: "</script><script>alert(1)</script>" });

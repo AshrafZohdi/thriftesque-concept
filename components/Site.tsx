@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChromeHeart } from "./Chrome";
 import { LOCATION, SIZING, shopFacts, type ShopDetails } from "@/lib/shop-facts";
+import { INSTAGRAM, TIKTOK } from "@/lib/site";
 import { MadeWithNuvai } from "./MadeWithNuvai";
 import s from "./site.module.css";
 
@@ -51,7 +52,7 @@ export function Header({ right, nav = [["/#shop", "The drop"], ["/#how", "How to
             <ChromeHeart />
             Thriftesque
           </Link>
-          <MadeWithNuvai paper="var(--color-surface)" ink="var(--color-ink)" />
+          <MadeWithNuvai height={20} paper="var(--color-surface)" ink="var(--color-ink)" cycle="onLight" />
         </div>
         <nav className={`${s.nav} mono`} aria-label="Main">
           {nav.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
@@ -125,7 +126,8 @@ export function Footer({ waHref }: { waHref: string | null }) {
         </Link>
         <nav className={`${s.footerNav} mono`} aria-label="Links">
           <Link href="/about">About</Link>
-          <a href="https://www.tiktok.com/@thriftesque" target="_blank" rel="noopener">TikTok</a>
+          <a href={TIKTOK.url} target="_blank" rel="noopener">TikTok</a>
+          <a href={INSTAGRAM.url} target="_blank" rel="noopener">Instagram</a>
           {waHref && <a href={waHref} target="_blank" rel="noopener">WhatsApp</a>}
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
@@ -134,7 +136,7 @@ export function Footer({ waHref }: { waHref: string | null }) {
         </nav>
         <div className={s.footerBase}>
           <small>{LOCATION}</small>
-          <MadeWithNuvai height={14} paper="var(--color-ink)" ink="var(--color-surface)" />
+          <MadeWithNuvai height={24} paper="var(--color-ink)" ink="var(--color-surface)" cycle="onDark" />
         </div>
       </div>
     </footer>

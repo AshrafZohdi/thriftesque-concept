@@ -562,3 +562,16 @@ Client asks: show an old and a discounted price; sections like Basics, Jackets, 
   off, so nothing is left behind. The first one is the About page's share image. An optional description is the alt text.
 - Migration `20261116010000` must be pushed before deploying (D-052).
 
+### D-061 Builder pieces tuck over each other; Nuvai logo cycles colours; Instagram. Decided by Ashraf, 2026-11-16
+- **Builder:** replaces D-055's "no overlap" at Ashraf's request. Pieces meet where they would on a body: the top's hem over
+  the waistband, trouser hems over the shoes. One setting, `--tuck` (22 px on phones, 34 px on desktop). The top and dress
+  sit at the bottom of their rows, bottoms and shoes at the top; upper pieces lie over lower ones, arrows and locks above
+  all. A wide bottom (skirt, shorts) doesn't fill its row, so the builder measures the space under it (`--bottom-space`)
+  and pulls the shoes up by it; the stage adds the same space below so its height doesn't change while swiping. The e2e
+  test now checks each piece overlaps the next by more than 0 and at most a quarter of the lower piece. D-055's widths stay.
+- **"Made with Nuvai":** bigger (20 px tall in the header, 24 px in the footer) and its lettering cycles through Nuvai's
+  colours like nuvai.qa (`logo-cycle`: ink, indigo, mint, spark; 16 s; lighter versions on the black footer). Off for
+  reduced motion. Tailwind drops theme colours only used inline or inside @keyframes, so they're named in a plain rule.
+- **Instagram:** @thriftesqueqa (handle confirmed by Ashraf) in the footer, the shop's structured data (`sameAs`), the FAQ,
+  the default About text and /llms.txt. A plain link: no embed, no tracking.
+

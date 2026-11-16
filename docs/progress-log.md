@@ -2,6 +2,17 @@
 
 Newest first.
 
+## 2026-11-16: Builder tuck, Nuvai logo, Instagram (D-061)
+
+**Verified**: typecheck, lint, tokens, unit; builder and bag e2e in 5 browsers (75); header, footer and accessibility e2e at
+360, 390 and desktop; screenshots of the builder (phone and desktop) and the logo at each colour.
+
+**Went wrong and fixed**: Docker Desktop stopped mid-session, taking local Supabase down (product pages 500'd in e2e); restarted.
+The purple and the cycle colours first didn't show: Tailwind pruned the unused theme colours.
+
+**Owner actions**: cut-outs to redo are in `backups/cutouts-to-redo/` (TQ-0001, 0011, 0023, 0026, 0044, 0053). TQ-0023 is a
+tracksuit listed under Tops.
+
 ## 2026-11-16: Sale prices, sections, About photos (D-060)
 
 **Built, not deployed yet.** Needs migration `20261116010000` pushed first (`npx supabase db push`).

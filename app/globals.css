@@ -7,6 +7,13 @@
   --color-surface: #ffffff;
   --color-soft: #4f5563;
   --color-lime: #d6f84c;
+  /* Nuvai's logo colours, as nuvai.qa cycles them: for light backgrounds, then for dark ones. "Made with Nuvai" only. */
+  --color-nuvai-indigo: #4338ca;
+  --color-nuvai-mint: #08714c;
+  --color-nuvai-spark: #b93a0e;
+  --color-nuvai-indigo-on-dark: #a5b4fc;
+  --color-nuvai-mint-on-dark: #3ee0a8;
+  --color-nuvai-spark-on-dark: #ff8a63;
   --color-sky1: #8ecbff;
   --color-sky2: #d9efff;
   --color-band-grey: #8a8f99;

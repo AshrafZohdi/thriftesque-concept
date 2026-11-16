@@ -34,6 +34,7 @@ export async function GET() {
     `- [Terms](${siteUrl}/terms) and [Privacy](${siteUrl}/privacy)`,
     `- [Sitemap](${siteUrl}/sitemap.xml)`,
     "- [TikTok @thriftesque](https://www.tiktok.com/@thriftesque)",
+    "- [Instagram @thriftesqueqa](https://www.instagram.com/thriftesqueqa/)",
     "",
   ].join("\n");
   return new Response(body, { headers: { "content-type": "text/markdown; charset=utf-8" } });

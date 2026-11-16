@@ -95,6 +95,7 @@ test("terms, privacy and about are linked from every page and pass axe", async (
   await page.goto("/p/TQ-0705");
   await page.getByRole("contentinfo").getByRole("link", { name: "Terms" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Terms" })).toBeVisible();
+  await expect(page.getByRole("contentinfo").getByRole("link", { name: "Instagram" })).toHaveAttribute("href", "https://www.instagram.com/thriftesqueqa/");
   await page.getByRole("contentinfo").getByRole("link", { name: "About" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "About us" })).toBeVisible();
   // The button's text was once ink on ink (the text-link colour won).

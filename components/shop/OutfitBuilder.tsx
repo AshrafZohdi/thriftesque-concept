@@ -1,6 +1,6 @@
 "use client";
 // Outfit builder (D-027): arrows or a sideways swipe change one piece, lock keeps a piece, Shuffle changes the rest.
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { outfitMessage } from "@/lib/order";
 import {
   activeSlots, availableModes, initialOutfit, load, outfitPieces, pools, shuffle, step,
@@ -51,6 +51,26 @@ export function OutfitBuilder() {
   const swipe = useRef<{ x: number; y: number; key: SlotKey } | null>(null);
   const swiped = useRef(false);
 
+  // The bottom piece sits at the top of its row. A wide one (a skirt, shorts) doesn't fill the row's height and leaves space
+  // under it, so the stage gets that space as --bottom-space and the shoes pull up by it too, always tucking under the hem
+  // (D-061). Measured only once the cut-out has loaded, so a piece still loading doesn't make the shoes jump.
+  const stage = useRef<HTMLDivElement>(null);
+  const measureBottom = useCallback((img: HTMLImageElement | null) => {
+    if (!img) return;
+    const set = () => {
+      if (!img.complete || !img.naturalWidth || !img.parentElement) return;
+      stage.current?.style.setProperty("--bottom-space", `${Math.max(0, img.parentElement.clientHeight - img.offsetHeight)}px`);
+    };
+    const ro = new ResizeObserver(set);
+    ro.observe(img);
+    img.addEventListener("load", set);
+    set();
+    return () => {
+      ro.disconnect();
+      img.removeEventListener("load", set);
+    };
+  }, []);
+
   if (!state) return null;
   const slots = activeSlots(state.mode, pl);
   const pieces = outfitPieces(state, pl, byCode);
@@ -73,7 +93,7 @@ export function OutfitBuilder() {
 
   return (
     <div className={o.ob}>
-      <div className={o.stage}>
+      <div className={o.stage} ref={stage}>
         {modes.length > 1 && (
           <div className={o.modes} role="group" aria-label="Outfit type">
             <button type="button" aria-pressed={state.mode === "separates"} onClick={() => setMode("separates")}>Top + bottom</button>
@@ -110,7 +130,7 @@ export function OutfitBuilder() {
                   onClick={(e) => { if (!swiped.current) openProduct(p.code, e.currentTarget); }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img key={`${p.code}-${anim.n}`} className={anim.slots[slot.key] ? o[anim.slots[slot.key]!] : undefined} src={p.cutout} alt="" draggable={false} />
+                  <img key={`${p.code}-${anim.n}`} ref={slot.key === "bottom" ? measureBottom : undefined} className={anim.slots[slot.key] ? o[anim.slots[slot.key]!] : undefined} src={p.cutout} alt="" draggable={false} />
                 </button>
                 <button
                   className={o.lock}
