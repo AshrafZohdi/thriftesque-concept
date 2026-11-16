@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 import { PHOTO } from "../lib/photo-spec.ts";
 import { EMPTY_DETAILS, detailsToRow } from "../lib/shop-facts.ts";
-import { SAMPLE_LOOKS, SAMPLE_SALE, SAMPLE_SECTIONS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
+import { SAMPLE_BAG, SAMPLE_LOOKS, SAMPLE_SALE, SAMPLE_SECTIONS, SAMPLE_SETTINGS, cutoutFileFor, loadSeed, toWebp } from "./sample-data.ts";
 import { DEV_STRANGER, DEV_TEAM } from "./dev-accounts.ts";
 
 // The secret key comes straight from the local stack, never from an env file: OpenNext bakes every variable in the
@@ -82,8 +82,26 @@ async function main() {
     console.log(`${p.code}  ${(data.length / 1024).toFixed(1).padStart(5)} KB  q${quality}  ${p.name}`);
   }
 
+  // The local test bag for the builder's bag slot (D-063).
+  {
+    const b = SAMPLE_BAG;
+    const { data } = await toWebp(b.photo);
+    const cover = `${b.code}/seed-cover.webp`;
+    const cut = `${b.code}/seed-cutout.webp`;
+    const up1 = await db.storage.from(PHOTO.bucket).upload(cover, data, { contentType: "image/webp", upsert: true });
+    const up2 = await db.storage.from(PHOTO.bucket).upload(cut, await readFile(b.cutout), { contentType: "image/webp", upsert: true });
+    if (up1.error || up2.error) throw new Error(`Upload ${b.code}: ${(up1.error ?? up2.error)!.message}`);
+    const { error } = await db.from("products").upsert({
+      code: b.code, name: b.name, brand: b.brand, era: b.era, category: b.category, size: b.size, price_qar: b.price_qar,
+      was_price_qar: null, section_ids: [], condition: b.condition, measurements: b.measurements, status: b.status,
+      photos: [cover], cutout: cut,
+    }, { onConflict: "code" });
+    if (error) throw new Error(`Product ${b.code}: ${error.message}`);
+  }
+
   // Local resets must be exact: products added by tests or by hand are removed, with their photos.
-  const extra = await db.from("products").select("code, photos, cutout").not("code", "in", `(${seed.map((p) => p.code).join(",")})`);
+  const keep = [...seed.map((p) => p.code), SAMPLE_BAG.code];
+  const extra = await db.from("products").select("code, photos, cutout").not("code", "in", `(${keep.join(",")})`);
   if (extra.error) throw new Error(`Extra products: ${extra.error.message}`);
   if (extra.data.length) {
     const paths = extra.data.flatMap((r) => [...r.photos, ...(r.cutout ? [r.cutout] : [])]);

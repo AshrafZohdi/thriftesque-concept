@@ -6,6 +6,7 @@ import {
   activeSlots, availableModes, initialOutfit, load, outfitPieces, pools, shuffle, step,
   type OutfitMode, type OutfitState, type SlotKey,
 } from "@/lib/outfit";
+import type { ShopProduct } from "@/lib/shop-model";
 import { waLink } from "@/lib/wa";
 import { useShop } from "./ShopProvider";
 import o from "./builder.module.css";
@@ -70,62 +71,85 @@ export function OutfitBuilder() {
     bag.add(pieces.map((p) => p.code));
     bag.open(el);
   };
+  const clothes = slots.filter((x) => x.key !== "bag");
+  const bagSlot = slots.find((x) => x.key === "bag");
+  const bagPiece = bagSlot ? byCode.get(state.pick.bag ?? "") : undefined;
+
+  // One piece on the stage: tap for its details, swipe sideways to change it, lock to keep it when shuffling.
+  const piece = (slot: (typeof slots)[number], p: ShopProduct) => {
+    const name = slot.label.toLowerCase();
+    const locked = !!state.lock[slot.key];
+    return (
+      <div
+        className={o.item}
+        onPointerDown={(e) => { swipe.current = { x: e.clientX, y: e.clientY, key: slot.key }; swiped.current = false; }}
+        onPointerUp={(e) => {
+          const st = swipe.current;
+          swipe.current = null;
+          if (!st) return;
+          const dx = e.clientX - st.x, dy = e.clientY - st.y;
+          if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+            swiped.current = true;
+            setTimeout(() => (swiped.current = false), 80);
+            move(st.key, dx < 0 ? 1 : -1);
+          }
+        }}
+      >
+        <button
+          className={o.pick}
+          type="button"
+          aria-label={`${slot.label}: ${p.name}, size ${p.size}, ${p.price} QAR. View details`}
+          onClick={(e) => { if (!swiped.current) openProduct(p.code, e.currentTarget); }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img key={`${p.code}-${anim.n}`} className={anim.slots[slot.key] ? o[anim.slots[slot.key]!] : undefined} src={p.cutout!} alt="" draggable={false} />
+        </button>
+        <button
+          className={o.lock}
+          type="button"
+          aria-pressed={locked}
+          aria-label={`Keep this ${name} when shuffling`}
+          onClick={() => setState({ ...state, lock: { ...state.lock, [slot.key]: !locked } })}
+        >
+          <LockIcon open={!locked} />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className={o.ob}>
-      <div className={o.stage}>
+      <div className={`${o.stage} ${bagPiece?.cutout ? o.hasBag : ""}`}>
         {modes.length > 1 && (
           <div className={o.modes} role="group" aria-label="Outfit type">
             <button type="button" aria-pressed={state.mode === "separates"} onClick={() => setMode("separates")}>Top + bottom</button>
             <button type="button" aria-pressed={state.mode === "dress"} onClick={() => setMode("dress")}>Dress</button>
           </div>
         )}
-        {slots.map((slot) => {
-          const p = byCode.get(state.pick[slot.key] ?? "");
-          if (!p?.cutout) return null;
-          const name = slot.label.toLowerCase();
-          const locked = !!state.lock[slot.key];
-          return (
-            <div key={slot.key} className={`${o.row} ${o[slot.key]}`}>
-              <button className={o.nav} type="button" aria-label={`Previous ${name}`} onClick={() => move(slot.key, -1)}>‹</button>
-              <div
-                className={o.item}
-                onPointerDown={(e) => { swipe.current = { x: e.clientX, y: e.clientY, key: slot.key }; swiped.current = false; }}
-                onPointerUp={(e) => {
-                  const st = swipe.current;
-                  swipe.current = null;
-                  if (!st) return;
-                  const dx = e.clientX - st.x, dy = e.clientY - st.y;
-                  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-                    swiped.current = true;
-                    setTimeout(() => (swiped.current = false), 80);
-                    move(st.key, dx < 0 ? 1 : -1);
-                  }
-                }}
-              >
-                <button
-                  className={o.pick}
-                  type="button"
-                  aria-label={`${slot.label}: ${p.name}, size ${p.size}, ${p.price} QAR. View details`}
-                  onClick={(e) => { if (!swiped.current) openProduct(p.code, e.currentTarget); }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img key={`${p.code}-${anim.n}`} className={anim.slots[slot.key] ? o[anim.slots[slot.key]!] : undefined} src={p.cutout} alt="" draggable={false} />
-                </button>
-                <button
-                  className={o.lock}
-                  type="button"
-                  aria-pressed={locked}
-                  aria-label={`Keep this ${name} when shuffling`}
-                  onClick={() => setState({ ...state, lock: { ...state.lock, [slot.key]: !locked } })}
-                >
-                  <LockIcon open={!locked} />
-                </button>
+        <div className={o.clothes}>
+          {clothes.map((slot) => {
+            const p = byCode.get(state.pick[slot.key] ?? "");
+            if (!p?.cutout) return null;
+            const name = slot.label.toLowerCase();
+            return (
+              <div key={slot.key} className={`${o.row} ${o[slot.key]}`}>
+                <button className={o.nav} type="button" aria-label={`Previous ${name}`} onClick={() => move(slot.key, -1)}>‹</button>
+                {piece(slot, p)}
+                <button className={o.nav} type="button" aria-label={`Next ${name}`} onClick={() => move(slot.key, 1)}>›</button>
               </div>
-              <button className={o.nav} type="button" aria-label={`Next ${name}`} onClick={() => move(slot.key, 1)}>›</button>
+            );
+          })}
+        </div>
+        {/* The bag stands to the right of the clothes (D-063), with its arrows under it. */}
+        {bagSlot && bagPiece?.cutout && (
+          <div className={`${o.side} ${o.bag}`}>
+            {piece(bagSlot, bagPiece)}
+            <div className={o.sideNav}>
+              <button className={o.nav} type="button" aria-label="Previous bag" onClick={() => move("bag", -1)}>‹</button>
+              <button className={o.nav} type="button" aria-label="Next bag" onClick={() => move("bag", 1)}>›</button>
             </div>
-          );
-        })}
+          </div>
+        )}
       </div>
 
       <ul className={o.list}>

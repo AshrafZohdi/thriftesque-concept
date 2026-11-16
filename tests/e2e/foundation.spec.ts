@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { SAMPLE_BAG } from "../../scripts/sample-data";
 
 // Supabase serves product photos; it's the only other origin the page may talk to.
 const supabaseOrigin = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:55321").origin;
@@ -53,7 +54,7 @@ test("robots.txt keeps team pages out and points to a sitemap of what's for sale
   expect(res.status()).toBe(200);
   const xml = await res.text();
   const listed = new Set([...xml.matchAll(/\/p\/(TQ-\d+)</g)].map((m) => m[1]));
-  const seed: { code: string; status: string }[] = JSON.parse(readFileSync("design/seed-products.json", "utf8"));
+  const seed: { code: string; status: string }[] = [...JSON.parse(readFileSync("design/seed-products.json", "utf8")), SAMPLE_BAG];
   const forSale = seed.filter((p) => p.status === "live" || p.status === "reserved");
   expect([...listed].sort()).toEqual(forSale.map((p) => p.code).sort());
 });

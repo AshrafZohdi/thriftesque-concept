@@ -3,7 +3,7 @@
 import type { Category } from "./catalog";
 import type { ShopProduct } from "./shop-model";
 
-export type SlotKey = "top" | "dress" | "bottom" | "shoes";
+export type SlotKey = "top" | "dress" | "bottom" | "shoes" | "bag";
 export type OutfitMode = "separates" | "dress";
 
 export const SLOTS: { key: SlotKey; label: string; cats: Category[]; mode?: OutfitMode }[] = [
@@ -11,6 +11,8 @@ export const SLOTS: { key: SlotKey; label: string; cats: Category[]; mode?: Outf
   { key: "dress", label: "Dress", cats: ["Dresses"], mode: "dress" },
   { key: "bottom", label: "Bottom", cats: ["Bottoms"], mode: "separates" },
   { key: "shoes", label: "Shoes", cats: ["Shoes"] },
+  // Shown beside the clothes rather than under them (D-063). Never on its own: the builder needs a top, bottom or dress.
+  { key: "bag", label: "Bag", cats: ["Bags"] },
 ];
 
 export type Pools = Record<SlotKey, string[]>;
@@ -20,7 +22,7 @@ export const slotOf = (category: Category): SlotKey | undefined => SLOTS.find((s
 
 // Only live pieces with a cut-out can be dressed up. Order follows the shop (newest first).
 export function pools(products: ShopProduct[]): Pools {
-  const out: Pools = { top: [], dress: [], bottom: [], shoes: [] };
+  const out: Pools = { top: [], dress: [], bottom: [], shoes: [], bag: [] };
   for (const p of products) {
     const k = slotOf(p.category);
     if (k && p.status === "live" && p.cutout) out[k].push(p.code);

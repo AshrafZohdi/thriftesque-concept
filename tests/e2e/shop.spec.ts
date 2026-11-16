@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-// Runs against the seeded local database (npm run seed): 21 sample products, TQ-0705 and TQ-0711 sold, TQ-0710 on sale (was 90),
+// Runs against the seeded local database (npm run seed): 21 sample products plus a test bag (TQ-0700), TQ-0705 and TQ-0711 sold, TQ-0710 on sale (was 90),
 // and a Basics section with 3 pieces (plus an empty Men's section the shop leaves out).
 
 const cards = (page: Page) => page.locator("#shop article");
@@ -10,7 +10,7 @@ const chip = (page: Page, name: string) => page.getByRole("toolbar", { name: "Ca
 test("category chips filter the grid", async ({ page }) => {
   await page.goto("/");
   const all = await cards(page).count();
-  expect(all).toBe(21);
+  expect(all).toBe(22);
   await chip(page, "Shoes").click();
   await expect(chip(page, "Shoes")).toHaveAttribute("aria-pressed", "true");
   await expect(cards(page)).toHaveCount(2);
@@ -25,9 +25,9 @@ test("Hide sold removes sold pieces and shows them again", async ({ page }) => {
   const hide = page.getByRole("button", { name: "Hide sold" });
   await hide.click();
   await expect(hide).toHaveAttribute("aria-pressed", "true");
-  await expect(cards(page)).toHaveCount(19);
+  await expect(cards(page)).toHaveCount(20);
   await hide.click();
-  await expect(cards(page)).toHaveCount(21);
+  await expect(cards(page)).toHaveCount(22);
 });
 
 test("opening a piece shows the sheet with a shareable URL, Escape closes it and returns focus", async ({ page }) => {

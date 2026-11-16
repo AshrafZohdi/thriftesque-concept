@@ -580,3 +580,15 @@ D-061's tucked builder pieces looked bad on the live site, so the builder is bac
 gap, no overlap (CSS, the bottom-space measurement and the e2e test restored from 4d82737). The rest of D-061 (Nuvai logo
 colours and size, Instagram) stays.
 
+### D-063 A bag in the outfit builder, to the right of the clothes. Decided by Ashraf, 2026-11-16
+- New slot `bag` (category Bags) for both top + bottom and dress outfits. It stands in its own column to the right of the
+  clothes, about hip height, with its arrows under it and the usual lock; it's part of the outfit total and Add outfit.
+  Swipe, tap for details and Shuffle work as for the other pieces. A bag alone doesn't make an outfit.
+- With a bag the clothes column is narrower, so its pieces may use more of their row (top 100%, bottom 72%, dress 90%,
+  shoes 54%). Bag column 92 px on phones, 150 px on desktop.
+- Looks (AI and boards) still leave bags out.
+- Local tests use a drawn sample tote (`scripts/fixtures`, TQ-0700), not a real product; it's never loaded into production.
+- Found while testing: Next's fetch cache (`.next/cache/fetch-cache`) kept database responses between local builds, so a
+  build after a reseed showed old shop data. The gate now clears it before building. Deploys were never affected (they
+  build in a clean worktree).
+

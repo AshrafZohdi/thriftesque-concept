@@ -2,8 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { DEV_STRANGER, DEV_TEAM } from "../../scripts/dev-accounts";
+import { SAMPLE_BAG } from "../../scripts/sample-data";
 
-const seed: { status: string; price_qar: number }[] = JSON.parse(readFileSync("design/seed-products.json", "utf8"));
+// The sample products plus the local test bag (D-063).
+const seed: { status: string; price_qar: number }[] = [...JSON.parse(readFileSync("design/seed-products.json", "utf8")), SAMPLE_BAG];
 
 // Read-only team checks. Changing data is in team-writes.spec.ts, which runs after everything else.
 

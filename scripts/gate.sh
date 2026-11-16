@@ -31,6 +31,9 @@ npx supabase test db
 npm run seed
 
 step "workers build"
+# Next keeps database responses from earlier builds in its fetch cache and reuses them, so a build after a reseed showed old
+# shop data (found 2026-11-16). Clear it so the build reads the database just seeded. Deploys build in a fresh copy anyway.
+rm -rf .next/cache/fetch-cache
 npx opennextjs-cloudflare build
 
 step "worker size"

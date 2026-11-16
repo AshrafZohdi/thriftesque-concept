@@ -201,10 +201,28 @@ test("the open bag and an open look pass axe", async ({ page }) => {
 
 test("builder pieces don't overlap, and the bottom is no wider than the top", async ({ page }) => {
   await page.goto("/");
-  const imgs = page.locator("#outfit [class*=pick] img");
+  // The clothes rows only; the bag stands beside them (D-063).
+  const imgs = page.locator("#outfit [class*=row] [class*=pick] img");
   await expect(imgs.first()).toBeVisible();
   await page.locator("#outfit").scrollIntoViewIfNeeded();
   const boxes = await imgs.evaluateAll((list) => list.map((i) => { const r = i.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, width: r.width }; }));
   for (let i = 1; i < boxes.length; i++) expect(boxes[i].top).toBeGreaterThanOrEqual(boxes[i - 1].bottom - 0.5);
   expect(boxes[1].width).toBeLessThanOrEqual(boxes[0].width);
+});
+
+test("the bag stands to the right of the clothes, and goes in the outfit (D-063)", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#outfit").scrollIntoViewIfNeeded();
+  const bagPick = page.locator('#outfit button[aria-label^="Bag: "]');
+  await expect(bagPick).toHaveAttribute("aria-label", /^Bag: Sample tote bag \(test\)/);
+  const right = (l: typeof bagPick) => l.evaluate((el) => el.getBoundingClientRect().right);
+  const left = await bagPick.locator("img").evaluate((el) => el.getBoundingClientRect().left);
+  for (const slot of ["Top", "Bottom", "Shoes"]) {
+    expect(left).toBeGreaterThanOrEqual(await right(page.locator(`#outfit button[aria-label^="${slot}: "] img`)) - 0.5);
+  }
+  await expect(page.getByRole("button", { name: "Next bag" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Keep this bag when shuffling" })).toBeVisible();
+  await expect(page.locator("#outfit ul")).toContainText("Sample tote bag (test)");
+  // Still no sideways page scroll with the extra column.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBe(0);
 });

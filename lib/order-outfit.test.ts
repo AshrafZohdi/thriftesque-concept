@@ -60,7 +60,7 @@ const p = (code: string, category: ShopProduct["category"], status: ShopProduct[
   ({ code, name: code, category, status, cutout: cutout ? `c/${code}` : null, price: 100, size: "M" }) as ShopProduct;
 const products = [
   p("T1", "Tops"), p("T2", "Knitwear"), p("T3", "Outerwear", "sold"), p("T4", "Tops", "live", false),
-  p("B1", "Bottoms"), p("B2", "Bottoms", "reserved"), p("D1", "Dresses"), p("S1", "Shoes"), p("S2", "Shoes"),
+  p("B1", "Bottoms"), p("B2", "Bottoms", "reserved"), p("D1", "Dresses"), p("S1", "Shoes"), p("S2", "Shoes"), p("G1", "Bags"),
 ];
 const byCode = new Map(products.map((x) => [x.code, x]));
 const pl = pools(products);
@@ -68,25 +68,27 @@ const seq = (...v: number[]) => () => v.shift() ?? 0;
 
 describe("outfit pools and modes", () => {
   it("only uses live pieces with a cut-out", () => {
-    expect(pl).toEqual({ top: ["T1", "T2"], dress: ["D1"], bottom: ["B1"], shoes: ["S1", "S2"] });
+    expect(pl).toEqual({ top: ["T1", "T2"], dress: ["D1"], bottom: ["B1"], shoes: ["S1", "S2"], bag: ["G1"] });
   });
   it("offers a mode only when its slots have pieces", () => {
     expect(availableModes(pl)).toEqual(["separates", "dress"]);
     expect(availableModes({ ...pl, top: [], bottom: [] })).toEqual(["dress"]);
-    expect(initialOutfit({ top: [], dress: [], bottom: [], shoes: [] })).toBeNull();
+    expect(initialOutfit({ top: [], dress: [], bottom: [], shoes: [], bag: [] })).toBeNull();
+    expect(initialOutfit({ top: [], dress: [], bottom: [], shoes: [], bag: ["G1"] })).toBeNull(); // a bag alone is no outfit
   });
   it("works with only tops in stock: one Top slot to flip through (D-053)", () => {
-    const tops = { top: ["T1", "T2"], dress: [], bottom: [], shoes: [] };
+    const tops = { top: ["T1", "T2"], dress: [], bottom: [], shoes: [], bag: [] };
     expect(availableModes(tops)).toEqual(["separates"]);
     expect(activeSlots("separates", tops).map((s) => s.key)).toEqual(["top"]);
     expect(initialOutfit(tops)).toEqual({ mode: "separates", pick: { top: "T1" }, lock: {} });
     expect(activeSlots("separates", { ...tops, bottom: ["B1"] }).map((s) => s.key)).toEqual(["top", "bottom"]);
   });
   it("leaves out an empty slot", () => {
-    expect(activeSlots("separates", { ...pl, shoes: [] }).map((s) => s.key)).toEqual(["top", "bottom"]);
+    expect(activeSlots("separates", { ...pl, shoes: [], bag: [] }).map((s) => s.key)).toEqual(["top", "bottom"]);
+    expect(activeSlots("dress", pl).map((s) => s.key)).toEqual(["dress", "shoes", "bag"]); // the bag goes with either
   });
   it("starts with the newest piece in each slot", () => {
-    expect(initialOutfit(pl)).toEqual({ mode: "separates", pick: { top: "T1", dress: "D1", bottom: "B1", shoes: "S1" }, lock: {} });
+    expect(initialOutfit(pl)).toEqual({ mode: "separates", pick: { top: "T1", dress: "D1", bottom: "B1", shoes: "S1", bag: "G1" }, lock: {} });
   });
 });
 
@@ -102,7 +104,7 @@ describe("outfit actions", () => {
     const locked = { ...start, lock: { top: true } };
     const { state, moved } = shuffle(locked, pl, seq(0, 0, 0));
     expect(state.pick.top).toBe("T1");
-    expect(moved).toEqual(["bottom", "shoes"]);
+    expect(moved).toEqual(["bottom", "shoes", "bag"]);
     expect(state.pick.shoes).toBe("S2"); // rand picked S1 again, so it moved on
   });
   it("loads a look: switches mode, places and locks its pieces", () => {
@@ -111,7 +113,7 @@ describe("outfit actions", () => {
     expect(state.pick).toMatchObject({ dress: "D1", shoes: "S2" });
     expect(state.lock).toEqual({ dress: true, shoes: true });
     expect(moved).toEqual(["dress", "shoes"]);
-    expect(outfitPieces(state, pl, byCode).map((x) => x.code)).toEqual(["D1", "S2"]);
+    expect(outfitPieces(state, pl, byCode).map((x) => x.code)).toEqual(["D1", "S2", "G1"]); // the bag already chosen stays
   });
   it("ignores pieces that can't be dressed up", () => {
     const { state, moved } = load(start, pl, [byCode.get("T3")!, byCode.get("T4")!], true);

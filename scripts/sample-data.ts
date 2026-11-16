@@ -61,3 +61,12 @@ export const SAMPLE_SECTIONS = [
   { name: "Basics", codes: ["TQ-0709", "TQ-0710", "TQ-0717"] },
   { name: "Men's", codes: [] as string[] },
 ];
+
+// A drawn tote for local tests of the builder's bag slot (D-063): not a real product, never loaded into production
+// (scripts/demo.ts doesn't use it). TQ-0700 sits below the sample codes, so the next new code stays TQ-0722.
+export const SAMPLE_BAG = {
+  code: "TQ-0700", name: "Sample tote bag (test)", brand: "Unbranded", era: "2010s", category: "Bags", size: "One size",
+  price_qar: 90, condition: "Very good", measurements: { Width: 36, Height: 30, Depth: 12 }, status: "live",
+  photo: "scripts/fixtures/test-tote.jpg", cutout: "scripts/fixtures/test-tote-cutout.webp",
+};
+
