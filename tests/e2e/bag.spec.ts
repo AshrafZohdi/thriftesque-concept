@@ -199,17 +199,12 @@ test("the open bag and an open look pass axe", async ({ page }) => {
   expect(await serious()).toEqual([]);
 });
 
-test("builder pieces tuck slightly over each other, never mostly, and the bottom is no wider than the top (D-055, D-061)", async ({ page }) => {
+test("builder pieces don't overlap, and the bottom is no wider than the top", async ({ page }) => {
   await page.goto("/");
   const imgs = page.locator("#outfit [class*=pick] img");
   await expect(imgs.first()).toBeVisible();
   await page.locator("#outfit").scrollIntoViewIfNeeded();
-  const boxes = await imgs.evaluateAll((list) => list.map((i) => { const r = i.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, width: r.width, height: r.height, z: Number(getComputedStyle(i).zIndex) }; }));
-  for (let i = 1; i < boxes.length; i++) {
-    const overlap = boxes[i - 1].bottom - boxes[i].top;
-    expect(overlap).toBeGreaterThan(0);
-    expect(overlap).toBeLessThanOrEqual(boxes[i].height * 0.25);
-    expect(boxes[i - 1].z).toBeGreaterThan(boxes[i].z); // the upper piece lies over the lower one
-  }
+  const boxes = await imgs.evaluateAll((list) => list.map((i) => { const r = i.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, width: r.width }; }));
+  for (let i = 1; i < boxes.length; i++) expect(boxes[i].top).toBeGreaterThanOrEqual(boxes[i - 1].bottom - 0.5);
   expect(boxes[1].width).toBeLessThanOrEqual(boxes[0].width);
 });

@@ -46,11 +46,6 @@
   background: var(--color-ink);
   color: var(--color-surface);
 }
-/* How far each piece tucks over the next (D-061): the top's hem over the waistband, trouser hems over the shoes. One number
-   to tune; 0 puts the pieces edge to edge. */
-.stage {
-  --tuck: 22px;
-}
 .row {
   position: relative;
   display: grid;
@@ -60,33 +55,21 @@
   width: 100%;
   max-width: 460px;
 }
-/* Each piece is sized like it would sit on a person (D-055): the top widest, bottoms narrower but taller, shoes small. Rows
-   set the height; the widths below cap each piece inside its row. Pieces meet where they would on a body (D-061): the top
-   and dress sit at the bottom of their row, bottoms and shoes at the top of theirs, and each row below pulls up by --tuck. */
+/* Each piece stays in its own row (no overlap) and is sized like it would sit on a person (D-055): the top widest, bottoms
+   narrower but taller, shoes small. Rows set the height; the widths below cap each piece inside its row. */
 .top {
   height: 160px;
 }
 .bottom {
   height: 196px;
-  margin-top: calc(-1 * var(--tuck));
+  margin-top: 8px;
 }
 .dress {
   height: 330px;
 }
 .shoes {
   height: 72px;
-  margin-top: calc(-0.6 * var(--tuck));
-}
-/* Under a bottom, the shoes also take up the space a wide bottom leaves (measured in OutfitBuilder). The stage adds the
-   same space below, so its height stays put while shoppers swipe through bottoms and the page under it doesn't jump. */
-.bottom + .shoes {
-  margin-top: calc(-0.6 * var(--tuck) - var(--bottom-space, 0px));
-}
-.stage:has(.bottom + .shoes) {
-  padding-bottom: calc(22px + var(--bottom-space, 0px));
-}
-.stage:has(.bottom + .shoes)::after {
-  bottom: calc(16px + var(--bottom-space, 0px));
+  margin-top: 8px;
 }
 .top .pick img {
   max-width: 80%;
@@ -99,25 +82,6 @@
 }
 .shoes .pick img {
   max-width: 42%;
-}
-.top .pick img,
-.dress .pick img {
-  margin-bottom: 0;
-}
-.bottom .pick img,
-.shoes .pick img {
-  margin-top: 0;
-}
-/* Upper pieces lie over lower ones (a top over the waistband, hems over shoes); the arrows and locks stay above them all. */
-.top .pick img,
-.dress .pick img {
-  z-index: 3;
-}
-.bottom .pick img {
-  z-index: 2;
-}
-.shoes .pick img {
-  z-index: 1;
 }
 .item {
   position: relative;
@@ -183,8 +147,6 @@
 }
 .nav,
 .lock {
-  position: relative;
-  z-index: 4;
   display: grid;
   place-items: center;
   width: 44px;
@@ -306,12 +268,6 @@
     grid-row: 1 / span 3;
     padding-block: 70px 36px;
   }
-  .stage:has(.bottom + .shoes) {
-    padding-bottom: calc(36px + var(--bottom-space, 0px));
-  }
-  .stage:has(.bottom + .shoes)::after {
-    bottom: calc(30px + var(--bottom-space, 0px));
-  }
   .list,
   .actions,
   .ask {
@@ -331,16 +287,15 @@
   .top {
     height: 250px;
   }
-  .stage {
-    --tuck: 34px;
-  }
   .bottom {
     height: 304px;
+    margin-top: 10px;
   }
   .dress {
     height: 480px;
   }
   .shoes {
     height: 104px;
+    margin-top: 10px;
   }
 }

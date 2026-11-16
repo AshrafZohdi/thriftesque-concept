@@ -575,3 +575,8 @@ Client asks: show an old and a discounted price; sections like Basics, Jackets, 
 - **Instagram:** @thriftesqueqa (handle confirmed by Ashraf) in the footer, the shop's structured data (`sameAs`), the FAQ,
   the default About text and /llms.txt. A plain link: no embed, no tracking.
 
+### D-062 Builder overlap reverted. Decided by Ashraf, 2026-11-16
+D-061's tucked builder pieces looked bad on the live site, so the builder is back to D-055: each piece in its own row with a
+gap, no overlap (CSS, the bottom-space measurement and the e2e test restored from 4d82737). The rest of D-061 (Nuvai logo
+colours and size, Instagram) stays.
+

@@ -2,6 +2,10 @@
 
 Newest first.
 
+## 2026-11-16: Builder overlap reverted (D-062)
+
+Back to separate rows (D-055) at Ashraf's request; the logo and Instagram changes stay live.
+
 ## 2026-11-16: Builder tuck, Nuvai logo, Instagram (D-061)
 
 **Verified**: typecheck, lint, tokens, unit; builder and bag e2e in 5 browsers (75); header, footer and accessibility e2e at
