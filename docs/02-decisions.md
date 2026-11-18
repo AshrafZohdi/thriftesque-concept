@@ -592,3 +592,21 @@ colours and size, Instagram) stays.
   build after a reseed showed old shop data. The gate now clears it before building. Deploys were never affected (they
   build in a clean worktree).
 
+### D-064 Shop search, and Next.js 16.4.6. Decided 2026-11-18 (search asked for by Ashraf)
+- **Search** (`lib/search.ts`, unit tested): a box at the top of the drop's sticky bar, so it stays above the grid while
+  scrolling, plus a search button in the header on every page (on the shop it scrolls to the drop and focuses the box; on
+  other pages it links to the drop). Every word must match the start of a word in a piece's name, brand, category, colour,
+  era, size, code, sections or description; plurals match singulars. General words find their category ("jacket", "bag",
+  "pants", "sweater", "shoes"); specific garments must be in the piece itself, so "jeans" doesn't bring up skirts. "sale"
+  finds pieces with a was price. Ranked: own details first, then category words, then description mentions. Combines with
+  the section and category chips and Hide sold. Results counted in a live region; an honest empty state with a clear button.
+- **Shareable**: the search is kept in the address as `?q=` (replaced, not pushed), and a `?q=` link opens with it, so ads
+  can point at e.g. `/?q=bags`. Read in the browser because the page is cached for everyone.
+- The sections row moved out of the sticky bar so the bar (search + categories) stays the same height as before.
+- Header at 360 px: the search cell fits by trimming padding and the wordmark's letter-spacing on screens under 380 px.
+- **Next.js 16.4.3 → 16.4.6** (and eslint-config-next): the patch release fixing GHSA-mfr8-8qww-v76h and GHSA-vc7v-qv4w-wrv8
+  (moderate; cache leaks with `'use cache'`/`unstable_cache`, which this app doesn't use). The build had started refusing to
+  run on the old version every other time, which would have blocked deploys. Within the Cloudflare adapter's peer range
+  (`>=16.4.1`). Verified on the Worker preview with the full e2e suite. The remaining 5 moderate audit items are in the
+  adapter's build-time tooling (glob, minimatch); npm's suggested fix downgrades the adapter, so they're left.
+

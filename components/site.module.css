@@ -102,6 +102,33 @@
   letter-spacing: 0.06em;
   text-decoration: none;
 }
+/* Search in the header (D-064): an icon cell before the Bag, on every screen size. */
+.searchCell {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  color: var(--color-ink);
+}
+.searchCell:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: -5px;
+}
+/* The narrowest phones: a little less padding and spacing, so the wordmark, About, Search and Bag all fit at 360 px. */
+@media (max-width: 379px) {
+  .brand {
+    padding-inline: 12px;
+  }
+  .brand .logo {
+    letter-spacing: 0.08em;
+  }
+  .aboutCell {
+    padding: 0 10px;
+  }
+  .searchCell {
+    width: 44px;
+  }
+}
 .cell {
   display: flex;
   align-items: center;
@@ -321,6 +348,9 @@
   }
   .aboutCell {
     display: none;
+  }
+  .searchCell {
+    border-inline-start: 1px solid var(--color-ink);
   }
   .steps {
     grid-template-columns: repeat(3, 1fr);

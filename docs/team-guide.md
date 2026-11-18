@@ -89,6 +89,11 @@ phone's "lift subject".
 when there are bottoms, layered tops (a top with a knit or jacket over it) when there aren't. Suggestions arrive as drafts; nothing shows in
 the shop until you press **Publish**. A published look hides itself if one of its pieces is sold or hidden.
 
+## Links for ads and posts
+
+Shop links can open with a search already filled in: add `?q=` and the words. For example
+`https://thriftesque.com/?q=bags`, `?q=jeans` or `?q=sale`. Spaces work as `+`: `?q=black+bag`.
+
 ## Good to know
 
 - Deleting a piece also deletes its photos. It can't be undone; marking it Sold or Hidden can.

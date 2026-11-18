@@ -5,6 +5,7 @@ import { ChromeHeart } from "./Chrome";
 import { LOCATION, SIZING, shopFacts, type ShopDetails } from "@/lib/shop-facts";
 import { INSTAGRAM, TIKTOK } from "@/lib/site";
 import { MadeWithNuvai } from "./MadeWithNuvai";
+import { SearchButton } from "./SearchButton";
 import s from "./site.module.css";
 
 // Endless scrolling strip. Each half holds several copies so it's wider than any screen (one copy of the strip is about
@@ -60,6 +61,7 @@ export function Header({ right, nav = [["/#shop", "The drop"], ["/#how", "How to
         </nav>
         {/* Phones have no room for the nav, so About gets its own cell there (the nav's link takes over on wider screens). */}
         <Link className={s.aboutCell} href="/about">About</Link>
+        <SearchButton className={s.searchCell} />
         {right ?? (
           <Link className={s.cell} href="/#shop">
             Shop

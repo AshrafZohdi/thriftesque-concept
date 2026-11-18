@@ -117,3 +117,41 @@ test("a piece on sale shows the old price crossed out, and Sale and section chip
   await page.goto("/p/TQ-0710");
   await expect(page.getByRole("main")).toContainText("Was 90 QAR, now 65 QAR27% off");
 });
+
+test("search: the header button opens it, results follow what you type, and a ?q= link opens with it (D-064)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("banner").getByRole("link", { name: "Search the shop" }).click();
+  const box = page.getByRole("searchbox", { name: "Search the shop" });
+  await expect(box).toBeFocused();
+  await box.fill("jeans");
+  await expect(cards(page)).toHaveText([/Light wash straight jeans/, /Rigid dark wash straight jeans/]); // newest first
+  await expect(page.getByRole("status").filter({ hasText: "2 pieces match" })).toHaveText("2 pieces match “jeans”");
+  await expect(page).toHaveURL(/\?q=jeans$/);
+
+  // Every word has to match; a category word finds the whole category.
+  await box.fill("black boots");
+  await expect(cards(page)).toHaveText([/Black leather Chelsea boots/]);
+  await box.fill("bags");
+  await expect(cards(page)).toHaveText([/Sample tote bag/]);
+
+  await box.fill("velvet unicorn");
+  await expect(page.locator("#shop")).toContainText("Nothing matches “velvet unicorn”.");
+  await page.getByRole("button", { name: "Clear search" }).first().click();
+  await expect(box).toHaveValue("");
+  await expect(cards(page)).toHaveCount(22);
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.goto("/?q=skirt");
+  await expect(page.getByRole("searchbox", { name: "Search the shop" })).toHaveValue("skirt");
+  await expect(cards(page)).toHaveCount(2);
+  const { violations } = await new AxeBuilder({ page }).include("#shop").analyze();
+  expect(violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
+});
+
+test("search from another page takes you to the shop (D-064)", async ({ page }) => {
+  await page.goto("/about");
+  await page.getByRole("banner").getByRole("link", { name: "Search the shop" }).click();
+  await expect(page).toHaveURL(/\/#shop$/);
+  await expect(page.getByRole("searchbox", { name: "Search the shop" })).toBeVisible();
+});
+
