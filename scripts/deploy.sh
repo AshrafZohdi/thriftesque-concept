@@ -18,6 +18,8 @@ sha="$(git rev-parse --short HEAD)"
 # Read the target's config now so a typo fails fast, but export it only after the gate: the gate builds and tests against
 # local Supabase, and these values would point that build at the live database instead.
 exports="$(node scripts/wrangler-env.mjs "$target")"
+# Fail now, not after the build, if the Wrangler login can't reach this target's account (D-065).
+node scripts/check-cloudflare-login.mjs "$target"
 
 step() { printf '\n== %s\n' "$1"; }
 

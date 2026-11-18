@@ -610,3 +610,10 @@ colours and size, Instagram) stays.
   (`>=16.4.1`). Verified on the Worker preview with the full e2e suite. The remaining 5 moderate audit items are in the
   adapter's build-time tooling (glob, minimatch); npm's suggested fix downgrades the adapter, so they're left.
 
+### D-065 The deploy checks the Cloudflare login first. Decided 2026-11-18
+Twice (2026-11-16 and 2026-11-18) a deploy built for minutes and then failed with "Authentication error": the Wrangler login
+is shared by every project on this Mac, and work on another project had switched it to an account that can't reach the
+client's. Nothing went live either time and the smoke showed the old version still serving. `scripts/deploy.sh` now runs
+`scripts/check-cloudflare-login.mjs` before the gate and the build: it stops with the sign-in command if the login can't reach
+the target's `account_id`. The lasting fix is for the client to add Nuvai's login to their Cloudflare account (owner action).
+
