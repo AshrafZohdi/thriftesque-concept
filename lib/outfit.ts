@@ -18,7 +18,8 @@ export const SLOTS: { key: SlotKey; label: string; cats: Category[]; mode?: Outf
 export type Pools = Record<SlotKey, string[]>;
 export type OutfitState = { mode: OutfitMode; pick: Partial<Record<SlotKey, string>>; lock: Partial<Record<SlotKey, boolean>> };
 
-export const slotOf = (category: Category): SlotKey | undefined => SLOTS.find((s) => s.cats.includes(category))?.key;
+// A piece without a category (allowed since D-066) has no slot, so it stays out of the builder.
+export const slotOf = (category: Category | null): SlotKey | undefined => (category ? SLOTS.find((s) => s.cats.includes(category))?.key : undefined);
 
 // Only live pieces with a cut-out can be dressed up. Order follows the shop (newest first).
 export function pools(products: ShopProduct[]): Pools {

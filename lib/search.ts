@@ -35,13 +35,13 @@ export type Searchable = Pick<ShopProduct, "name" | "brand" | "category" | "colo
 // only the description 1. So the obvious results come first.
 export function searchScore(p: Searchable, words: string[], sectionNames: Map<string, string>): number {
   if (!words.length) return 1;
-  const strong = norm([p.name, p.brand, p.category, p.colour ?? "", p.era, p.size, p.code, ...p.sections.map((id) => sectionNames.get(id) ?? "")].join(" ")).split(" ").map(stem);
+  const strong = norm([p.name, p.brand, p.category ?? "", p.colour ?? "", p.era ?? "", p.size ?? "", p.code, ...p.sections.map((id) => sectionNames.get(id) ?? "")].join(" ")).split(" ").map(stem);
   const weak = norm(p.description ?? "").split(" ").map(stem);
   const has = (list: string[], w: string) => list.some((x) => x.startsWith(w));
   let score = 0;
   for (const w of words) {
     if (has(strong, w) || (w === "sale" && p.wasPrice !== null)) score += 3;
-    else if (CATEGORY_WORDS[p.category]?.some((c) => c.startsWith(w) || w.startsWith(c))) score += 2;
+    else if (p.category && CATEGORY_WORDS[p.category]?.some((c) => c.startsWith(w) || w.startsWith(c))) score += 2;
     else if (has(weak, w)) score += 1;
     else return 0;
   }

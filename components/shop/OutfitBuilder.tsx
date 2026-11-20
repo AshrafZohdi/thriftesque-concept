@@ -6,7 +6,7 @@ import {
   activeSlots, availableModes, initialOutfit, load, outfitPieces, pools, shuffle, step,
   type OutfitMode, type OutfitState, type SlotKey,
 } from "@/lib/outfit";
-import type { ShopProduct } from "@/lib/shop-model";
+import { joinDetails, type ShopProduct } from "@/lib/shop-model";
 import { waLink } from "@/lib/wa";
 import { useShop } from "./ShopProvider";
 import o from "./builder.module.css";
@@ -98,7 +98,7 @@ export function OutfitBuilder() {
         <button
           className={o.pick}
           type="button"
-          aria-label={`${slot.label}: ${p.name}, size ${p.size}, ${p.price} QAR. View details`}
+          aria-label={`${slot.label}: ${[p.name, p.size && `size ${p.size}`, `${p.price} QAR`].filter(Boolean).join(", ")}. View details`}
           onClick={(e) => { if (!swiped.current) openProduct(p.code, e.currentTarget); }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -158,7 +158,7 @@ export function OutfitBuilder() {
           return p ? (
             <li key={slot.key}>
               <span className={o.k}>{slot.label}</span>
-              <span className={o.n}>{p.name}<small>Size {p.size} · {p.code}</small></span>
+              <span className={o.n}>{p.name}<small>{joinDetails(p.size && `Size ${p.size}`, p.code)}</small></span>
               <b>{p.price} QAR</b>
             </li>
           ) : null;

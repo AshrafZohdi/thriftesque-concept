@@ -12,15 +12,16 @@ export const productSchema = z
   .object({
     name: text(120, "Name").min(1, "Give the piece a name."),
     brand: text(80, "Brand"),
-    era: z.enum(ERAS, { message: "Choose an era." }),
-    category: z.enum(CATEGORIES, { message: "Choose a category." }),
-    size: text(20, "Size").min(1, "Add a size."),
+    // Optional since D-066: a piece can go live with only a name, a photo and a price. "" means not filled in.
+    era: z.enum(ERAS).or(z.literal("")),
+    category: z.enum(CATEGORIES).or(z.literal("")),
+    size: text(20, "Size"),
     price: z.coerce.number({ message: "Add a price." }).int("Price: whole QAR only.").min(1, "Add a price.").max(999_999, "That price is too high."),
     // Sale (D-060): the price before the reduction. Empty means not on sale.
     wasPrice: z.union([z.literal(""), z.null(), z.coerce.number({ message: "Was price: a whole number of QAR." }).int("Was price: whole QAR only.").min(1).max(999_999)]),
     // Team-made sections the piece belongs to (D-060).
     sectionIds: z.array(z.uuid()).max(10, "10 sections at most."),
-    condition: z.enum(CONDITIONS, { message: "Choose a condition." }),
+    condition: z.enum(CONDITIONS).or(z.literal("")),
     colour: text(40, "Colour"),
     // Flat measurements in cm. Empty means not measured.
     measurements: z.record(z.string(), z.union([z.literal(""), z.coerce.number().min(0, "Measurements can't be negative.").max(500, "Check that measurement.")])),
@@ -33,7 +34,7 @@ export const productSchema = z
   .superRefine((v, ctx) => {
     if (typeof v.wasPrice === "number" && v.wasPrice <= v.price)
       ctx.addIssue({ code: "custom", path: ["wasPrice"], message: "The was price has to be higher than the price, or leave it empty." });
-    const allowed = MEASURE[v.category as Category];
+    const allowed = v.category ? MEASURE[v.category as Category] : [];
     for (const k of Object.keys(v.measurements)) {
       if (!allowed.includes(k)) ctx.addIssue({ code: "custom", path: ["measurements", k], message: `${k} isn't measured for ${v.category}.` });
     }
@@ -62,13 +63,13 @@ export function toProductRow(v: ProductValues) {
   return {
     name: v.name,
     brand: v.brand || "Unbranded",
-    era: v.era,
-    category: v.category,
-    size: v.size,
+    era: v.era || null,
+    category: v.category || null,
+    size: v.size || null,
     price_qar: v.price,
     was_price_qar: typeof v.wasPrice === "number" ? v.wasPrice : null,
     section_ids: v.sectionIds,
-    condition: v.condition,
+    condition: v.condition || null,
     colour: v.colour || null,
     measurements,
     status: v.status,
@@ -80,6 +81,6 @@ export function toProductRow(v: ProductValues) {
 }
 
 export const emptyProduct = (): ProductInput => ({
-  name: "", brand: "", era: "90s", category: "Tops", size: "", price: "" as unknown as number, wasPrice: "", sectionIds: [], condition: "Very good",
+  name: "", brand: "", era: "", category: "", size: "", price: "" as unknown as number, wasPrice: "", sectionIds: [], condition: "",
   colour: "", measurements: {}, status: "hidden", photos: [], cutout: "", description: "", stylingTip: "",
 });

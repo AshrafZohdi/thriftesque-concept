@@ -124,8 +124,8 @@ function Bulk({ onClose, onDone, onEdit, products, closeRef, cancelRef }: {
       </div>
       <div className={d.edBody}>
         <p className={d.muted}>
-          One piece per photo, up to {MAX_BULK} at a time. Each becomes a hidden draft. Then open each one to add the price, size,
-          condition and measurements, and set it live.
+          One piece per photo, up to {MAX_BULK} at a time. Each becomes a hidden draft. Then open each one to add the price (and any
+          other details you want), and set it live.
         </p>
         {phase === "pick" && (
           <>
@@ -163,7 +163,7 @@ function Bulk({ onClose, onDone, onEdit, products, closeRef, cancelRef }: {
                       <span className={d.bulkText}>
                         <span className={d.bulkName}>{p.code} · {p.name}</span>
                         <span className={d.bulkNote}>
-                          {missing.length ? `Needs ${missing.join(", ")}` : p.status === "live" ? "Live in the shop" : "Details done, still hidden"}
+                          {missing.length ? `Needs ${missing.join(", ")}` : p.status === "live" ? "Live in the shop" : "Ready to go live, still hidden"}
                         </span>
                       </span>
                       <span className={d.bulkGo} aria-hidden="true">Edit</span>

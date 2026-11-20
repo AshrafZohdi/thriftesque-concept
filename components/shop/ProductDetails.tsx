@@ -1,7 +1,7 @@
 // Product details shared by the sheet over the shop and the /p/[code] page. No hooks, so it renders on server or client.
 import type { ReactNode } from "react";
 import { CONDITION_NOTE } from "@/lib/catalog";
-import { percentOff, type ShopProduct } from "@/lib/shop-model";
+import { joinDetails, percentOff, type ShopProduct } from "@/lib/shop-model";
 import s from "./shop.module.css";
 
 // The price, with the old one crossed out while a live or reserved piece is on sale (D-060). Screen readers hear "was, now".
@@ -40,7 +40,7 @@ export function ProductDetails({ product: p, titleId, heading = "h1", actions }:
   const Title = heading;
   return (
     <div className={s.detail}>
-      <p className={`${s.meta} mono`}>{p.brand} · {p.era} · {p.category} · {p.code}</p>
+      <p className={`${s.meta} mono`}>{joinDetails(p.brand, p.era, p.category, p.code)}</p>
       <Title className={`${s.title} display`} id={titleId}>{p.name}</Title>
       <p className={s.bigPrice}><Price p={p} big /></p>
       {p.status !== "live" && (
@@ -50,13 +50,13 @@ export function ProductDetails({ product: p, titleId, heading = "h1", actions }:
       )}
       <table className={s.table}>
         <tbody>
-          <tr><td>Tagged size</td><td>{p.size}</td></tr>
+          {p.size && <tr><td>Tagged size</td><td>{p.size}</td></tr>}
           {p.measurements.map(([k, v]) => <tr key={k}><td>{k}</td><td>{v} cm</td></tr>)}
           {p.colour && <tr><td>Colour</td><td>{p.colour}</td></tr>}
-          <tr><td>Condition</td><td>{p.condition}</td></tr>
+          {p.condition && <tr><td>Condition</td><td>{p.condition}</td></tr>}
         </tbody>
       </table>
-      <p className={s.note}>{CONDITION_NOTE[p.condition]} Measured flat. Lay a piece you own flat to compare.</p>
+      <p className={s.note}>{p.condition && `${CONDITION_NOTE[p.condition]} `}{p.measurements.length > 0 && "Measured flat. Lay a piece you own flat to compare."}</p>
       {p.description && <p>{p.description}</p>}
       {p.stylingTip && <p className={s.note}>Styling tip: {p.stylingTip}</p>}
       <div className={s.actions}>{actions}</div>

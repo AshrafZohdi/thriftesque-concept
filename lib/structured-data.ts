@@ -26,7 +26,8 @@ export function shopJsonLd(siteUrl: string) {
 
 export function productJsonLd(p: ShopProduct, siteUrl: string) {
   const url = `${siteUrl}/p/${p.code}`;
-  const description = [p.description, `Size ${p.size}. ${p.era}. Condition: ${p.condition}.`].filter(Boolean).join(" ");
+  const facts = [p.size && `Size ${p.size}.`, p.era && `${p.era}.`, p.condition && `Condition: ${p.condition}.`].filter(Boolean).join(" ");
+  const description = [p.description, facts].filter(Boolean).join(" ") || `${p.name}. One of one.`;
   return [
     {
       "@context": "https://schema.org",
@@ -37,8 +38,8 @@ export function productJsonLd(p: ShopProduct, siteUrl: string) {
       url,
       image: p.photos,
       description,
-      category: p.category,
-      size: p.size,
+      ...(p.category && { category: p.category }),
+      ...(p.size && { size: p.size }),
       ...(p.colour ? { color: p.colour } : {}),
       ...(p.brand && p.brand !== "Unbranded" ? { brand: { "@type": "Brand", name: p.brand } } : {}),
       itemCondition: "https://schema.org/UsedCondition",
@@ -73,9 +74,9 @@ export function jsonLdText(data: unknown): string {
 export function productSnippet(p: Pick<ShopProduct, "description" | "size" | "price" | "condition" | "era" | "status"> & Partial<Pick<ShopProduct, "wasPrice">>): string {
   const state = p.status === "sold" ? "Sold. " : p.status === "reserved" ? "Reserved. " : "";
   const was = p.wasPrice && p.status !== "sold" ? ` (was ${p.wasPrice})` : "";
-  const facts = `${state}Size ${p.size}, ${p.price} QAR${was}, ${p.condition.toLowerCase()} condition. One of one, order on WhatsApp.`;
+  const facts = `${state}${[p.size && `Size ${p.size}`, `${p.price} QAR${was}`, p.condition && `${p.condition.toLowerCase()} condition`].filter(Boolean).join(", ")}. One of one, order on WhatsApp.`;
   const desc = (p.description ?? "").replace(/\s+/g, " ").trim();
-  if (!desc) return `${state}Size ${p.size} · ${p.condition} · ${p.era}. One of one, order on WhatsApp.`;
+  if (!desc) return `${state}${[p.size && `Size ${p.size}`, p.condition, p.era, `${p.price} QAR`].filter(Boolean).join(" · ")}. One of one, order on WhatsApp.`;
   const room = 160 - facts.length - 1;
   let lead = desc;
   if (lead.length > room) {

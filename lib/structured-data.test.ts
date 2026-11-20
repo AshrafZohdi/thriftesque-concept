@@ -51,7 +51,10 @@ describe("productSnippet (D-058)", () => {
   });
   it("says sold or reserved first, and falls back without a description", () => {
     expect(productSnippet({ ...piece, status: "sold" })).toMatch(/^Cotton twill\. Sold\. Size M/);
-    expect(productSnippet({ ...piece, description: null })).toBe("Size M · Very good · 90s. One of one, order on WhatsApp.");
+    expect(productSnippet({ ...piece, description: null })).toBe("Size M · Very good · 90s · 140 QAR. One of one, order on WhatsApp.");
+    // Details the team left empty are simply left out (D-066).
+    expect(productSnippet({ ...piece, description: null, size: null, condition: null, era: null })).toBe("140 QAR. One of one, order on WhatsApp.");
+    expect(productSnippet({ ...piece, size: null, condition: null })).toBe("Cotton twill. 140 QAR. One of one, order on WhatsApp.");
   });
 });
 

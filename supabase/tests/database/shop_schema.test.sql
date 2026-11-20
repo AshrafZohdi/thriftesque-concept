@@ -9,10 +9,11 @@ insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-00000000bbbb', 'stranger@example.test', 'authenticated', 'authenticated');
 insert into public.team_members (user_id, name) values ('00000000-0000-0000-0000-00000000aaaa', 'Test team');
 
-insert into public.products (code, name, era, category, size, price_qar, condition, status) values
-  ('TQ-9001', 'Test live jacket', '90s', 'Outerwear', 'M', 100, 'Excellent', 'live'),
-  ('TQ-9002', 'Test hidden draft', '90s', 'Tops', 'S', 50, 'Good', 'hidden'),
-  ('TQ-9003', 'Test reserved dress', 'Y2K', 'Dresses', 'S', 80, 'Very good', 'reserved');
+-- Pieces in the shop need a photo (D-066).
+insert into public.products (code, name, era, category, size, price_qar, condition, status, photos) values
+  ('TQ-9001', 'Test live jacket', '90s', 'Outerwear', 'M', 100, 'Excellent', 'live', '{p/t1.webp}'),
+  ('TQ-9002', 'Test hidden draft', '90s', 'Tops', 'S', 50, 'Good', 'hidden', '{}'),
+  ('TQ-9003', 'Test reserved dress', 'Y2K', 'Dresses', 'S', 80, 'Very good', 'reserved', '{p/t3.webp}');
 
 -- ----- code formatting -----
 select is(public.format_product_code(7), 'TQ-0007', 'codes pad to four digits');
@@ -88,8 +89,8 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-00000000aaaa", "role": "authenticated"}';
 select is((select count(*)::int from public.products where code like 'TQ-900%'), 3, 'team sees hidden drafts too');
 select lives_ok(
-  $$ insert into public.products (name, era, category, size, price_qar, condition, status)
-     values ('Team piece', 'Y2K', 'Shoes', 'EU 38', 130, 'Excellent', 'live') $$,
+  $$ insert into public.products (name, era, category, size, price_qar, condition, status, photos)
+     values ('Team piece', 'Y2K', 'Shoes', 'EU 38', 130, 'Excellent', 'live', '{p/t4.webp}') $$,
   'team can add products');
 update public.products set status = 'reserved', price_qar = 120 where name = 'Team piece';
 select is((select price_qar from public.products where name = 'Team piece'), 120, 'team can edit products');

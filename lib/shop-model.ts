@@ -12,13 +12,14 @@ export type ShopProduct = {
   code: string;
   name: string;
   brand: string;
-  era: Era;
-  category: Category;
-  size: string;
+  // Optional since D-066: the team can put a piece live with only a name, a photo and a price.
+  era: Era | null;
+  category: Category | null;
+  size: string | null;
   price: number;
   // The price before a reduction, or null when the piece isn't on sale (D-060).
   wasPrice: number | null;
-  condition: Condition;
+  condition: Condition | null;
   colour: string | null;
   measurements: [label: string, cm: number][];
   status: ShopStatus;
@@ -30,6 +31,9 @@ export type ShopProduct = {
 };
 
 export type ShopSection = { id: string; name: string };
+
+// Joins the details a piece has, skipping missing ones (D-066): "Unbranded · 90s · Good", or just "Unbranded".
+export const joinDetails = (...parts: (string | null | undefined)[]) => parts.filter(Boolean).join(" · ");
 
 export type AboutPhoto = { path: string; alt: string };
 
@@ -49,19 +53,19 @@ export type ShopProductRow = Pick<
 // Hidden rows never reach the shop (RLS filters them), but a mapping bug must not show one either.
 export function toShopProduct(row: ShopProductRow, publicUrl: (path: string) => string): ShopProduct | null {
   if (row.status === "hidden") return null;
-  // The database won't let an incomplete product out of hidden (D-051); this guards the mapping all the same.
-  if (!row.era || !row.category || !row.size || row.price_qar === null || !row.condition) return null;
+  // The database won't let a piece without a price out of hidden (D-066); this guards the mapping all the same.
+  if (row.price_qar === null || !row.photos.length) return null;
   const m = row.measurements && typeof row.measurements === "object" && !Array.isArray(row.measurements) ? row.measurements : {};
   return {
     code: row.code,
     name: row.name,
     brand: row.brand,
-    era: row.era as Era,
-    category: row.category as Category,
-    size: row.size,
+    era: (row.era as Era | null) || null,
+    category: (row.category as Category | null) || null,
+    size: row.size || null,
     price: row.price_qar,
     wasPrice: row.was_price_qar !== null && row.was_price_qar > row.price_qar ? row.was_price_qar : null,
-    condition: row.condition as Condition,
+    condition: (row.condition as Condition | null) || null,
     colour: row.colour,
     measurements: Object.entries(m)
       .map(([k, v]) => [k, Number(v)] as [string, number])

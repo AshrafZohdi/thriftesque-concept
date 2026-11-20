@@ -10,11 +10,10 @@ export type TeamProduct = {
   was_price_qar?: number | null; section_ids?: string[]; condition?: string | null; status: Status; photos: string[]; cutout?: string | null; created_at: string; sold_at: string | null;
 };
 
-const NEEDED_FOR_SHOP = [["price_qar", "price"], ["size", "size"], ["category", "category"], ["era", "era"], ["condition", "condition"]] as const;
-
-// What a product still needs before it can be live, reserved or sold. Empty means ready. The database enforces the same rule.
-export function missingForShop(p: Pick<TeamProduct, "price_qar" | "size" | "category" | "era"> & { condition?: string | null }): string[] {
-  return NEEDED_FOR_SHOP.filter(([k]) => p[k] === null || p[k] === undefined || p[k] === "").map(([, label]) => label);
+// What a product still needs before it can be live, reserved or sold: a price and a photo (D-066; size, category, era and
+// condition are optional). Empty means ready. The database enforces the same rule.
+export function missingForShop(p: Pick<TeamProduct, "price_qar" | "photos">): string[] {
+  return [p.price_qar === null || p.price_qar === undefined ? "price" : "", p.photos.length ? "" : "a photo"].filter(Boolean);
 }
 
 const DAY = 86_400_000;

@@ -28,7 +28,7 @@ export function orderBlocker(items: unknown[], settings: ShopSettings, form: Ord
 
 export function orderMessage(items: Pick<ShopProduct, "name" | "size" | "price" | "code">[], settings: ShopSettings, form: OrderForm): string {
   const { subtotal, fee, total } = orderTotals(items, settings, form);
-  const lines = items.map((p, i) => `${i + 1}. ${p.name} (size ${p.size}), ${p.price} QAR [${p.code}]`);
+  const lines = items.map((p, i) => `${i + 1}. ${p.name}${p.size ? ` (size ${p.size})` : ""}, ${p.price} QAR [${p.code}]`);
   return [
     "Hi Thriftesque! I'd like to order:",
     "",
@@ -48,7 +48,7 @@ export function outfitMessage(items: Pick<ShopProduct, "name" | "size" | "price"
   return [
     `Hi Thriftesque, is this ${lookTitle ? `look still available? (${lookTitle})` : "outfit still available?"}`,
     "",
-    ...items.map((p, i) => `${i + 1}. ${p.name} (size ${p.size}), ${p.price} QAR [${p.code}]`),
+    ...items.map((p, i) => `${i + 1}. ${p.name}${p.size ? ` (size ${p.size})` : ""}, ${p.price} QAR [${p.code}]`),
     "",
     `Total: ${total} QAR`,
   ].join("\n");

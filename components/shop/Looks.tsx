@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ChromeHeart } from "@/components/Chrome";
 import { outfitMessage } from "@/lib/order";
 import { boardLayout } from "@/lib/board";
-import type { ShopLook, ShopProduct } from "@/lib/shop-model";
+import { joinDetails, type ShopLook, type ShopProduct } from "@/lib/shop-model";
 import { waLink } from "@/lib/wa";
 import { Overlay } from "./Overlay";
 import { useShop } from "./ShopProvider";
@@ -87,7 +87,7 @@ export function Looks({ looks }: { looks: ShopLook[] }) {
                       <li key={p.code}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={p.cutout!} alt="" />
-                        <span>{p.name}<small>Size {p.size} · {p.code}</small></span>
+                        <span>{p.name}<small>{joinDetails(p.size && `Size ${p.size}`, p.code)}</small></span>
                         <b>{p.price} QAR</b>
                       </li>
                     ))}

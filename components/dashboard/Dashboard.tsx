@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { deleteProduct, saveSettings, setStatus } from "@/app/dashboard/actions";
+import { deleteProduct, makeLive, saveSettings, setStatus } from "@/app/dashboard/actions";
 import { ChromeHeart } from "@/components/Chrome";
 import s from "@/components/shop/shop.module.css";
 import { STATUSES, codeNumber, type Status } from "@/lib/catalog";
@@ -60,8 +60,10 @@ async function loadAll(): Promise<Load | "signed-out"> {
   };
 }
 
-function Row({ p, onStatus, onDelete, onEdit }: {
+function Row({ p, onStatus, onDelete, onEdit, selected }: {
   p: TeamProduct; onStatus: (code: string, s: Status) => void; onDelete: (code: string) => void; onEdit: (code: string, el: HTMLElement) => void;
+  // In the Hidden tab: whether this ready piece is ticked for "Make live", and how to change that (D-066).
+  selected?: { on: boolean; set: (on: boolean) => void };
 }) {
   const [confirm, setConfirm] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -72,7 +74,12 @@ function Row({ p, onStatus, onDelete, onEdit }: {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={p.photos[0] ? photoUrl(p.photos[0]) : ""} alt="" width={56} height={70} />
       <div className={d.nm}>
-        <b>{p.name}</b>
+        {selected && missing.length === 0 ? (
+          <label className={d.pickName}>
+            <input type="checkbox" checked={selected.on} aria-label={`Select ${p.name}`} onChange={(e) => selected.set(e.target.checked)} />
+            <b>{p.name}</b>
+          </label>
+        ) : <b>{p.name}</b>}
         <span>{[p.code, p.brand, p.era].filter(Boolean).join(" · ")}</span>
         {missing.length > 0 && <span className={d.needs}>Needs {missing.join(", ")}</span>}
       </div>
@@ -113,6 +120,47 @@ const DETAIL_FIELDS: [keyof ShopDetails, string, number][] = [
   ["reservedHoldText", "For example: 24 hours", 0],
   ["orderRetentionText", "For example: 6 months after delivery", 0],
 ];
+
+// Bulk go-live in the Hidden tab (D-066): the ticked pieces, or every ready one when none are ticked. Two taps, like Delete.
+function BulkLiveBar({ list, picked, setPicked, onLive }: {
+  list: TeamProduct[]; picked: Set<string>; setPicked: (s: Set<string>) => void; onLive: (codes: string[]) => Promise<void>;
+}) {
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const ready = list.filter((p) => missingForShop(p).length === 0).map((p) => p.code);
+  const chosen = ready.filter((c) => picked.has(c));
+  const target = chosen.length ? chosen : ready;
+  const notReady = list.length - ready.length;
+
+  async function press() {
+    if (!confirm) {
+      setConfirm(true);
+      timer.current = setTimeout(() => setConfirm(false), 3000);
+      return;
+    }
+    clearTimeout(timer.current);
+    setConfirm(false);
+    setBusy(true);
+    await onLive(target);
+    setBusy(false);
+  }
+
+  return (
+    <div className={d.bulkBar} role="group" aria-label="Make hidden pieces live">
+      <label className={d.check}>
+        <input type="checkbox" checked={ready.length > 0 && chosen.length === ready.length} disabled={!ready.length}
+          onChange={(e) => setPicked(e.target.checked ? new Set(ready) : new Set())} />
+        Select all ready ({ready.length})
+      </label>
+      <button className={`${s.btn} ${s.primary}`} type="button" disabled={!target.length || busy} data-confirm={confirm} onClick={press}>
+        {busy ? "Making live…" : confirm ? `Tap again: ${target.length} live` : chosen.length ? `Make ${chosen.length} selected live` : `Make all ${ready.length} ready live`}
+      </button>
+      {notReady > 0 && <p className={d.muted}>{notReady} {notReady === 1 ? "draft needs" : "drafts need"} a price or photo first.</p>}
+    </div>
+  );
+}
 
 // An About photo in the settings: saved ones have a path; new ones wait as a resized blob until Save settings uploads them.
 type AboutItem = { key: string; path?: string; blob?: Blob; ext?: string; preview: string; alt: string };
@@ -274,6 +322,7 @@ export function Dashboard() {
   const [load, setLoad] = useState<Load>({ state: "checking" });
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<Status | "all">("all");
+  const [picked, setPicked] = useState<Set<string>>(new Set());
   const [note, setNote] = useState("");
   const [edit, setEdit] = useState<{ target: EditTarget; trigger: HTMLElement | null } | null>(null);
   const [bulk, setBulk] = useState<{ n: number; trigger: HTMLElement | null } | null>(null);
@@ -313,6 +362,14 @@ export function Dashboard() {
     const r = await setStatus(code, status);
     if (!r.ok) return say(r.error);
     say(status === "sold" ? `${name} marked sold` : status === "live" ? `${name} is live in the shop` : status === "reserved" ? `${name} reserved` : `${name} hidden from the shop`);
+    await refresh();
+  }
+
+  async function goLive(codes: string[]) {
+    const r = await makeLive(codes);
+    if (!r.ok) return say(r.error);
+    setPicked(new Set());
+    say(`${r.live.length} ${r.live.length === 1 ? "piece is" : "pieces are"} live in the shop${r.skipped.length ? `; ${r.skipped.length} still need a price or photo` : ""}`);
     await refresh();
   }
 
@@ -407,8 +464,12 @@ export function Dashboard() {
             ))}
           </div>
         </div>
+        {tab === "hidden" && <BulkLiveBar list={list} picked={picked} setPicked={setPicked} onLive={goLive} />}
         <section className={d.table} aria-label="Products">
-          {list.length ? list.map((p) => <Row key={p.code} p={p} onStatus={changeStatus} onDelete={remove} onEdit={openEditor} />) : (
+          {list.length ? list.map((p) => (
+            <Row key={p.code} p={p} onStatus={changeStatus} onDelete={remove} onEdit={openEditor}
+              selected={tab === "hidden" ? { on: picked.has(p.code), set: (on) => setPicked((cur) => { const n = new Set(cur); if (on) n.add(p.code); else n.delete(p.code); return n; }) } : undefined} />
+          )) : (
             <p className={d.empty}>No products match. Try another search or tab.</p>
           )}
         </section>

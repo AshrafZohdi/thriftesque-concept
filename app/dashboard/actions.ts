@@ -25,15 +25,36 @@ export async function setStatus(code: string, status: string): Promise<Result> {
   const t = await requireTeam();
   if (!t.ok) return t;
   if (status !== "hidden") {
-    const cur = await t.db.from("products").select("era,category,size,price_qar,condition").eq("code", code).maybeSingle();
+    const cur = await t.db.from("products").select("price_qar,photos").eq("code", code).maybeSingle();
     const missing = cur.data ? missingForShop(cur.data) : [];
     if (missing.length) return { ok: false, error: `${code} needs ${missing.join(", ")} before it can show in the shop. Open it with Edit.` };
   }
   const { data, error } = await t.db.from("products").update({ status }).eq("code", code).select("code");
-  if (error) return { ok: false, error: error.code === "23514" ? `${code} needs its price, size and details before it can show in the shop.` : `Couldn't save: ${error.message}` };
+  if (error) return { ok: false, error: error.code === "23514" ? `${code} needs a price and a photo before it can show in the shop.` : `Couldn't save: ${error.message}` };
   if (!data.length) return { ok: false, error: `${code} wasn't found. Refresh the page.` };
   refreshProduct(code);
   return { ok: true };
+}
+
+// Puts several hidden pieces live at once (D-066). Pieces still missing a price or photo are left hidden and reported.
+export async function makeLive(codes: string[]): Promise<{ ok: true; live: string[]; skipped: string[] } | { ok: false; error: string }> {
+  const list = [...new Set(Array.isArray(codes) ? codes : [])];
+  if (!list.length || list.length > 200 || !list.every(isCode)) return { ok: false, error: "That selection isn't valid. Refresh the page." };
+  const t = await requireTeam();
+  if (!t.ok) return t;
+  const cur = await t.db.from("products").select("code,price_qar,photos,status").in("code", list);
+  if (cur.error) return { ok: false, error: `Couldn't check the pieces: ${cur.error.message}` };
+  const ready = cur.data.filter((p) => p.status === "hidden" && missingForShop(p).length === 0).map((p) => p.code);
+  const skipped = list.filter((c) => !ready.includes(c));
+  if (ready.length) {
+    const { error } = await t.db.from("products").update({ status: "live" }).in("code", ready).eq("status", "hidden");
+    if (error) return { ok: false, error: `Couldn't make them live: ${error.message}` };
+    revalidatePath("/");
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/llms.txt");
+    for (const c of ready) revalidatePath(`/p/${c}`);
+  }
+  return { ok: true, live: ready, skipped };
 }
 
 export async function deleteProduct(code: string): Promise<Result> {

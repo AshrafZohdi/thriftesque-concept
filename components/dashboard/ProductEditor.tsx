@@ -215,19 +215,19 @@ function Editor({ code, initial, sections, onClose, onSaved, closeRef, cancelRef
             <input {...register("brand")} {...field("brand", ids.brand)} placeholder="Unbranded" />
           </div>
           <div className={d.field}>
-            <label htmlFor={ids.era}>Era</label>
-            <select {...register("era")} {...field("era", ids.era)}><option value="" disabled>Choose</option>{ERAS.map((x) => <option key={x}>{x}</option>)}</select>
+            <label htmlFor={ids.era}>Era (optional)</label>
+            <select {...register("era")} {...field("era", ids.era)}><option value="">Not set</option>{ERAS.map((x) => <option key={x}>{x}</option>)}</select>
             <Err id={`${ids.era}-err`} errors={errors} name="era" />
           </div>
         </div>
         <div className={d.grid3}>
           <div className={d.field}>
-            <label htmlFor={ids.cat}>Category</label>
-            <select {...register("category")} {...field("category", ids.cat)}><option value="" disabled>Choose</option>{CATEGORIES.map((x) => <option key={x}>{x}</option>)}</select>
+            <label htmlFor={ids.cat}>Category (optional)</label>
+            <select {...register("category")} {...field("category", ids.cat)}><option value="">Not set</option>{CATEGORIES.map((x) => <option key={x}>{x}</option>)}</select>
             <Err id={`${ids.cat}-err`} errors={errors} name="category" />
           </div>
           <div className={d.field}>
-            <label htmlFor={ids.size}>Size</label>
+            <label htmlFor={ids.size}>Size (optional)</label>
             <input {...register("size")} {...field("size", ids.size)} placeholder="M, W30, EU 38" />
             <Err id={`${ids.size}-err`} errors={errors} name="size" />
           </div>
@@ -244,7 +244,8 @@ function Editor({ code, initial, sections, onClose, onSaved, closeRef, cancelRef
           <p className={d.muted}>To put the piece on sale, type the old price here and the new one in Price. The shop crosses out the old price and shows the % off. Empty it to end the sale.</p>
         </div>
         <fieldset className={d.measures}>
-          <legend className={d.fieldLegend}>Measurements, laid flat (cm)</legend>
+          <legend className={d.fieldLegend}>Measurements, laid flat (cm, optional)</legend>
+          {!category && <p className={d.muted}>Choose a category to add its measurements.</p>}
           {(MEASURE[category] ?? []).map((k) => {
             const id = `${ids.cat}-m-${k}`;
             return (
@@ -257,8 +258,8 @@ function Editor({ code, initial, sections, onClose, onSaved, closeRef, cancelRef
         </fieldset>
         <div className={d.grid2}>
           <div className={d.field}>
-            <label htmlFor={ids.cond}>Condition</label>
-            <select {...register("condition")} {...field("condition", ids.cond)}><option value="" disabled>Choose</option>{CONDITIONS.map((x) => <option key={x}>{x}</option>)}</select>
+            <label htmlFor={ids.cond}>Condition (optional)</label>
+            <select {...register("condition")} {...field("condition", ids.cond)}><option value="">Not set</option>{CONDITIONS.map((x) => <option key={x}>{x}</option>)}</select>
             <Err id={`${ids.cond}-err`} errors={errors} name="condition" />
           </div>
           <div className={d.field}>

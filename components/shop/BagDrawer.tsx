@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useId } from "react";
 import { lowestFee, orderBlocker, orderMessage, orderTotals } from "@/lib/order";
+import { joinDetails } from "@/lib/shop-model";
 import { waLink } from "@/lib/wa";
 import { Overlay } from "./Overlay";
 import { useShop } from "./ShopProvider";
@@ -40,7 +41,7 @@ function Receipt() {
           <img src={p.photos[0]} alt="" width={44} height={55} />
           <div>
             <div className={b.rcName}>{p.name}</div>
-            <div className={b.rcDetail}>Size {p.size} · {p.code}</div>
+            <div className={b.rcDetail}>{joinDetails(p.size && `Size ${p.size}`, p.code)}</div>
             <button className={b.rcRm} type="button" onClick={() => bag.remove(p.code)} aria-label={`Remove ${p.name}`}>Remove</button>
           </div>
           <div>{p.price}</div>

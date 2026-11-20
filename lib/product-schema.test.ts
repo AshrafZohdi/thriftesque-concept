@@ -21,7 +21,9 @@ describe("productSchema", () => {
   it("explains what's missing in plain words", () => {
     const r = productSchema.safeParse({ ...emptyProduct() });
     const messages = r.success ? [] : r.error.issues.map((i) => i.message);
-    expect(messages).toEqual(expect.arrayContaining(["Give the piece a name.", "Add a size.", "Add a photo so customers can see the piece."]));
+    expect(messages).toEqual(expect.arrayContaining(["Give the piece a name.", "Add a price.", "Add a photo so customers can see the piece."]));
+    // Size, category, era and condition are optional (D-066).
+    expect(messages.some((m) => /size|category|era|condition/i.test(m))).toBe(false);
   });
 
   it("rejects bad prices, too many photos, odd paths and the wrong measurements", () => {

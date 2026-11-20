@@ -39,8 +39,14 @@ Forgot the password? Ask Nuvai to reset it.
 3. **Add drafts**. Keep the screen open until it says it's done.
 4. When it's done, the list shows each photo with what it still needs. Tap one to open it, add the price, size, condition,
    measurements and any extra photos, set Visibility to "Live in shop" and save. You land back on the list, ready for the
-   next one. A piece can't go live until it has a price, size, category, era and condition.
+   next one. A piece can go live as soon as it has a name, a photo and a price; everything else is optional and simply left
+   off the shop until you add it.
 5. Drafts you don't finish now stay under **Hidden** in the product list, marked "Needs ...".
+
+## Put many pieces live at once
+
+Open the **Hidden** tab. Tick the pieces you want, or tick none to take all of them, then press **Make ... live** and tap it
+again to confirm. Pieces without a price stay hidden (they show "Needs price").
 
 ## When someone orders
 

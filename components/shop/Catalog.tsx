@@ -3,7 +3,7 @@
 // Hide sold, then the grid. The product sheet and bag live in ShopProvider.
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Category } from "@/lib/catalog";
-import { categoryChips, filterShop, percentOff, sectionChips, type ShopProduct, type ShopSection } from "@/lib/shop-model";
+import { categoryChips, filterShop, joinDetails, percentOff, sectionChips, type ShopProduct, type ShopSection } from "@/lib/shop-model";
 import { SearchIcon } from "@/components/SearchButton";
 import { searchShop } from "@/lib/search";
 import { Price } from "./ProductDetails";
@@ -36,8 +36,8 @@ function Card({ p }: { p: ShopProduct }) {
       </div>
       <div className={s.cardInfo}>
         <h3 className={s.cardName}>{p.name}</h3>
-        <p className={s.cardMeta}>{p.brand} · {p.era} · {p.condition}</p>
-        <p className={s.cardRow}><span className={s.size}>{p.size}</span><Price p={p} /></p>
+        <p className={s.cardMeta}>{joinDetails(p.brand, p.era, p.condition)}</p>
+        <p className={s.cardRow}>{p.size ? <span className={s.size}>{p.size}</span> : <span />}<Price p={p} /></p>
       </div>
     </article>
   );

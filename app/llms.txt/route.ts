@@ -12,7 +12,7 @@ export async function GET() {
   const { products, settings } = await getShop();
   const live = products.filter((p) => p.status === "live");
   const line = (p: (typeof live)[number]) =>
-    `- [${p.name}](${siteUrl}/p/${p.code}): ${p.category}, size ${p.size}, ${p.price} QAR, ${p.era}, ${p.condition.toLowerCase()} condition${p.colour ? `, ${p.colour.toLowerCase()}` : ""}`;
+    `- [${p.name}](${siteUrl}/p/${p.code}): ${[p.category, p.size && `size ${p.size}`, `${p.price} QAR`, p.era, p.condition && `${p.condition.toLowerCase()} condition`, p.colour?.toLowerCase()].filter(Boolean).join(", ")}`;
   const body = [
     "# Thriftesque",
     "",

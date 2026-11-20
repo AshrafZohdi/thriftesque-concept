@@ -617,3 +617,20 @@ client's. Nothing went live either time and the smoke showed the old version sti
 `scripts/check-cloudflare-login.mjs` before the gate and the build: it stops with the sign-in command if the login can't reach
 the target's `account_id`. The lasting fix is for the client to add Nuvai's login to their Cloudflare account (owner action).
 
+### D-066 Go live with a name, photo and price; bulk go-live. Decided by Ashraf for the client, 2026-11-20
+- The client sometimes wants pieces live before every detail is in. To be live, reserved or sold a piece now needs only a
+  name, a photo and a price (`products_shop_ready_unless_hidden`, migration `20261120000000`, replacing D-051's
+  `products_complete_unless_hidden`). Size, category, era, condition and measurements are optional for any status. The price
+  stays required so bag totals and WhatsApp orders always add up (the client chose this over "Ask for price").
+- The shop leaves out whatever is missing: card meta, size chip, product details table, condition note, order and outfit
+  lines, search, structured data, snippets and /llms.txt (`joinDetails`). A piece without a category has no builder slot and
+  no category chip; it still shows under All and in search.
+- The editor's era, category and condition start as "Not set" (no more pre-filled 90s / Tops / Very good, which could put
+  unchecked facts live), each marked optional.
+- **Bulk go-live** (Hidden tab): tick ready pieces, or none for all of them, then "Make N live" with a second tap within 3 s
+  (like Delete). `makeLive` re-checks each piece on the server and reports any still missing a price or photo.
+- Cut-out clean-up: removed the broken cut-outs of TQ-0053 (cargo trousers, almost empty) and TQ-0085 (PINK hoodie, mostly
+  missing). The other 44 live cut-outs looked right.
+- Testing notes: Docker Desktop stopped again under heavy load from another project, taking local Supabase down; restarted.
+  The team-writes sign-in now gets the same 15 s wait as the dashboard tests.
+

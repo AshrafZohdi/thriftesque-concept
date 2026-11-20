@@ -16,9 +16,9 @@ const LAYOUTS: Record<string, Partial<Record<Role, Spot>>> = {
   "dress": { dress: [6, 4, 60, 82, -3], layer: [58, 4, 38, 44, 5], shoes: [58, 60, 38, 32, 7] },
 };
 
-const isLayer = (c: Category, all: Category[]) => c === "Outerwear" || (c === "Knitwear" && all.includes("Tops"));
+const isLayer = (c: Category | null, all: (Category | null)[]) => c === "Outerwear" || (c === "Knitwear" && all.includes("Tops"));
 
-export function boardLayout(pieces: { code: string; category: Category }[]): Map<string, Spot> {
+export function boardLayout(pieces: { code: string; category: Category | null }[]): Map<string, Spot> {
   const cats = pieces.map((p) => p.category);
   const upper = pieces.filter((p) => p.category === "Tops" || p.category === "Knitwear" || p.category === "Outerwear");
   const dress = cats.includes("Dresses");

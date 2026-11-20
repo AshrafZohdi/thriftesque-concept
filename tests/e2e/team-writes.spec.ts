@@ -9,7 +9,8 @@ async function signIn(page: Page) {
   await page.getByLabel("Email").fill(DEV_TEAM.email);
   await page.getByLabel("Password").fill(DEV_TEAM.password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+  // Same wait as the dashboard tests: sign-in plus the dashboard's first load can take over 5 s when the machine is busy.
+  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible({ timeout: 15_000 });
 }
 
 test("a status change reaches the shop", async ({ page }) => {
@@ -149,6 +150,35 @@ test("About photos: added, described, shown and removed from storage when taken 
   expect((await page.request.get(firstSrc)).status()).not.toBe(200);
 });
 
+test("hidden pieces go live together: the ticked ones, or all ready ones, with a second tap (D-066)", async ({ page }) => {
+  await signIn(page);
+  for (const name of ["Sage V-neck sweater", "Navy stripe ringer tee"]) {
+    await page.getByLabel(`Status of ${name}`).selectOption("hidden");
+    await expect(page.getByRole("status").filter({ hasText: `${name} hidden from the shop` })).toBeVisible();
+  }
+  await page.getByRole("toolbar", { name: "Status" }).getByRole("button", { name: /^Hidden/ }).click();
+  const bar = page.getByRole("group", { name: "Make hidden pieces live" });
+  await expect(bar.getByRole("button")).toHaveText("Make all 2 ready live");
+
+  await page.getByRole("checkbox", { name: "Select Sage V-neck sweater" }).check();
+  const go = bar.getByRole("button");
+  await expect(go).toHaveText("Make 1 selected live");
+  await go.click();
+  await expect(go).toHaveText("Tap again: 1 live");
+  await go.click();
+  await expect(page.getByRole("status").filter({ hasText: "1 piece is live in the shop" })).toBeVisible();
+  await expect(page.getByLabel("Status of Sage V-neck sweater")).toHaveCount(0); // gone from the Hidden tab
+
+  await expect(go).toHaveText("Make all 1 ready live");
+  await go.click();
+  await go.click();
+  // Wait for the piece to leave the Hidden list (the first "1 piece is live" message may still be showing).
+  await expect(page.getByLabel("Status of Navy stripe ringer tee")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Products" })).toContainText("No products match");
+  await page.goto("/");
+  for (const name of ["Sage V-neck sweater", "Navy stripe ringer tee"]) await expect(page.locator("#shop article", { hasText: name })).toHaveCount(1);
+});
+
 test.describe("product editor", () => {
   test("an empty save explains what's missing", async ({ page }) => {
     await signIn(page);
@@ -157,7 +187,8 @@ test.describe("product editor", () => {
     await expect(editor).toBeVisible();
     await editor.getByRole("button", { name: "Add to shop" }).click();
     await expect(editor).toContainText("Give the piece a name.");
-    await expect(editor).toContainText("Add a size.");
+    await expect(editor).toContainText("Add a price.");
+    await expect(editor).not.toContainText("Add a size."); // optional since D-066
     await expect(editor).toContainText("Add a photo so customers can see the piece.");
     await editor.getByRole("button", { name: "Cancel" }).click();
     await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -311,7 +342,7 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   // Each saved photo opens in the editor, on top of the list.
   const rows = bulk.getByRole("button", { name: /^TQ-\d+ · Untitled draft Needs / });
   await expect(rows).toHaveCount(2);
-  await expect(rows.first()).toContainText("Needs price, size, category, era, condition");
+  await expect(rows.first()).toContainText("Needs price");
   await rows.first().click();
   const editor = page.getByRole("dialog", { name: /^Edit TQ-/ });
   await expect(editor).toBeVisible();
@@ -323,16 +354,12 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   await expect(bulk).toBeVisible();
   await expect(rows.first()).toBeFocused();
 
-  // Finish the first piece; its line in the list updates.
+  // Finish the first piece with just a name and a price (D-066): size, category, era and condition stay empty.
   await rows.first().click();
   await expect(editor.getByLabel("Category")).toHaveValue("");
   await editor.getByRole("button", { name: "Save changes" }).click();
-  await expect(editor).toContainText("Choose a category.");
+  await expect(editor).toContainText("Add a price.");
   await editor.getByLabel("Product name").fill("Bulk striped tee");
-  await editor.getByLabel("Category").selectOption("Tops");
-  await editor.getByLabel("Era").selectOption("90s");
-  await editor.getByLabel("Condition").selectOption("Good");
-  await editor.getByLabel("Size").fill("M");
   await editor.getByLabel("Price (QAR)").fill("55");
   await editor.getByLabel("Visibility").selectOption("live");
   await editor.getByRole("button", { name: "Save changes" }).click();
@@ -342,7 +369,7 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
 
   // The unfinished one still can't go live.
   await page.getByRole("region", { name: "Products" }).getByRole("combobox", { name: "Status of Untitled draft" }).selectOption("live");
-  await expect(page.getByRole("status").filter({ hasText: /needs price, size, category, era, condition before it can show in the shop/ })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /needs price before it can show in the shop/ })).toBeVisible();
   // It went live without a cut-out, so the dashboard offers to make one; afterwards it stops offering (D-053).
   const cutouts = page.getByRole("region", { name: "Cut-outs" });
   await expect(cutouts).toContainText("1 piece in the shop has no cut-out yet");
@@ -350,6 +377,14 @@ test("bulk add turns photos into drafts you can finish one by one from the list"
   await expect(cutouts.getByRole("status")).toContainText("1 cut-out made", { timeout: 120_000 }); // first run downloads the model
   await expect(cutouts.getByRole("button", { name: /^Make \d+ cut-out/ })).toHaveCount(0);
 
+  // In the shop, the details it doesn't have are simply left out.
   await page.goto("/");
-  await expect(page.locator("#shop article", { hasText: "Bulk striped tee" })).toContainText("55");
+  const card = page.locator("#shop article", { hasText: "Bulk striped tee" });
+  await expect(card).toContainText("55 QAR");
+  await expect(card).not.toContainText("null");
+  await card.getByRole("button", { name: "View Bulk striped tee" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).not.toContainText("null");
+  await expect(sheet).not.toContainText("Tagged size");
+  await expect(sheet.getByRole("button", { name: "Add to bag" })).toBeVisible();
 });
