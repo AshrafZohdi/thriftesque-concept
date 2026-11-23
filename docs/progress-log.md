@@ -2,6 +2,29 @@
 
 Newest first.
 
+## 2026-11-23: Shop stats for Nuvai's monthly report (D-067)
+
+**Built, not deployed.** Needs migration `20261123000000` pushed first (`npx supabase db push`); the deploy refuses to go
+ahead without it. Nothing changes for the shop's team.
+
+**Verified**
+- Typecheck, lint, tokens, unit tests (event validation, the route's refusals).
+- The migration on a scratch Postgres 16 with the earlier migrations, plus `supabase/tests/shop_stats.test.sql` (24 checks,
+  run with a small pgTAP stand-in because Docker isn't available): anon can only count through `record_event`; anon and
+  team members can't read events or run the report; one visitor code per browser per day; IPs never stored; the service
+  role's monthly report adds up (visitors, views, bag adds, orders and value, questions, pieces sold, sent then sold,
+  sources, one point per day); last month is empty. Retention checked by hand.
+- Production build for Cloudflare and the local Workers preview, driven as a shopper on an iPhone 13 viewport with
+  `/api/tally` intercepted: landing page view with source, a product sheet counted as a product view only, bag add, order
+  with codes and prices and without the typed name, About page view, direct product page, nothing from /dashboard.
+
+**Full gate on local Supabase (Docker)**: audit, typecheck, lint, 146 unit, `supabase test db` 99/99 (the new test first
+failed because seeded pieces sold this month counted too; the test now moves them out of the month), workers build, size,
+build secrets, e2e 245/246. The one failure (bag name field, iPhone profile) didn't involve this change and passed 64/64 on
+repeat runs: flaky.
+
+**Owner (Nuvai) actions**: push the migration, deploy. Reports: Nuvai's report tool (`~/Documents/GitHub/nuvai-client-reports`).
+
 ## 2026-11-16: Builder overlap reverted (D-062)
 
 Back to separate rows (D-055) at Ashraf's request; the logo and Instagram changes stay live.

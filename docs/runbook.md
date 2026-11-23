@@ -187,6 +187,17 @@ npx supabase db push        # linked to production; lists the new migrations and
 npm run deploy -- production
 ```
 
+## Shop stats (D-067)
+
+- Counts arrive at `POST /api/tally` and go to `site_events` through `record_event`. Only the service role reads them, through
+  `monthly_report(date)`. The shop's team sees nothing new.
+- Monthly report: Nuvai's report tool (`~/Documents/GitHub/nuvai-client-reports`, `npm run report -- thriftesque 2026-11`),
+  using the project's secret key from the macOS keychain. Or in the Supabase SQL editor: `select public.monthly_report('2026-11-01');`
+- Check after a deploy: open the shop on a phone, open a piece, then in the SQL editor
+  `select name, path, props, at from public.site_events order by id desc limit 5;`
+- To turn counting off: remove `NEXT_PUBLIC_SHOP_STATS` from the production vars and deploy. The privacy text follows.
+- Events older than 400 days are deleted automatically once a day. To delete everything: `delete from public.site_events;`
+
 ## Cut-outs made on a Mac (D-054)
 
 ```
@@ -234,3 +245,4 @@ team) and `stranger@thriftesque.test` (signed in but not on the team). The seed 
 | `GEMINI_API_KEY` | Worker secret | **yes** | `wrangler versions secret put GEMINI_API_KEY --env production` (pasted at the prompt). May sit in `.env.local` for local previews only; the deploy build refuses it |
 | `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` | `env.production.vars` | no | `gemini-3.8-flash` / `gemini-3.5-flash-lite` |
 | `NEXT_PUBLIC_SITE_URL` | `env.production.vars` | no | Open Graph URLs, robots.txt, sitemap. The deploy check refuses http or localhost |
+| `NEXT_PUBLIC_SHOP_STATS` | `env.production.vars` | no | `"1"` turns on the anonymous counts for the monthly report and their privacy text (D-067). Needs migration `20261123000000` |

@@ -7,6 +7,7 @@ import {
   type OutfitMode, type OutfitState, type SlotKey,
 } from "@/lib/outfit";
 import { joinDetails, type ShopProduct } from "@/lib/shop-model";
+import { sentItems, tally } from "@/lib/tally";
 import { waLink } from "@/lib/wa";
 import { useShop } from "./ShopProvider";
 import o from "./builder.module.css";
@@ -174,7 +175,7 @@ export function OutfitBuilder() {
           {allIn ? "Outfit is in your bag" : `Add outfit · ${total} QAR`}
         </button>
       </div>
-      {ask && <a className={o.ask} href={ask} target="_blank" rel="noopener">Ask about this outfit on WhatsApp</a>}
+      {ask && <a className={o.ask} href={ask} target="_blank" rel="noopener" onClick={() => tally("ask_sent", { kind: "outfit", items: sentItems(pieces) })}>Ask about this outfit on WhatsApp</a>}
       <p className="sr-only-text" aria-live="polite">{live}</p>
     </div>
   );

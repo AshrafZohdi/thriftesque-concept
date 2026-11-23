@@ -6,6 +6,7 @@ import { ChromeHeart } from "@/components/Chrome";
 import { outfitMessage } from "@/lib/order";
 import { boardLayout } from "@/lib/board";
 import { joinDetails, type ShopLook, type ShopProduct } from "@/lib/shop-model";
+import { sentItems, tally } from "@/lib/tally";
 import { waLink } from "@/lib/wa";
 import { Overlay } from "./Overlay";
 import { useShop } from "./ShopProvider";
@@ -104,7 +105,7 @@ export function Looks({ looks }: { looks: ShopLook[] }) {
                         setTimeout(() => document.getElementById("outfit")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 300);
                       }}>Remix it in the outfit builder</button>
                     )}
-                    {ask && <a className={`${s.btn} ${s.secondary}`} href={ask} target="_blank" rel="noopener">Ask about this look</a>}
+                    {ask && <a className={`${s.btn} ${s.secondary}`} href={ask} target="_blank" rel="noopener" onClick={() => tally("ask_sent", { kind: "look", items: sentItems(pieces) })}>Ask about this look</a>}
                   </div>
                 </div>
               </div>

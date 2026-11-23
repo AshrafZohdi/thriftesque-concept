@@ -16,6 +16,10 @@ export const isPreview = process.env.NEXT_PUBLIC_SHOP_PREVIEW === "1";
 // the CSP (next.config.ts) and describes it on the privacy page, so what runs and what's disclosed can't drift apart.
 export const webAnalytics = process.env.NEXT_PUBLIC_WEB_ANALYTICS === "1";
 
+// Shop stats are on (D-067): set NEXT_PUBLIC_SHOP_STATS to "1" in the target's vars. The shop then sends anonymous counts to
+// /api/tally for Nuvai's monthly report, and the privacy page describes them. Off everywhere else, so tests count nothing.
+export const shopStats = process.env.NEXT_PUBLIC_SHOP_STATS === "1";
+
 // The shop's social accounts (Instagram handle confirmed by Ashraf, 2026-11-16).
 export const TIKTOK = { handle: "thriftesque", url: "https://www.tiktok.com/@thriftesque" };
 export const INSTAGRAM = { handle: "thriftesqueqa", url: "https://www.instagram.com/thriftesqueqa/" };

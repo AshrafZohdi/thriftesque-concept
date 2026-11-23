@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { preconnect } from "react-dom";
 import { Anton, Instrument_Sans, Space_Mono } from "next/font/google";
 import { ChromeDefs } from "@/components/Chrome";
+import { PageTally } from "@/components/PageTally";
 import { PreviewStrip } from "@/components/PreviewStrip";
-import { SITE_DESCRIPTION, SITE_TITLE, isPreview, siteUrl } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_TITLE, isPreview, shopStats, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted at build time, so no request goes to Google (D-018). Families from option F (D-029).
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ChromeDefs />
         {isPreview && <PreviewStrip />}
         {children}
+        {shopStats && <PageTally />}
       </body>
     </html>
   );

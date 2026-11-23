@@ -37,7 +37,10 @@
         "GEMINI_MODEL": "gemini-3.8-flash",
         "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite",
         // Cloudflare Web Analytics on (D-058): allows its script in the CSP and describes it on the privacy page.
-        "NEXT_PUBLIC_WEB_ANALYTICS": "1"
+        "NEXT_PUBLIC_WEB_ANALYTICS": "1",
+        // Shop stats on (D-067): anonymous counts for Nuvai's monthly report, described on the privacy page. Needs migration
+        // 20261123000000 applied first (the deploy's schema check refuses to deploy without it).
+        "NEXT_PUBLIC_SHOP_STATS": "1"
         // Preview mode ended 2026-11-14 (D-044, D-057). To turn it back on: "NEXT_PUBLIC_SHOP_PREVIEW": "1", then deploy.
       },
       "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "thriftesque-production" }],

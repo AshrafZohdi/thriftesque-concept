@@ -3,6 +3,7 @@
 // sheet is open (with /p/<code> in the address bar), requests to load pieces into the builder, and the toast.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { bagStore, parseBag, type BagData } from "@/lib/bag-store";
+import { tally } from "@/lib/tally";
 import type { OrderForm } from "@/lib/order";
 import type { ShopProduct, ShopSettings } from "@/lib/shop-model";
 import { BagDrawer } from "./BagDrawer";
@@ -75,7 +76,10 @@ export function ShopProvider({ products, settings, hasBuilder, children }: {
     has: (code) => data.codes.includes(code),
     add: (codes) => {
       const fresh = codes.filter((c) => byCode.get(c)?.status === "live" && !data.codes.includes(c));
-      if (fresh.length) write({ ...data, codes: [...liveCodes(data), ...fresh] });
+      if (fresh.length) {
+        write({ ...data, codes: [...liveCodes(data), ...fresh] });
+        tally("bag_add", { codes: fresh });
+      }
       return fresh.length;
     },
     remove: (code) => write({ ...data, codes: liveCodes(data).filter((c) => c !== code) }),

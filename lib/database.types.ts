@@ -61,6 +61,20 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"site_events": {
+                  Row: {
+                    "at": string,"id": number,"name": string,"path": string,"props": NonNullable<Json>,"visitor": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "at"?: string,"id"?: never,"name": string,"path"?: string,"props"?: NonNullable<Json>,"visitor"?: string | null
+                  }
+                  Update: {
+                    "at"?: string,"id"?: never,"name"?: string,"path"?: string,"props"?: NonNullable<Json>,"visitor"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"team_members": {
                   Row: {
                     "created_at": string,"name": string,"user_id": string
@@ -87,8 +101,14 @@ export type Database = {
 "is_team":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"record_event":
+{ Args: { "p_fingerprint": string; "p_name": string; "p_path": string; "p_props": Json }; Returns: undefined
+                           },
 "schema_version":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"monthly_report":
+{ Args: { "p_month": string }; Returns: Json
                            },
 "sync_product_code_seq":
 { Args: Record<PropertyKey, never>; Returns: number

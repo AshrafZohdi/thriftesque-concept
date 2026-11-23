@@ -1,9 +1,11 @@
 "use client";
-// The bag: a printed thrift receipt that becomes the WhatsApp message. Nothing is sent to our server (D-009).
+// The bag: a printed thrift receipt that becomes the WhatsApp message. The bag itself stays in the browser (D-009); sending
+// it counts the pieces, prices and totals for the shop stats, never the name or area (D-067).
 import Link from "next/link";
 import { useId } from "react";
 import { lowestFee, orderBlocker, orderMessage, orderTotals } from "@/lib/order";
 import { joinDetails } from "@/lib/shop-model";
+import { sentItems, tally } from "@/lib/tally";
 import { waLink } from "@/lib/wa";
 import { Overlay } from "./Overlay";
 import { useShop } from "./ShopProvider";
@@ -67,6 +69,10 @@ export function BagDrawer({ open, trigger, onClose }: { open: boolean; trigger: 
   const href = blocker ? null : waLink(settings.whatsappNumber, orderMessage(bag.items, settings, bag.form));
   const hint = blocker ?? (href ? "Opens WhatsApp with this receipt as your message." : "Ordering on WhatsApp isn't set up yet.");
   const from = lowestFee(settings);
+  const countOrder = () => {
+    const t = orderTotals(bag.items, settings, bag.form);
+    tally("order_sent", { items: sentItems(bag.items), subtotal: t.subtotal, fee: t.fee ?? 0, total: t.total, mode: bag.form.mode });
+  };
 
   return (
     <Overlay item={open ? true : null} onClose={onClose} trigger={trigger} kind="drawer" label="Your bag">
@@ -124,7 +130,7 @@ export function BagDrawer({ open, trigger, onClose }: { open: boolean; trigger: 
           {bag.items.length > 0 && (
             <div className={b.foot}>
               {href ? (
-                <a className={`${s.btn} ${b.wa}`} href={href} target="_blank" rel="noopener"><WaIcon />Send order on WhatsApp</a>
+                <a className={`${s.btn} ${b.wa}`} href={href} target="_blank" rel="noopener" onClick={countOrder}><WaIcon />Send order on WhatsApp</a>
               ) : (
                 <button className={`${s.btn} ${b.wa}`} type="button" disabled><WaIcon />Send order on WhatsApp</button>
               )}

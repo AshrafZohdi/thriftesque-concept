@@ -634,3 +634,30 @@ the target's `account_id`. The lasting fix is for the client to add Nuvai's logi
 - Testing notes: Docker Desktop stopped again under heavy load from another project, taking local Supabase down; restarted.
   The team-writes sign-in now gets the same 15 s wait as the dashboard tests.
 
+### D-067 Shop stats, recorded in the background for a monthly report. Asked for by Ashraf, 2026-11-23
+- Ashraf wants to show the client how the shop performs (how many people come, what goes in bags, what is sent to WhatsApp
+  and which pieces) in a **monthly report Nuvai sends**. The client's team is not involved: no new screens, no new fields,
+  nothing to fill in. Cloudflare Web Analytics (D-058) counts visits but can't count taps or say which pieces, so the shop
+  now counts these itself, first-party, into its own Supabase.
+- **What is counted** (`lib/stats.ts`, one allowlist in code and the same in a database check): `page_view` (with
+  `landing` on the first page of a visit and the referring site or `utm_source`), `product_view` (piece code), `bag_add`
+  (codes), `order_sent` (codes, prices, subtotal, delivery fee, total, delivery or pickup) and `ask_sent` (piece, outfit or
+  look, with codes and prices). **Never** the shopper's name, area, phone number or any typed text, and no query strings.
+- **Visitors without cookies**: `/api/tally` passes the IP address and browser name to `record_event`, which hashes them with
+  a random salt for the Doha day and keeps 16 hex characters. The salt table is unreadable and yesterday's salt is deleted,
+  so the code can't be traced back or linked across days. IPs are never stored. "Visitors" is the sum of daily unique
+  visitors (someone who comes on two days counts twice).
+- **Writes** go only through `record_event` (SECURITY DEFINER; anon and authenticated have no table rights). `/api/tally`
+  checks the Origin, caps the body at 4 KB, rebuilds every field from the allowlist, skips bots and link previews, and
+  always answers 204. Not called `track` because ad blockers block that name; they still hide some visits, so the report
+  reads as "at least".
+- **Reads**: nobody but the service role. `monthly_report(date)` returns one Doha calendar month in the generic shape
+  Nuvai's report tool renders for every client (metrics, lists, one daily series). Includes pieces the team marked Sold that
+  month (their normal work, `sold_at`), so the report has a measured sales figure next to the WhatsApp orders.
+- **Retention**: 400 days. `record_event` deletes older events when it makes a new day's salt (once a day), so no new cron.
+- **Switch**: `NEXT_PUBLIC_SHOP_STATS=1` in the production vars. It turns on the counting in the browser and the route, and
+  the matching text on the privacy page, so what runs and what is disclosed can't drift. Off locally, in previews and tests.
+- **Profit** isn't in the database: the team doesn't record what they paid, and won't be asked to. The report tool can show
+  an estimate from a margin Nuvai sets, labelled as an assumption.
+- Rejected: a dashboard Insights panel and a "What you paid" field (built first, then removed the same day at Ashraf's
+  request), counting with a cookie or localStorage id, Google Analytics, a cron for retention.

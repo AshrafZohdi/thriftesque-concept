@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ContactLine, Fact, LegalPage } from "@/components/LegalPage";
 import { getShop } from "@/lib/shop";
 import { shopFacts } from "@/lib/shop-facts";
-import { webAnalytics } from "@/lib/site";
+import { shopStats, webAnalytics } from "@/lib/site";
 
 // Describes what the site actually does (D-046). If the code changes how data is handled, this page changes with it.
 export const revalidate = false;
@@ -27,7 +27,11 @@ export default async function PrivacyPage() {
       <ul>
         <li>You don&apos;t need an account to shop, and we don&apos;t ask for one.</li>
         <li>Your bag is saved in your own browser, not on our servers.</li>
-        <li>Nothing is sent to us until you press send in WhatsApp.</li>
+        <li>
+          {shopStats
+            ? "Your name, number and area are never sent to us by the site. We count, without knowing who you are, which pieces are viewed, added to bags and sent to WhatsApp."
+            : "Nothing is sent to us until you press send in WhatsApp."}
+        </li>
         <li>
           {webAnalytics
             ? "No advertising and no tracking cookies. We count visits with analytics that uses no cookies and doesn't identify you."
@@ -41,6 +45,24 @@ export default async function PrivacyPage() {
         storage on your device so your bag is still there when you come back. They aren&apos;t sent anywhere while you
         browse. To remove them, empty your bag or clear this site&apos;s data in your browser settings.
       </p>
+
+      {shopStats && (
+        <>
+          <h2 className="display">What we count</h2>
+          <p>
+            To see which pieces people like, the site counts: pages and pieces viewed, pieces added to a bag, and orders and
+            questions sent to WhatsApp, with the piece codes, prices and totals in them. With a visit we keep the name of the
+            site you came from (for example tiktok.com), if your browser shares it.
+          </p>
+          <p>
+            We never count your name, phone number, area or anything you type. To count each visitor once a day, your IP
+            address and browser name are mixed with a random code that changes every day, and only the result is kept. Your IP
+            address itself is never stored, and the result can&apos;t be traced back to you or linked from one day to the
+            next. No cookies are used for this. The counts are kept for 400 days. Only Nuvai Solutions, who build and run this website
+            for us, read them, to send us a monthly report.
+          </p>
+        </>
+      )}
 
       <h2 className="display">When you order</h2>
       <p>
@@ -73,8 +95,8 @@ export default async function PrivacyPage() {
           and the pages you request, and keeps short-lived logs (a few days) to run the service and fix problems.
         </li>
         <li>
-          <strong>Supabase</strong> stores the product catalogue and photos, on servers in Mumbai, India. It doesn&apos;t
-          receive anything about shoppers.
+          <strong>Supabase</strong> stores the product catalogue and photos, on servers in Mumbai, India.{" "}
+          {shopStats ? "It also stores the anonymous counts described above, and nothing else about shoppers." : "It doesn't receive anything about shoppers."}
         </li>
         <li>
           <strong>Google Gemini</strong> helps our team write product descriptions from product photos. It only ever sees

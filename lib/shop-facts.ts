@@ -58,7 +58,7 @@ export function missingDetails(d: ShopDetails): string[] {
 }
 
 // When the legal pages' fixed wording last changed. Update it with any change to app/terms or app/privacy.
-export const LEGAL_UPDATED = "13 November 2026";
+export const LEGAL_UPDATED = "23 November 2026";
 
 // Columns on the settings row, and the mapping both ways.
 export const DETAIL_COLUMNS = "operator_name,contact_email,delivery_text,payment_text,returns_text,reserved_hold_text,order_retention_text" as const;
